@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* Base tokens */
+@layer base {
+  :root, .dark {
+    --background: 215 30% 6%;
+    --foreground: 210 40% 98%;
+    --card: 224 71% 4%;
+    --card-foreground: 210 40% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 355 100% 97%;
+    --secondary: 220 14% 11%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 14% 11%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 220 14% 11%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 50 96% 85%;
+    --border: 220 14% 11%;
+    --input: 220 14% 11%;
+    --ring: 142 76% 36%;
+    --radius: 0.75rem;
+
+    /* App-specific tokens */
+    --bg-base: #0a0f0a;
+    --bg-card: #111a11;
+    --bg-input: #0a120a;
+    --bg-elevated: #1a2a1a;
+    --border-subtle: rgba(6, 78, 59, 0.2);
+    --border-default: rgba(6, 78, 59, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --accent-green: #10b981;
+    --accent-green-light: rgba(16, 185, 129, 0.1);
+    --accent-green-border: rgba(16, 185, 129, 0.2);
+    --accent-purple: #8b5cf6;
+    --accent-purple-light: rgba(139, 92, 246, 0.1);
+    --accent-blue: #3b82f6;
+    --accent-blue-light: rgba(59, 130, 246, 0.1);
+    --accent-amber: #f59e0b;
+    --accent-amber-light: rgba(245, 158, 11, 0.1);
+    --accent-red: #f87171;
+    --accent-red-light: rgba(239, 68, 68, 0.1);
+    --accent-red-border: rgba(239, 68, 68, 0.2);
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 84% 4.9%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 355 100% 97%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 50 96% 85%;
+    --border: 214 31% 91%;
+    --input: 214 31% 91%;
+    --ring: 142 76% 36%;
+
+    /* App-specific tokens */
+    --bg-base: #ffffff;
+    --bg-card: #f8faf8;
+    --bg-input: #f0f4f0;
+    --bg-elevated: #ffffff;
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-default: rgba(0, 0, 0, 0.12);
+    --text-primary: #0a1a0a;
+    --text-secondary: rgba(0, 0, 0, 0.6);
+    --text-muted: rgba(0, 0, 0, 0.4);
+    --accent-green: #16a34a;
+    --accent-green-light: rgba(22, 163, 74, 0.1);
+    --accent-green-border: rgba(22, 163, 74, 0.2);
+    --accent-purple: #8b5cf6;
+    --accent-purple-light: rgba(139, 92, 246, 0.1);
+    --accent-blue: #3b82f6;
+    --accent-blue-light: rgba(59, 130, 246, 0.1);
+    --accent-amber: #f59e0b;
+    --accent-amber-light: rgba(245, 158, 11, 0.1);
+    --accent-red: #f87171;
+    --accent-red-light: rgba(239, 68, 68, 0.1);
+    --accent-red-border: rgba(239, 68, 68, 0.2);
+  }
+
+  .dark {
+    /* Dark mode is already defined in :root */
+  }
+}
+
+/* Global reset for borders */
+* {
+  border-color: var(--border-default);
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
