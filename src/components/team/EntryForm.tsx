@@ -158,7 +158,6 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors focus:border-emerald-500/50"
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
                   value={numWorkers}
                   onChange={(e) => onNumWorkersChange(e.target.value)}
@@ -171,7 +170,6 @@ export default function EntryForm({
                   Lot
                 </label>
                 <input
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors focus:border-emerald-500/50"
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
                   value={lot}
                   onChange={(e) => onLotChange(e.target.value)}
@@ -188,7 +186,6 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors focus:border-emerald-500/50"
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
                   value={bunches}
                   onChange={(e) => onBunchesChange(e.target.value)}
@@ -215,7 +212,6 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors focus:border-emerald-500/50"
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
                   value={backlogs}
                   onChange={(e) => onBacklogsChange(e.target.value)}
