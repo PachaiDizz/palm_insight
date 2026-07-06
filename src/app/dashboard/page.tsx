@@ -9,6 +9,8 @@ import Link from "next/link";
 import { Users, Calendar, ChevronDown, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp } from "lucide-react";
 import { Plantation, TeamLeader, TodayStats } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { DashboardSkeleton } from "@/components/ui/Skeleton";
+import { FadeIn } from "@/components/ui/Skeleton";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -155,8 +157,8 @@ export default function DashboardPage() {
   if (checking) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-green)", borderTopColor: "transparent" }} />
+        <div className="min-h-full overflow-x-hidden p-6 max-w-6xl mx-auto" style={{ backgroundColor: "var(--bg-base)" }}>
+          <FadeIn><DashboardSkeleton /></FadeIn>
         </div>
       </DashboardLayout>
     );
@@ -172,8 +174,8 @@ export default function DashboardPage() {
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15" style={{ backgroundColor: "#6ee7b7" }} />
           <div className="absolute top-8 right-1/3 w-32 h-32 rounded-full opacity-10" style={{ backgroundColor: "#a7f3d0" }} />
 
-          <div className="relative z-10 px-6 py-8 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
+          <div className="relative z-10 px-4 py-6 sm:px-6 sm:py-8 max-w-6xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#d1fae5" }}>
@@ -181,12 +183,12 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 mb-1">
-                  <Tractor className="w-8 h-8" style={{ color: "#34d399" }} />
-                  <h1 className="text-3xl font-bold text-white tracking-tight">
+                  <Tractor className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: "#34d399" }} />
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
                     {getGreeting()}, {profile?.full_name || (user?.user_metadata as Record<string, string>)?.full_name || user?.email?.split("@")[0] || ""}
                   </h1>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-xs sm:text-sm" style={{ color: "var(--text-secondary)" }}>
                   {getFormattedDate()}
                 </p>
               </div>
@@ -246,17 +248,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="p-4 sm:p-6 max-w-6xl mx-auto">
           {/* Plantation Details Card */}
           {selectedPlantation && (
-            <div className="rounded-2xl border p-6 mb-6 -mt-4 relative shadow-lg" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <div className="rounded-2xl border p-4 sm:p-6 mb-4 sm:mb-6 -mt-4 relative shadow-lg" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
                   <Sprout className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
                 </div>
                 <h2 className="text-base font-semibold text-white">Plantation Details</h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
                 <div>
                   <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Rancangan</div>
                   <div className="text-sm font-medium text-white">{selectedPlantation.rancangan || "-"}</div>
@@ -299,24 +301,24 @@ export default function DashboardPage() {
               <Clock className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
               <h2 className="text-lg font-semibold text-white">Today's Overview</h2>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
                 { label: "Total Bunches", value: todayStats.bunches, icon: Sprout, color: "var(--accent-purple)", bg: "rgba(139,92,246,0.12)" },
                 { label: "Transported", value: `${todayStats.transported} ton`, icon: Truck, color: "var(--accent-green)", bg: "rgba(16,185,129,0.12)" },
                 { label: "Backlogs", value: todayStats.backlogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
                 { label: "Teams Active", value: `${todayStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
               ].map((s) => (
-                <div key={s.label} className="relative rounded-2xl p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                <div key={s.label} className="relative rounded-2xl p-3 sm:p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
                   {/* Decorative blob */}
                   <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-30 blur-xl" style={{ backgroundColor: s.color }} />
                   <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{s.label}</span>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: s.bg }}>
-                        <s.icon className="w-4 h-4" style={{ color: s.color }} />
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{s.label}</span>
+                      <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: s.bg }}>
+                        <s.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: s.color }} />
                       </div>
                     </div>
-                    <div className="text-3xl font-bold text-white">{s.value}</div>
+                    <div className="text-xl sm:text-3xl font-bold text-white">{s.value}</div>
                   </div>
                 </div>
               ))}
@@ -325,12 +327,12 @@ export default function DashboardPage() {
 
           {/* Weekly Trend */}
           {weeklyTrend.length > 0 && (
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <BarChart3 className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-                <h2 className="text-lg font-semibold text-white">Weekly Trend</h2>
+                <h2 className="text-base sm:text-lg font-semibold text-white">Weekly Trend</h2>
               </div>
-              <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+              <div className="rounded-2xl border p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#10b981" }} />
@@ -360,15 +362,15 @@ export default function DashboardPage() {
           )}
 
           {/* Quick Actions */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <TrendingUp className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-              <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-white">Quick Actions</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Link
                 href="/team"
-                className="group flex items-center gap-4 rounded-2xl p-5 border transition-all hover:scale-[1.01]"
+                className="group flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 border transition-all hover:scale-[1.01] min-h-[44px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
@@ -382,7 +384,7 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/reports"
-                className="group flex items-center gap-4 rounded-2xl p-5 border transition-all hover:scale-[1.01]"
+                className="group flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 border transition-all hover:scale-[1.01] min-h-[44px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8b5cf6, #a855f7)" }}>
@@ -398,14 +400,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Entries */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <ClipboardList className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-              <h2 className="text-lg font-semibold text-white">Recent Entries</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-white">Recent Entries</h2>
             </div>
             <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
               {recentEntries.length === 0 ? (
-                <div className="p-8 text-center">
+                <div className="p-6 sm:p-8 text-center">
                   <ClipboardList className="w-10 h-10 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.1)" }} />
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries logged yet — go to Teams to add one.</p>
                 </div>
@@ -416,8 +418,8 @@ export default function DashboardPage() {
                     const plantation = e.plantations as any;
                     const isWork = e.work_status === "work";
                     return (
-                      <div key={e.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div key={e.id} className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-3.5 hover:bg-white/[0.02] transition-colors">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                           <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: isWork ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)" }}>
                             <Users className="w-4 h-4" style={{ color: isWork ? "#10b981" : "#f87171" }} />
                           </div>
@@ -426,8 +428,8 @@ export default function DashboardPage() {
                             <div className="text-xs" style={{ color: "var(--text-muted)" }}>{plantation ? `Block ${plantation.block}` : "-"} &middot; {e.date}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <div className="text-right">
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+                          <div className="text-right hidden sm:block">
                             <div className="text-sm font-medium text-white">{e.bunches ?? 0} <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>bunches</span></div>
                             <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{e.tons ?? 0} ton</div>
                           </div>

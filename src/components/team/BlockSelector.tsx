@@ -42,7 +42,7 @@ export default function BlockSelector({ plantations, teamLeaders, blockLastEntri
         <MapPin className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
         Select Block
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <AnimatePresence mode="popLayout">
           {plantations.map((p, idx) => {
             const lCount = teamLeaders.filter((l) => l.plantation_id === p.id).length;
@@ -58,7 +58,7 @@ export default function BlockSelector({ plantations, teamLeaders, blockLastEntri
                 whileHover={{ scale: 1.02, backgroundColor: "rgba(16,185,129,0.12)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectBlock(p.id)}
-                className="rounded-2xl border p-5 text-left cursor-pointer"
+                className="rounded-2xl border p-4 sm:p-5 text-left cursor-pointer min-h-[44px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 <div className="flex items-center justify-between mb-3">

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Trash2, Users, Phone, MapPin, Edit2, X, Loader2, Save, CheckCircle, AlertCircle, BarChart3, TrendingUp, Eye, ChevronLeft, Calendar, ChevronDown, Truck } from "lucide-react";
+import { Plus, Trash2, Users, Phone, MapPin, Edit2, X, Save, CheckCircle, AlertCircle, BarChart3, TrendingUp, Eye, ChevronLeft, Calendar, ChevronDown, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
 import BlockSelector from "@/components/team/BlockSelector";
@@ -16,6 +16,7 @@ import AddLeaderModal from "@/components/team/AddLeaderModal";
 import EditEntryModal from "@/components/team/EditEntryModal";
 import EmptyLeaderState from "@/components/team/EmptyLeaderState";
 import Toast from "@/components/ui/Toast";
+import { BlockCardSkeleton, LeaderCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
 
 const defaultStats = { totalEntries: 0, workDays: 0, totalBunches: 0, totalTons: 0, totalBacklogs: 0, avgBunches: 0, avgTons: "0", avgWorkers: 0 };
 const defaultDetailStats = { totalEntries: 0, workDays: 0, noWorkDays: 0, totalBunches: 0, totalTons: 0, totalBacklogs: 0, avgBunches: 0, avgTons: "0", avgWorkers: 0 };
@@ -32,7 +33,7 @@ function normalizeDate(dateStr: string): string {
 
 export default function TeamsPage() {
   return (
-    <Suspense fallback={<DashboardLayout><div className="p-6 max-w-6xl mx-auto"><Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--accent-green)" }} /></div></DashboardLayout>}>
+    <Suspense fallback={<DashboardLayout><div className="p-6 max-w-6xl mx-auto"><FadeIn><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">{[1,2,3,4].map(i => <BlockCardSkeleton key={i} />)}</div></FadeIn></div></DashboardLayout>}>
       <TeamsContent />
     </Suspense>
   );
@@ -410,11 +411,11 @@ function TeamsContent() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex justify-between items-center mb-8">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Team Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Team Management</h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               {selectedBlock ? `${selectedP?.rancangan}, Peringkat ${selectedP?.peringkat} — Block ${selectedP?.block}` : "Select a block to manage team leaders."}
             </p>
@@ -513,33 +514,33 @@ function TeamsContent() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   {[{ label: "Working Days", value: detailStats.workDays, icon: Calendar, color: "var(--accent-green)", bg: "rgba(16,185,129,0.12)" },
                     { label: "Total Bunches", value: detailStats.totalBunches, icon: TrendingUp, color: "var(--accent-purple)", bg: "rgba(139,92,246,0.12)" },
                     { label: "Total Tonnage", value: `${detailStats.totalTons} ton`, icon: Truck, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
                     { label: "Total Backlogs", value: detailStats.totalBacklogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
                   ].map((s) => (
-                    <div key={s.label} className="relative rounded-2xl p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                    <div key={s.label} className="relative rounded-2xl p-3 sm:p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
                       <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-20 blur-xl" style={{ backgroundColor: s.color }} />
                       <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{s.label}</span>
-                          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: s.bg }}><s.icon className="w-4 h-4" style={{ color: s.color }} /></div>
+                        <div className="flex items-center justify-between mb-2 sm:mb-3">
+                          <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{s.label}</span>
+                          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: s.bg }}><s.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: s.color }} /></div>
                         </div>
-                        <div className="text-3xl font-bold text-white">{s.value}</div>
+                        <div className="text-xl sm:text-3xl font-bold text-white">{s.value}</div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
                   {[{ label: "Avg Bunches/Day", value: detailStats.avgBunches, color: "var(--accent-purple)" },
                     { label: "Avg Tons/Day", value: detailStats.avgTons, color: "var(--accent-green)" },
                     { label: "Avg Workers/Day", value: detailStats.avgWorkers, color: "var(--accent-blue)" },
                   ].map((s) => (
-                    <div key={s.label} className="rounded-2xl p-5 border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                    <div key={s.label} className="rounded-2xl p-4 sm:p-5 border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
                       <div className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>{s.label}</div>
-                      <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
+                      <div className="text-xl sm:text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
                     </div>
                   ))}
                 </div>

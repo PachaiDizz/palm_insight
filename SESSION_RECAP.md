@@ -1,205 +1,166 @@
 # PalmInsight — Session Recap
 
-## Bugs Fixed
-
-### 1. EntryForm.tsx — Missing `<` on label tags
-- **File**: `src/components/team/EntryForm.tsx`
-- **Issue**: Two `<label>` elements were missing the opening `<` bracket (lines 155 and 185), causing JSX parse errors.
-- **Fix**: Added the missing `<` before `label` on both occurrences.
-
-### 2. EditEntryModal — Missing import
-- **File**: `src/app/team/page.tsx`
-- **Issue**: `EditEntryModal` was used but never imported.
-- **Fix**: Added `import EditEntryModal from "@/components/team/EditEntryModal"`.
-
----
-
-## Feature: Team Leader Focus Behavior
+## 1. Skeleton Loaders (Replace Blank Loading States)
 
 ### Problem
-When clicking "View Details" or "Add Entry" on a Team Leader card, all other leader cards remained visible in the org chart.
+Pages showed blank/empty content or spinners while data loaded from Supabase. No visual feedback about what content was coming.
 
-### Solution
-- **`LeaderOrgChart.tsx`**: Added `focusedLeaderId` prop — when set, filters the leaders list to show only that one card.
-- **`page.tsx`**: Passes `focusedLeaderId={selectedLeader?.id || viewingLeader?.id}` to the org chart.
-- **Connector lines**: Simplified from multi-branch horizontal line to single vertical line when focused.
-- **Back handler**: New `handleBackToOrgChart` clears both `selectedLeader` and `viewingLeader` without navigating away.
+### Changes Made
+
+**`src/components/ui/Skeleton.tsx`** — Complete rewrite:
+- Added shimmer animation via CSS keyframes (`skeleton-shimmer`, 1.5s infinite)
+- Added `FadeIn` wrapper component for smooth opacity 0→1 transition (300ms)
+- New skeleton components:
+  - `StatCardSkeleton` — matches dashboard stat card dimensions
+  - `PlantationCardSkeleton` — matches plantation card label-value layout
+  - `LeaderCardSkeleton` — matches org chart leader card dimensions
+  - `BlockCardSkeleton` — matches team block card layout
+  - `ChartSkeleton` — rectangle matching chart height (300px default)
+  - `TableSkeleton` — rows/columns matching data tables
+  - `DashboardSkeleton` — full-page skeleton combining all dashboard elements
+
+**`src/app/globals.css`** — Added keyframe animations:
+- `skeleton-shimmer` — background-position animation for shimmer effect
+- `skeleton-fade-in` — opacity + translateY for content fade-in
+
+**`src/app/dashboard/page.tsx`**:
+- Replaced spinner loading state with `DashboardSkeleton` + `FadeIn`
+
+**`src/app/plantations/page.tsx`**:
+- Added `loading` state variable
+- Shows `PlantationCardSkeleton` × 3 during load
+- Real content wrapped in `{!loading && (...)}`
+
+**`src/app/team/page.tsx`**:
+- Suspense fallback now shows `BlockCardSkeleton` × 4 grid instead of spinner
+
+**`src/app/reports/page.tsx`**:
+- Added `loading` state variable
+- Shows `StatCardSkeleton` × 6, `ChartSkeleton` × 2, `TableSkeleton` during load
+- Real content wrapped in `{!loading && (...)}`
+
+**`src/app/daily-entries/page.tsx`**:
+- Replaced spinner with `StatCardSkeleton` × 5 + `TableSkeleton`
+
+### Animation Specs
+- Shimmer: `linear-gradient(90deg, #1a2a1a 25%, #243324 50%, #1a2a1a 75%)`, background-size 200%, animates from 200% to -200% over 1.5s
+- Content fade-in: opacity 0→1 + translateY 8px→0 over 300ms ease-out
 
 ---
 
-## Feature: Browser Back Button Navigation
+## 2. Responsive Mobile Layout
 
 ### Problem
-Pressing the browser back button from View Details / Add Entry went all the way back to the block selection page instead of the org chart.
+The app was desktop-only. Sidebar was always visible, no hamburger menu, no responsive grids, and touch targets were too small for mobile use.
 
-### Solution (`page.tsx`)
-- `handleSelectLeader` and `handleViewDetails` now call `window.history.pushState()` to push a history entry before entering leader views.
-- `handleBackToOrgChart` now calls `window.history.back()` to pop that entry.
-- Added a `popstate` event listener that routes back navigation:
-  - Leader view → org chart (clears leader state, keeps block)
-  - Org chart → block selection (clears block)
-- `prevBlockRef` prevents the `searchParams` effect from interfering with popstate-driven navigation.
+### Changes Made
 
----
+**`src/components/Sidebar.tsx`** — Complete rewrite for responsive behavior:
+- Desktop (≥1024px): sidebar visible as fixed left panel
+- Mobile (<1024px): sidebar hidden by default, slides in from left as drawer
+- Hamburger button ☰ fixed at top-left on mobile
+- Overlay backdrop behind open sidebar on mobile, tap to close
+- Drawer slides in with `translateX(-100%)` → `translateX(0)` transition 300ms easeOut
+- Close button (X) inside drawer header on mobile
+- All nav links have `min-h-[44px]` touch targets
+- Route changes auto-close mobile sidebar
 
-## Feature: Smooth Animations
+**`src/components/DashboardLayout.tsx`** — Mobile header with hamburger:
+- Added mobile header bar visible only on `<1024px` with hamburger menu button
+- Hamburger button has `min-h-[44px] min-w-[44px]` touch target
+- Manages `mobileOpen` state for sidebar drawer
+- Passes state to Sidebar component
 
-### BlockSelector.tsx
-- Block cards: fade in from `y:16 + opacity:0`, 300ms ease-out, staggered 60ms per card.
-- Block exit: `scale:0.95 + opacity:0`, 250ms ease-in.
+**`src/app/dashboard/page.tsx`** — Responsive dashboard:
+- Header: `flex-col` on mobile, `flex-row` on `sm:`
+- Greeting text: `text-xl sm:text-2xl lg:text-3xl`
+- Stat cards: 2 columns on all sizes, reduced padding on mobile
+- Stat card values: `text-xl sm:text-3xl`
+- Stat labels: `text-[10px] sm:text-xs`
+- Quick actions: full width on mobile, 2 columns on `sm:`
+- Recent entries: reduced padding, hidden tonnage on mobile
+- All sections: `mb-4 sm:mb-6` spacing
 
-### LeaderOrgChart.tsx
-- Block card: fade in from `y:16 + opacity:0`, 300ms ease-out.
-- Leader cards: fade in from `y:24 + opacity:0`, 300ms ease-out, staggered 80ms per card.
-- Vertical connector line: SVG `pathLength` draw-in animation, 400ms ease-out, 200ms delay.
-- Horizontal connector: `scaleX` from center, 400ms ease-out, 350ms delay.
-- Per-card vertical stubs: SVG `pathLength` draw-in with staggered delay.
+**`src/components/team/BlockSelector.tsx`** — Responsive block cards:
+- Grid: `grid-cols-1 sm:grid-cols-2` (1 col mobile, 2 col desktop)
+- Card padding: `p-4 sm:p-5`
+- Touch target: `min-h-[44px]`
 
-### page.tsx
-- All view transitions wrapped in `<AnimatePresence>` with matching enter/exit animations.
-- Org chart: `y:16 + opacity:0`, 350ms ease-out.
-- Entry form: `y:20 + opacity:0`, 300ms ease-out.
-- Detail view: `y:20 + opacity:0`, 350ms ease-out.
-- Filter bar: `y:-10 + opacity:0`, 300ms ease-out.
+**`src/components/team/LeaderOrgChart.tsx`** — Responsive org chart:
+- Cards stack vertically on mobile (`flex-col`), side-by-side on `md:` (`md:flex-row`)
+- Card width: `max-w-full md:max-w-[420px]`
+- Card padding: `p-4 sm:p-8`
+- Stats grid: `gap-2 sm:gap-4`, text `text-xs sm:text-sm`
+- Connector lines hidden on mobile (cards stack without needing connectors)
+- Vertical stubs hidden on mobile
+- Buttons: `min-h-[44px]`, text `text-xs sm:text-sm`
 
----
+**`src/components/team/EntryForm.tsx`** — Mobile-friendly form:
+- Action buttons: `flex-col` on mobile, `flex-row` on `sm:`
+- All buttons: `min-h-[44px]` touch targets
+- Work/No Work toggle buttons: `min-h-[44px]`
 
-## Fix: Remove Horizontal Scroll / Sliders
+**`src/components/ui/Skeleton.tsx`** — Responsive skeletons:
+- `PlantationCardSkeleton`: responsive grid `grid-cols-2 sm:grid-cols-3`
+- `LeaderCardSkeleton`: `max-w-full md:max-w-[420px]`, padding `p-4 sm:p-8`
+- `DashboardSkeleton`: responsive header, stat cards, quick actions
+- Recent entries skeleton: hidden tonnage on mobile
 
-### Problem
-Dashboard page had a horizontal scrollbar caused by decorative blobs with negative positioning. Tables on Daily Entries, Reports, and Team pages caused overflow due to `overflow-x-auto` and fixed widths.
+**`src/app/plantations/page.tsx`** — Mobile padding:
+- Page padding: `p-4 sm:p-6`
 
-### Solution
-- **`dashboard/page.tsx`**: Added `overflow-x-hidden` to the main container.
-- **`team/page.tsx`**: Removed `overflow-x-auto` wrapper and `min-w-[600px]` from entries table. Added responsive mobile card layout (`md:hidden`).
-- **`daily-entries/page.tsx`**: Removed `overflow-x-auto` wrapper. Added mobile card layout.
-- **`reports/page.tsx`**: Removed `overflow-x-auto` wrapper. Added mobile card layout.
+**`src/app/reports/page.tsx`** — Mobile padding:
+- Page padding: `p-4 sm:p-6`
 
----
+**`src/app/settings/page.tsx`** — Mobile padding:
+- Page padding: `p-4 sm:p-6`
 
-## Fix: Team Leader Cards Layout
+**`src/app/daily-entries/page.tsx`** — Mobile padding:
+- Page padding: `p-4 sm:p-6`
 
-### Problem
-Leader cards were stacking vertically instead of sitting side by side.
+**`src/app/team/page.tsx`** — Mobile responsive:
+- Header: `flex-col sm:flex-row`, text `text-2xl sm:text-3xl`
+- Detail stat cards: `p-3 sm:p-5`, values `text-xl sm:text-3xl`
+- Avg stats: `grid-cols-1 sm:grid-cols-3`
 
-### Solution (`LeaderOrgChart.tsx`)
-- Changed `flex-wrap` to `flex-row` on the leader cards container so both cards appear next to each other horizontally.
-- Block card: `w-[400px]` → `w-full max-w-[400px]` for responsive sizing.
-- Leader cards: `w-[420px]` → `w-full max-w-[420px]` for responsive sizing.
-- Horizontal connector: hardcoded pixel offsets → percentage-based `15%`.
+### Touch Target Standards
+- All interactive elements: minimum 44px height/width
+- Nav links, buttons, toggles all meet WCAG touch target requirements
 
----
-
-## Fix: Reports Page — `months is not defined`
-
-### Problem
-Reports page crashed with `ReferenceError: months is not defined` at line 118.
-
-### Solution (`reports/page.tsx`)
-- Added the `months` array at the top of the file, above the component:
-```ts
-const months = [
-  "January", "February", "March", "April",
-  "May", "June", "July", "August",
-  "September", "October", "November", "December"
-];
-```
-
----
-
-## Files Modified
-
-| File | Changes |
-|------|---------|
-| `src/components/team/EntryForm.tsx` | Fixed missing `<` on label tags |
-| `src/components/team/LeaderOrgChart.tsx` | Added `focusedLeaderId` prop, SVG connector animations, responsive widths, flex-row layout |
-| `src/components/team/BlockSelector.tsx` | Updated entrance/exit animations |
-| `src/app/team/page.tsx` | Added `EditEntryModal` import, browser back nav, AnimatePresence, focus behavior, responsive table |
-| `src/app/dashboard/page.tsx` | Added `overflow-x-hidden`, removed Daily Entries card, added Recent Entries feed, added Weekly Trend chart |
-| `src/app/daily-entries/page.tsx` | Removed overflow-x-auto, added mobile card layout |
-| `src/app/reports/page.tsx` | Added `months` array, removed overflow-x-auto, added mobile card layout |
+### Mobile Breakpoints Used
+- Default (mobile): < 640px
+- `sm`: ≥ 640px (tablets)
+- `md`: ≥ 768px (larger tablets / small desktop)
+- `lg`: ≥ 1024px (desktop — sidebar visible)
 
 ---
 
-## Plantations Page Improvements
+## 3. Favicon & Dynamic Page Titles
 
-### 1. Team Leaders Count per Plantation Card
-- On load, queries `team_leaders` table to count leaders per plantation.
-- Displays as a blue badge: e.g. "4 Team Leaders".
+### Favicon
 
-### 2. Last Entry Date per Plantation Card
-- On load, queries `daily_entries` table for the most recent date per plantation (filtered by `user_id`).
-- Displays as "Last entry: 06/07/2026" or "No entries yet" if none exist.
+**`public/favicon.svg`** — New SVG favicon:
+- Green circle (#059669) with a palm leaf shape
+- Uses `#d1fae5` (light green) for the leaf body
+- Simple, recognizable at small sizes
 
-### 3. Go to Teams Button
-- Each card has a "Go to Teams →" link.
-- Navigates to `/team?block={plantation.id}` (UUID as query param).
-- Teams page already reads this `block` param on load and auto-selects that block's org chart.
+**`src/app/layout.tsx`** — Updated metadata:
+- Added `icons: { icon: "/favicon.svg" }` to root metadata config
 
-### Files Modified
-| File | Changes |
-|------|---------|
-| `src/app/plantations/page.tsx` | Added leader counts, last entry dates, and Go to Teams button |
+### Dynamic Page Titles
 
----
+Created co-located `metadata.ts` files for each client-component route (can't export metadata from "use client" pages directly):
 
-## Dashboard Improvements
+| Route | File | Title |
+|-------|------|-------|
+| `/dashboard` | `src/app/dashboard/metadata.ts` | Dashboard \| PalmInsight |
+| `/plantations` | `src/app/plantations/metadata.ts` | Plantations \| PalmInsight |
+| `/team` | `src/app/team/metadata.ts` | Team Management \| PalmInsight |
+| `/reports` | `src/app/reports/metadata.ts` | Reports \| PalmInsight |
+| `/settings` | `src/app/settings/metadata.ts` | Settings \| PalmInsight |
+| `/login` | `src/app/login/metadata.ts` | Login \| PalmInsight |
+| `/register` | `src/app/register/metadata.ts` | Register \| PalmInsight |
+| `/onboarding/plantation` | `src/app/onboarding/plantation/metadata.ts` | Setup Plantation \| PalmInsight |
+| `/onboarding/teams` | `src/app/onboarding/teams/metadata.ts` | Setup Team \| PalmInsight |
 
-### 1. Removed Daily Entries Quick Action
-- Removed the standalone Daily Entries card from the Quick Actions section. Only View Teams and View Reports remain.
-
-### 2. Added Recent Entries Feed
-- New section below Quick Actions showing the last 5 entries across all team leaders.
-- Each row displays: Team Leader name, date, block, bunches, tons, and a Work/No Work status badge.
-- Queries `daily_entries` joined with `team_leaders` and `plantations`, ordered by `created_at DESC`, limit 5.
-- Empty state: "No entries logged yet — go to Teams to add one."
-
-### 3. Added Weekly Trend Mini Chart
-- New Recharts `BarChart` section below Today's Overview stat cards.
-- Shows total bunches (green) and total tons (blue) for the last 7 days.
-- X-axis: day labels (Mon, Tue, Wed...). Y-axis: values.
-- Only renders when there is data to display.
-
----
-
-## Teams Page — Block Card Improvements
-
-### 1. Last Entry Date per Block Card
-- Queries `daily_entries` ordered by date descending, picks the first date per `plantation_id`.
-- Displays as "Last entry: 06/07/2026" or "No entries yet" if none exist.
-
-### 2. Workers Today per Block Card
-- Queries `daily_entries` filtered by today's date and `user_id`, sums `num_workers` grouped by `plantation_id`.
-- Displays as "Workers today: 9" or "Workers today: 0" if none.
-
-### Files Modified
-| File | Changes |
-|------|---------|
-| `src/app/team/page.tsx` | Added `blockLastEntries` and `blockWorkersToday` state, `loadBlockStats` function, passed new props to `BlockSelector` |
-| `src/components/team/BlockSelector.tsx` | Added `blockLastEntries` and `blockWorkersToday` props, display last entry date and workers today on each card |
-
----
-
-## Settings Page Improvements
-
-### 1. Account Section
-- **Display Name**: Editable field with Save button. Updates both `profiles` table and Supabase user metadata. Shows success/error messages.
-- **Email**: Read-only display of the current logged-in email.
-- **Change Password**: New Password + Confirm Password fields with Update Password button. Validates match and minimum 6 characters. Shows success/error messages.
-
-### 2. Appearance Section
-- Moved Light/Dark mode toggle from Sidebar to Settings page.
-- Clean toggle switch UI with current theme label (Dark mode / Light mode).
-- Uses existing `ThemeContext` — persists to localStorage, applies across the whole app.
-
-### 3. Data Management Section
-- Export Data, Restore Data, and Danger Zone kept exactly as they were.
-
-### Sidebar Cleanup
-- Removed the Light/Dark mode toggle button from the Sidebar component.
-
-### Files Modified
-| File | Changes |
-|------|---------|
-| `src/app/settings/page.tsx` | Full rewrite with Account, Appearance, and Data Management sections |
-| `src/components/Sidebar.tsx` | Removed theme toggle button and related imports |
+The root layout's `template: "%s | PalmInsight"` pattern automatically appends "| PalmInsight" to all child page titles.

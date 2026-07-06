@@ -5,9 +5,10 @@ import { useAuth } from "@/components/AuthProvider";
 import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Calendar, Filter, Download, ChevronLeft, ChevronRight, Loader2, Users, TrendingUp, Truck, AlertCircle } from "lucide-react";
+import { Calendar, Filter, Download, ChevronLeft, ChevronRight, Users, TrendingUp, Truck, AlertCircle } from "lucide-react";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
+import { StatCardSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/ui/Skeleton";
 
 export default function DailyEntriesPage() {
   const { user } = useAuth();
@@ -101,8 +102,21 @@ export default function DailyEntriesPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="w-10 h-10 animate-spin text-[var(--accent-green)]" />
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+          <FadeIn>
+            <PageHeader title="Daily Entries" subtitle="View and export all harvest entries" action={null} />
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <Skeleton className="w-9 h-9 rounded-xl" />
+                <Skeleton className="w-36 h-4" />
+                <Skeleton className="w-9 h-9 rounded-xl" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              {[1,2,3,4,5].map(i => <StatCardSkeleton key={i} />)}
+            </div>
+            <TableSkeleton rows={5} cols={9} />
+          </FadeIn>
         </div>
       </DashboardLayout>
     );

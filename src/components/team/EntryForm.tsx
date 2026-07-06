@@ -120,7 +120,7 @@ export default function EntryForm({
           <button
             type="button"
             onClick={() => onWorkStatusChange("work")}
-            className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10"
+            className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10 min-h-[44px]"
             style={{ color: workStatus === "work" ? "#10b981" : "rgba(255,255,255,0.35)" }}
           >
             Work Day
@@ -128,7 +128,7 @@ export default function EntryForm({
           <button
             type="button"
             onClick={() => onWorkStatusChange("no_work")}
-            className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10"
+            className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10 min-h-[44px]"
           >
             No Work
           </button>
@@ -236,14 +236,14 @@ export default function EntryForm({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-1">
           {savedId && (
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               type="button"
               onClick={onNewEntry}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-white/5 text-[var(--text-muted)]"
+            className="px-4 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-white/5 text-[var(--text-muted)] min-h-[44px]"
           >
             New Entry
             </motion.button>
@@ -253,7 +253,7 @@ export default function EntryForm({
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={saving}
-            className="relative flex items-center gap-2 px-7 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}

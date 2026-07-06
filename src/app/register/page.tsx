@@ -1,7 +1,12 @@
 "use client";
 import AuthPage from "@/components/AuthPage";
+import PageTransition from "@/components/PageTransition";
 
 export default function RegisterPage() {
-  return <AuthPage initialMode="register" />;
+  return (
+    <PageTransition>
+      <AuthPage initialMode="register" />
+    </PageTransition>
+  );
 }
 

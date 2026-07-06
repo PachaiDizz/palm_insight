@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description: "Track palm oil plantation productivity, manage team leaders, log daily harvest entries, and generate insightful reports.",
   keywords: ["palm oil", "plantation", "productivity", "tracker", "harvest", "agriculture"],
   authors: [{ name: "PalmInsight" }],
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

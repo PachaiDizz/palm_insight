@@ -11,6 +11,7 @@ import { Plantation } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import Toast, { ToastData } from "@/components/ui/Toast";
 import { plantationSchema } from "@/lib/schemas";
+import { PlantationCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
 
 interface LeaderDraft {
   id: string;
@@ -33,6 +34,7 @@ export default function PlantationsPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [leaderCounts, setLeaderCounts] = useState<Record<string, number>>({});
   const [lastEntries, setLastEntries] = useState<Record<string, string | null>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) loadData();
@@ -61,6 +63,7 @@ export default function PlantationsPage() {
       }
     });
     setLastEntries(lastMap);
+    setLoading(false);
   }
 
   const resetForm = () => {
@@ -171,104 +174,119 @@ export default function PlantationsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-6xl mx-auto">
-        <PageHeader
-          title="Plantations"
-          subtitle={`${plantations.length} plantation${plantations.length !== 1 ? "s" : ""}`}
-          action={
-            <button
-              onClick={() => { resetForm(); setEditing(null); setShowModal(true); }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:scale-[1.02]"
-              style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}
-            >
-              <Plus className="w-4 h-4" /> Add Plantation
-            </button>
-          }
-        />
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+        {loading && (
+          <FadeIn>
+            <div className="mb-4">
+              <PageHeader title="Plantations" subtitle="Loading..." action={null} />
+            </div>
+            <div className="space-y-3">
+              {[1,2,3].map(i => <PlantationCardSkeleton key={i} />)}
+            </div>
+          </FadeIn>
+        )}
 
-        {plantations.length === 0 ? (
-          <div className="rounded-2xl border p-12 text-center" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-            <Sprout className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-              {plantations.map((p: Plantation) => (
-              <div key={p.id} className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="mb-4">
-                      <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Basic Information</div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Rancangan</div>
-                          <div className="text-sm font-medium text-white">{p.rancangan || "-"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Peringkat</div>
-                          <div className="text-sm font-medium text-white">{p.peringkat || "-"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Block</div>
-                          <div className="text-sm font-medium text-white">{p.block || "-"}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mb-4">
-                      <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Management Details</div>
-                      <div className="grid grid-cols-4 gap-4">
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Ketua Block</div>
-                          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.ketua_block || "-"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Biro Ladang</div>
-                          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.biro_ladang || "-"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Penyelia</div>
-                          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.penyelia || "-"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Mandor</div>
-                          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.mandor || "-"}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Area Information</div>
-                      <div className="text-sm font-medium text-white">{p.area_hectare ? `${p.area_hectare} ha` : "-"}</div>
-                    </div>
+        {!loading && (
+          <>
+            <PageHeader
+              title="Plantations"
+              subtitle={`${plantations.length} plantation${plantations.length !== 1 ? "s" : ""}`}
+              action={
+                <button
+                  onClick={() => { resetForm(); setEditing(null); setShowModal(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:scale-[1.02]"
+                  style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}
+                >
+                  <Plus className="w-4 h-4" /> Add Plantation
+                </button>
+              }
+            />
 
-                    <div className="flex items-center gap-4 mt-4 pt-4" style={{ borderTop: "1px solid var(--border-default)" }}>
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(59,130,246,0.1)" }}>
-                        <Users className="w-3.5 h-3.5" style={{ color: "var(--accent-blue)" }} />
-                        <span className="text-xs font-medium" style={{ color: "var(--accent-blue)" }}>{leaderCounts[p.id] || 0} Team Leader{leaderCounts[p.id] !== 1 ? "s" : ""}</span>
-                      </div>
-                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        {lastEntries[p.id] ? `Last entry: ${lastEntries[p.id]}` : "No entries yet"}
-                      </div>
-                      <Link
-                        href={`/team?block=${p.id}`}
-                        className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-[1.03]"
-                        style={{ backgroundColor: "rgba(16,185,129,0.15)", color: "var(--accent-green)" }}
-                      >
-                        Go to Teams →
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    <button onClick={() => { setEditing(p); setFormData({ rancangan: p.rancangan || "", peringkat: p.peringkat || "", block: p.block || "", ketua_block: p.ketua_block || "", biro_ladang: p.biro_ladang || "", penyelia: p.penyelia || "", mandor: p.mandor || "", area_hectare: p.area_hectare?.toString() || "" }); setShowModal(true); }} className="p-2 rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleDelete(p.id)} className="p-2 rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--accent-red)" }}>
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+            {plantations.length === 0 ? (
+              <div className="rounded-2xl border p-12 text-center" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                <Sprout className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations yet.</p>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="space-y-3">
+                {plantations.map((p: Plantation) => (
+                  <div key={p.id} className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="mb-4">
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Basic Information</div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Rancangan</div>
+                              <div className="text-sm font-medium text-white">{p.rancangan || "-"}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Peringkat</div>
+                              <div className="text-sm font-medium text-white">{p.peringkat || "-"}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Block</div>
+                              <div className="text-sm font-medium text-white">{p.block || "-"}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mb-4">
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Management Details</div>
+                          <div className="grid grid-cols-4 gap-4">
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Ketua Block</div>
+                              <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.ketua_block || "-"}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Biro Ladang</div>
+                              <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.biro_ladang || "-"}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Penyelia</div>
+                              <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.penyelia || "-"}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Mandor</div>
+                              <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{p.mandor || "-"}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Area Information</div>
+                          <div className="text-sm font-medium text-white">{p.area_hectare ? `${p.area_hectare} ha` : "-"}</div>
+                        </div>
+
+                        <div className="flex items-center gap-4 mt-4 pt-4" style={{ borderTop: "1px solid var(--border-default)" }}>
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(59,130,246,0.1)" }}>
+                            <Users className="w-3.5 h-3.5" style={{ color: "var(--accent-blue)" }} />
+                            <span className="text-xs font-medium" style={{ color: "var(--accent-blue)" }}>{leaderCounts[p.id] || 0} Team Leader{leaderCounts[p.id] !== 1 ? "s" : ""}</span>
+                          </div>
+                          <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                            {lastEntries[p.id] ? `Last entry: ${lastEntries[p.id]}` : "No entries yet"}
+                          </div>
+                          <Link
+                            href={`/team?block=${p.id}`}
+                            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-[1.03]"
+                            style={{ backgroundColor: "rgba(16,185,129,0.15)", color: "var(--accent-green)" }}
+                          >
+                            Go to Teams →
+                          </Link>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button onClick={() => { setEditing(p); setFormData({ rancangan: p.rancangan || "", peringkat: p.peringkat || "", block: p.block || "", ketua_block: p.ketua_block || "", biro_ladang: p.biro_ladang || "", penyelia: p.penyelia || "", mandor: p.mandor || "", area_hectare: p.area_hectare?.toString() || "" }); setShowModal(true); }} className="p-2 rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(p.id)} className="p-2 rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--accent-red)" }}>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Modal */}

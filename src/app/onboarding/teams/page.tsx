@@ -7,6 +7,7 @@ import { getUserPlantation } from "@/lib/onboarding";
 import { Leaf, ArrowRight, Loader2, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import TeamLeaderCard from "@/components/onboarding/TeamLeaderCard";
+import PageTransition from "@/components/PageTransition";
 
 interface TeamLeader {
   name: string;
@@ -81,6 +82,7 @@ export default function TeamSetupPage() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--bg-base)" }}>
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(6, 78, 59, 0.2)" }} />
@@ -161,5 +163,6 @@ export default function TeamSetupPage() {
         </div>
       </motion.div>
     </div>
+    </PageTransition>
   );
 }

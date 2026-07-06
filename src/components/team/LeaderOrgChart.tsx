@@ -92,8 +92,8 @@ export default function LeaderOrgChart({
           transition={{ duration: 0.3, delay: 0.15 }}
           className="mt-6"
         >
-          {/* Vertical connector line — animated draw-in */}
-          <div className="flex justify-center">
+          {/* Vertical connector line — hidden on mobile where cards stack */}
+          <div className="hidden md:flex justify-center">
             <svg width="2" height="48" className="overflow-visible">
               <motion.line
                 x1="1" y1="0" x2="1" y2="48"
@@ -107,10 +107,10 @@ export default function LeaderOrgChart({
           </div>
 
           <div className="relative">
-            {/* Horizontal connector — only shown when multiple leaders */}
+            {/* Horizontal connector — only shown on desktop when multiple leaders */}
             {!focusedLeaderId && (
               <motion.div
-                className="absolute top-0 h-px origin-center"
+                className="hidden md:block absolute top-0 h-px origin-center"
                 style={{
                   backgroundColor: "rgba(16,185,129,0.3)",
                   left: "15%",
@@ -122,7 +122,7 @@ export default function LeaderOrgChart({
               />
             )}
 
-            <div className={`pt-5 flex flex-row justify-center gap-6 md:gap-10`}>
+            <div className="pt-5 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
               {sortedLeaders.map((leader, idx) => {
                 const latest = latestEntries[leader.id];
                 const totalWorkers = latest?.work_status === "work" ? (latest.num_workers ?? 0) : 0;
@@ -135,10 +135,10 @@ export default function LeaderOrgChart({
                     initial="hidden"
                     animate="visible"
                     whileHover={{ scale: 1.02, backgroundColor: "rgba(16,185,129,0.06)" }}
-                    className="flex flex-col items-center shrink-0 w-full max-w-[420px]"
+                    className="flex flex-col items-center shrink-0 w-full max-w-full md:max-w-[420px]"
                   >
-                    {/* Vertical stub from horizontal line to card */}
-                    <svg width="2" height="24" className="overflow-visible">
+                    {/* Vertical stub from horizontal line to card — hidden on mobile */}
+                    <svg width="2" height="24" className="overflow-visible hidden md:block">
                       <motion.line
                         x1="1" y1="0" x2="1" y2="24"
                         stroke="rgba(16,185,129,0.3)"
@@ -149,7 +149,7 @@ export default function LeaderOrgChart({
                       />
                     </svg>
 
-                    <div className="w-full rounded-2xl border p-8 bg-[var(--bg-card)] border-[var(--border-default)]">
+                    <div className="w-full rounded-2xl border p-4 sm:p-8 bg-[var(--bg-card)] border-[var(--border-default)]">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-[rgba(16,185,129,0.12)]">
@@ -173,31 +173,31 @@ export default function LeaderOrgChart({
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="p-4 rounded-xl bg-[rgba(16,185,129,0.08)]">
-                          <div className="text-sm mb-1 text-[var(--text-muted)]">Total Workers</div>
-                          <div className="text-lg font-bold text-white">{totalWorkers}</div>
+                      <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                        <div className="p-3 sm:p-4 rounded-xl bg-[rgba(16,185,129,0.08)]">
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Total Workers</div>
+                          <div className="text-base sm:text-lg font-bold text-white">{totalWorkers}</div>
                         </div>
-                        <div className="p-4 rounded-xl bg-[var(--accent-purple-light)]">
-                          <div className="text-sm mb-1 text-[var(--text-muted)]">Additional</div>
-                          <div className="text-lg font-bold text-white">0</div>
+                        <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-purple-light)]">
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Additional</div>
+                          <div className="text-base sm:text-lg font-bold text-white">0</div>
                         </div>
-                        <div className="p-4 rounded-xl bg-[var(--accent-amber-light)]">
-                          <div className="text-sm mb-1 text-[var(--text-muted)]">Total Lots</div>
-                          <div className="text-lg font-bold text-white uppercase">{totalLots}</div>
+                        <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-amber-light)]">
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Total Lots</div>
+                          <div className="text-base sm:text-lg font-bold text-white uppercase">{totalLots}</div>
                         </div>
-                        <div className="p-4 rounded-xl bg-[var(--accent-blue-light)]">
-                          <div className="text-sm mb-1 text-[var(--text-muted)]">Loose Fruit</div>
-                          <div className="text-lg font-bold text-white">0</div>
+                        <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-blue-light)]">
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Loose Fruit</div>
+                          <div className="text-base sm:text-lg font-bold text-white">0</div>
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-2 sm:gap-3">
                         <motion.button
                           whileHover={{ scale: 1.03, backgroundColor: "rgba(16,185,129,0.18)" }}
                           whileTap={{ scale: 0.97 }}
                           onClick={() => onSelectLeader(leader)}
-                          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-medium transition-all bg-[var(--accent-green-light)] text-[var(--accent-green)]"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium transition-all bg-[var(--accent-green-light)] text-[var(--accent-green)] min-h-[44px]"
                         >
                           <Save className="w-3.5 h-3.5" />
                           Add Entry
@@ -206,7 +206,7 @@ export default function LeaderOrgChart({
                           onClick={() => onViewDetails(leader)}
                           whileHover={{ scale: 1.03, backgroundColor: "rgba(59,130,246,0.18)" }}
                           whileTap={{ scale: 0.97 }}
-                          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-medium transition-all bg-[var(--accent-blue-light)] text-[var(--accent-blue)]"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium transition-all bg-[var(--accent-blue-light)] text-[var(--accent-blue)] min-h-[44px]"
                         >
                           <Eye className="w-4 h-4" />
                           View Details
