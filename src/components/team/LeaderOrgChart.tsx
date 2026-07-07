@@ -68,7 +68,7 @@ export default function LeaderOrgChart({
           Back to all blocks
         </motion.button>
           <div
-            className="rounded-2xl border p-8 text-center w-full max-w-[400px] bg-[rgba(16,185,129,0.08)]"
+            className="card-glow rounded-2xl p-8 text-center w-full max-w-[400px] bg-[rgba(16,185,129,0.08)]"
         >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[var(--accent-green-light)]">
               <MapPin className="w-6 h-6 text-[var(--accent-green)]" />
@@ -149,7 +149,7 @@ export default function LeaderOrgChart({
                       />
                     </svg>
 
-                    <div className="w-full rounded-2xl border p-4 sm:p-8 bg-[var(--bg-card)] border-[var(--border-default)]">
+                    <div className="card-glow w-full rounded-2xl p-4 sm:p-8 bg-[var(--bg-card)]">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-[rgba(16,185,129,0.12)]">

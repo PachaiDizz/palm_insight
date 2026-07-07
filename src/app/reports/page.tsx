@@ -222,7 +222,7 @@ export default function ReportsPage() {
                 { label: "No Work Days", value: stats.noWorkDays, icon: Calendar, color: "#ef4444" },
                 { label: "Total Backlogs", value: stats.totalBacklogs, icon: TrendingUp, color: "var(--accent-amber)" },
               ].map((s) => (
-                <div key={s.label} className="rounded-2xl p-4 border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                <div key={s.label} className="card-glow rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{s.label}</span>
                     <s.icon className="w-4 h-4" style={{ color: s.color }} />
@@ -234,15 +234,15 @@ export default function ReportsPage() {
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-              <div className="lg:col-span-2 rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-                <h3 className="text-sm font-semibold text-white mb-4">Daily Production</h3>
+              <div className="lg:col-span-2 card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
+                <h3 className="card-title text-sm text-white mb-4">Daily Production</h3>
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(6,78,59,0.3)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,185,129,0.12)" />
                       <XAxis dataKey="date" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
                       <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
-                      <Tooltip contentStyle={{ backgroundColor: "#1a2332", border: "1px solid rgba(6,78,59,0.3)", borderRadius: "12px" }} />
+                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(16,185,129,0.12)", borderRadius: "12px" }} />
                       <Bar dataKey="bunches" fill="#8b5cf6" name="Bunches" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="tons" fill="#10b981" name="Tons" radius={[4, 4, 0, 0]} />
                     </BarChart>
@@ -253,8 +253,8 @@ export default function ReportsPage() {
                   </div>
                 )}
               </div>
-              <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-                <h3 className="text-sm font-semibold text-white mb-4">Work Status</h3>
+              <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
+                <h3 className="card-title text-sm text-white mb-4">Work Status</h3>
                 {stats.workDays + stats.noWorkDays > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -263,7 +263,7 @@ export default function ReportsPage() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: "#1a2332", border: "1px solid rgba(6,78,59,0.3)", borderRadius: "12px" }} />
+                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(16,185,129,0.12)", borderRadius: "12px" }} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
@@ -285,9 +285,9 @@ export default function ReportsPage() {
             </div>
 
             {/* Entries Table */}
-            <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
-                <h3 className="text-sm font-semibold text-white">All Entries — {months[selectedMonth]} {selectedYear}</h3>
+                <h3 className="card-title text-sm text-white">All Entries — {months[selectedMonth]} {selectedYear}</h3>
               </div>
               {filteredEntries.length === 0 ? (
                 <div className="p-12 text-center">

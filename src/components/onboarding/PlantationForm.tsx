@@ -78,8 +78,8 @@ export default function PlantationForm() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(6, 78, 59, 0.2)" }} />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]" style={{ backgroundColor: "rgba(5, 46, 22, 0.2)" }} />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.06)" }} />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.06)" }} />
       </div>
 
       <motion.div
@@ -94,9 +94,9 @@ export default function PlantationForm() {
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: "linear-gradient(to right, #059669, #16a34a)" }}>1</div>
             <span className="text-sm font-medium text-white">Plantation</span>
           </div>
-          <div className="flex-1 h-px" style={{ backgroundColor: "rgba(6,78,59,0.4)" }} />
+          <div className="flex-1 h-px" style={{ backgroundColor: "rgba(16,185,129,0.15)" }} />
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ backgroundColor: "rgba(6,78,59,0.3)", color: "var(--text-muted)" }}>2</div>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ backgroundColor: "rgba(16,185,129,0.12)", color: "var(--text-muted)" }}>2</div>
             <span className="text-sm" style={{ color: "var(--text-muted)" }}>Team</span>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function PlantationForm() {
             <span className="font-bold text-lg text-white">PalmInsight</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-white mt-6 mb-1">Set Up Your Plantation</h1>
+          <h1 className="page-title text-2xl text-white mt-6 mb-1">Set Up Your Plantation</h1>
           <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>Fill in your plantation details before getting started.</p>
 
           {error && (
@@ -124,7 +124,7 @@ export default function PlantationForm() {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}>1</div>
-                <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.6)" }}>Basic Information</h2>
+                <h2 className="card-title text-sm uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.6)" }}>Basic Information</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -172,7 +172,7 @@ export default function PlantationForm() {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}>2</div>
-                <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.6)" }}>Management Details</h2>
+                <h2 className="card-title text-sm uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.6)" }}>Management Details</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -226,7 +226,7 @@ export default function PlantationForm() {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}>3</div>
-                <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.6)" }}>Area Information</h2>
+                <h2 className="card-title text-sm uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.6)" }}>Area Information</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

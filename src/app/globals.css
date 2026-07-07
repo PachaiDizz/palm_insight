@@ -1,42 +1,54 @@
 @import "tailwindcss";
 
+/* Font families */
+@theme {
+  --font-display: 'Cabinet Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
 /* Base tokens */
 @layer base {
   :root, .dark {
-    --background: 215 30% 6%;
+    --background: 150 25% 7%;
     --foreground: 210 40% 98%;
-    --card: 224 71% 4%;
+    --card: 150 25% 9%;
     --card-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
+    --popover: 150 25% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 142 76% 36%;
+    --primary: 160 84% 39%;
     --primary-foreground: 355 100% 97%;
-    --secondary: 220 14% 11%;
+    --secondary: 150 20% 12%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 220 14% 11%;
+    --muted: 150 20% 12%;
     --muted-foreground: 215 20% 65%;
-    --accent: 220 14% 11%;
+    --accent: 150 20% 12%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 50 96% 85%;
-    --border: 220 14% 11%;
-    --input: 220 14% 11%;
-    --ring: 142 76% 36%;
+    --border: 150 20% 12%;
+    --input: 150 20% 12%;
+    --ring: 160 84% 39%;
     --radius: 0.75rem;
 
     /* App-specific tokens */
-    --bg-base: #0a0f0a;
-    --bg-card: #111a11;
-    --bg-input: #0a120a;
+    --bg-base: #0f1a0f;
+    --bg-card: #131f13;
+    --bg-card-hover: #172217;
+    --bg-input: #0c150c;
     --bg-elevated: #1a2a1a;
-    --border-subtle: rgba(6, 78, 59, 0.2);
-    --border-default: rgba(6, 78, 59, 0.3);
+    --border-subtle: rgba(16, 185, 129, 0.08);
+    --border-default: rgba(16, 185, 129, 0.12);
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
     --text-muted: rgba(255, 255, 255, 0.4);
+    --accent-primary: #10b981;
+    --accent-hover: #059669;
+    --accent-subtle: rgba(16, 185, 129, 0.08);
     --accent-green: #10b981;
     --accent-green-light: rgba(16, 185, 129, 0.1);
     --accent-green-border: rgba(16, 185, 129, 0.2);
+    --border-card: rgba(16, 185, 129, 0.08);
+    --border-card-hover: rgba(16, 185, 129, 0.15);
     --accent-purple: #8b5cf6;
     --accent-purple-light: rgba(139, 92, 246, 0.1);
     --accent-blue: #3b82f6;
@@ -55,7 +67,7 @@
     --card-foreground: 222 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 84% 4.9%;
-    --primary: 142 76% 36%;
+    --primary: 160 84% 39%;
     --primary-foreground: 355 100% 97%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 84% 4.9%;
@@ -67,7 +79,7 @@
     --destructive-foreground: 50 96% 85%;
     --border: 214 31% 91%;
     --input: 214 31% 91%;
-    --ring: 142 76% 36%;
+    --ring: 160 84% 39%;
 
     /* App-specific tokens */
     --bg-base: #ffffff;
@@ -79,9 +91,9 @@
     --text-primary: #0a1a0a;
     --text-secondary: rgba(0, 0, 0, 0.6);
     --text-muted: rgba(0, 0, 0, 0.4);
-    --accent-green: #16a34a;
-    --accent-green-light: rgba(22, 163, 74, 0.1);
-    --accent-green-border: rgba(22, 163, 74, 0.2);
+    --accent-green: #10b981;
+    --accent-green-light: rgba(16, 185, 129, 0.1);
+    --accent-green-border: rgba(16, 185, 129, 0.2);
     --accent-purple: #8b5cf6;
     --accent-purple-light: rgba(139, 92, 246, 0.1);
     --accent-blue: #3b82f6;
@@ -109,6 +121,37 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Typography classes */
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
 @keyframes skeleton-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -117,4 +160,46 @@ body {
 @keyframes skeleton-fade-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s ease-out;
+}
+
+/* Card glow system */
+.card-glow {
+  border: 1px solid var(--border-card);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.04),
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-glow:hover {
+  border-color: var(--border-card-hover);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Light mode card overrides */
+.light .card-glow {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.light .card-glow:hover {
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.06);
 }

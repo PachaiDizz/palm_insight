@@ -176,7 +176,7 @@ export default function DailyEntriesPage() {
             { label: "Total Tons", value: stats.totalTons.toFixed(1), icon: Truck, color: "var(--accent-blue)" },
             { label: "Backlogs", value: stats.totalBacklogs, icon: AlertCircle, color: "var(--accent-amber)" },
           ].map((s) => (
-            <div key={s.label} className={`rounded-2xl p-4 border ${"bg-[var(--bg-card)]"}`}>
+            <div key={s.label} className={`card-glow rounded-2xl p-4 ${"bg-[var(--bg-card)]"}`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-[var(--text-muted)]">{s.label}</span>
                 <s.icon className="w-4 h-4" style={{ color: s.color }} />
@@ -187,9 +187,9 @@ export default function DailyEntriesPage() {
         </div>
 
         {/* Entries Table */}
-        <div className="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="card-glow rounded-2xl overflow-hidden bg-[var(--bg-card)]">
           <div className="px-5 py-3 border-b flex items-center justify-between border-[var(--border-default)]">
-            <h3 className="text-sm font-semibold text-white">All Entries</h3>
+            <h3 className="card-title text-sm text-white">All Entries</h3>
             <span className="text-xs px-2 py-1 rounded-full bg-[var(--accent-green-light)] text-[var(--accent-green)]">
               {filteredEntries.length} entries
             </span>

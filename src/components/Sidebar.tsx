@@ -4,8 +4,11 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { Leaf, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Leaf, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import NotificationPanel from "@/components/notifications/NotificationPanel";
+import { useNotifications } from "@/components/notifications/useNotifications";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
@@ -25,30 +28,19 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const { user, profile } = useAuth();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
-
-  // Close mobile sidebar on route change
-  useEffect(() => {
-    onMobileClose();
-  }, [pathname, onMobileClose]);
-
-  // Prevent body scroll when mobile sidebar is open
-  useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileOpen]);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    onMobileClose();
     router.push("/login");
   };
 
-  const sidebarContent = (
-    <>
+  return (
+    <aside
+      className={`h-screen flex-col border-r transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"} bg-[var(--bg-card)] min-w-[72px]`}
+      style={{ borderColor: "var(--border-default)" }}
+    >
       {/* Logo */}
       <div className="flex items-center justify-between gap-3 px-5 py-5 border-b" style={{ borderColor: "var(--border-default)" }}>
         <div className="flex items-center gap-3">
@@ -57,14 +49,21 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           </div>
           {!collapsed && <span className="font-bold text-lg text-white tracking-tight">PalmInsight</span>}
         </div>
-        {/* Mobile close button */}
-        <button
-          onClick={onMobileClose}
-          className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-          aria-label="Close menu"
-        >
-          <X className="w-5 h-5 text-white/60" />
-        </button>
+        {!collapsed && (
+          <div className="relative">
+            <NotificationBell unreadCount={unreadCount} onClick={() => setPanelOpen(!panelOpen)} />
+            {panelOpen && (
+              <NotificationPanel
+                notifications={notifications}
+                unreadCount={unreadCount}
+                onMarkAsRead={markAsRead}
+                onMarkAllAsRead={markAllAsRead}
+                onDismiss={dismiss}
+                onClose={() => setPanelOpen(false)}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Nav Items */}
@@ -75,7 +74,6 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              onClick={onMobileClose}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[44px] ${isActive ? "bg-[rgba(16,185,129,0.15)]" : ""}`}
               style={{ color: isActive ? "#10b981" : "rgba(255,255,255,0.5)" }}
             >
@@ -105,45 +103,14 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         </button>
       </div>
 
-      {/* Collapse Toggle (desktop only) */}
+      {/* Collapse Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="hidden lg:flex absolute top-1/2 -right-3 w-6 h-6 rounded-full items-center justify-center border bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-muted)]"
+        className="flex absolute top-1/2 -right-3 w-6 h-6 rounded-full items-center justify-center border bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-muted)]"
       >
         {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
       </button>
-    </>
-  );
-
-  return (
-    <>
-      {/* Desktop sidebar */}
-      <aside
-        className={`hidden lg:flex h-screen flex-col border-r transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"} bg-[var(--bg-card)] min-w-[72px]`}
-        style={{ borderColor: "var(--border-default)" }}
-      >
-        {sidebarContent}
-      </aside>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden transition-opacity duration-300"
-          onClick={onMobileClose}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile sidebar drawer */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col w-[280px] bg-[var(--bg-card)] border-r transition-transform duration-300 ease-out lg:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-        style={{ borderColor: "var(--border-default)" }}
-      >
-        {sidebarContent}
-      </aside>
-    </>
+    </aside>
   );
 }

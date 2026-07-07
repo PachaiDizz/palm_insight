@@ -203,14 +203,14 @@ export default function PlantationsPage() {
             />
 
             {plantations.length === 0 ? (
-              <div className="rounded-2xl border p-12 text-center" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+              <div className="card-glow rounded-2xl p-12 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
                 <Sprout className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations yet.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {plantations.map((p: Plantation) => (
-                  <div key={p.id} className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                  <div key={p.id} className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="mb-4">
@@ -292,22 +292,22 @@ export default function PlantationsPage() {
         {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="rounded-2xl border p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-              <h2 className="text-xl font-bold text-white mb-5">{editing ? "Edit" : "Add"} Plantation</h2>
+            <div className="card-glow rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "var(--bg-card)" }}>
+              <h2 className="section-heading text-xl text-white mb-5">{editing ? "Edit" : "Add"} Plantation</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Basic Information</div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <input placeholder="Rancangan" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.rancangan ? "#f87171" : "rgba(6,78,59,0.3)" }} value={formData.rancangan} onChange={(e) => { setFormData({ ...formData, rancangan: e.target.value }); if (fieldErrors.rancangan) setFieldErrors((p) => ({ ...p, rancangan: "" })); }} />
+                      <input placeholder="Rancangan" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.rancangan ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.rancangan} onChange={(e) => { setFormData({ ...formData, rancangan: e.target.value }); if (fieldErrors.rancangan) setFieldErrors((p) => ({ ...p, rancangan: "" })); }} />
                       {fieldErrors.rancangan && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.rancangan}</p>}
                     </div>
                     <div>
-                      <input type="number" min="0" placeholder="Peringkat" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.peringkat ? "#f87171" : "rgba(6,78,59,0.3)" }} value={formData.peringkat} onChange={(e) => { setFormData({ ...formData, peringkat: e.target.value }); if (fieldErrors.peringkat) setFieldErrors((p) => ({ ...p, peringkat: "" })); }} />
+                      <input type="number" min="0" placeholder="Peringkat" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.peringkat ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.peringkat} onChange={(e) => { setFormData({ ...formData, peringkat: e.target.value }); if (fieldErrors.peringkat) setFieldErrors((p) => ({ ...p, peringkat: "" })); }} />
                       {fieldErrors.peringkat && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.peringkat}</p>}
                     </div>
                     <div>
-                      <input type="number" min="0" placeholder="Block" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.block ? "#f87171" : "rgba(6,78,59,0.3)" }} value={formData.block} onChange={(e) => { setFormData({ ...formData, block: e.target.value }); if (fieldErrors.block) setFieldErrors((p) => ({ ...p, block: "" })); }} />
+                      <input type="number" min="0" placeholder="Block" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.block ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.block} onChange={(e) => { setFormData({ ...formData, block: e.target.value }); if (fieldErrors.block) setFieldErrors((p) => ({ ...p, block: "" })); }} />
                       {fieldErrors.block && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.block}</p>}
                     </div>
                   </div>
@@ -317,7 +317,7 @@ export default function PlantationsPage() {
                   <div className="grid grid-cols-2 gap-3">
                     {["ketua_block", "biro_ladang", "penyelia", "mandor"].map((field) => (
                       <div key={field}>
-                        <input placeholder={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors[field] ? "#f87171" : "rgba(6,78,59,0.3)" }} value={formData[field as keyof typeof formData]} onChange={(e) => { setFormData({ ...formData, [field]: e.target.value }); if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" })); }} />
+                        <input placeholder={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors[field] ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData[field as keyof typeof formData]} onChange={(e) => { setFormData({ ...formData, [field]: e.target.value }); if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" })); }} />
                         {fieldErrors[field] && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors[field]}</p>}
                       </div>
                     ))}
@@ -325,7 +325,7 @@ export default function PlantationsPage() {
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Area Information</div>
-                  <input type="number" step="0.01" min="0" placeholder="Area (hectare)" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.area_hectare ? "#f87171" : "rgba(6,78,59,0.3)" }} value={formData.area_hectare} onChange={(e) => { setFormData({ ...formData, area_hectare: e.target.value }); if (fieldErrors.area_hectare) setFieldErrors((p) => ({ ...p, area_hectare: "" })); }} />
+                  <input type="number" step="0.01" min="0" placeholder="Area (hectare)" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.area_hectare ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.area_hectare} onChange={(e) => { setFormData({ ...formData, area_hectare: e.target.value }); if (fieldErrors.area_hectare) setFieldErrors((p) => ({ ...p, area_hectare: "" })); }} />
                   {fieldErrors.area_hectare && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.area_hectare}</p>}
                 </div>
 

@@ -6,11 +6,12 @@ import { supabase } from "@/lib/supabaseClient";
 import { hasCompletedOnboarding, getAllUserPlantations, getUserTeamLeaders } from "@/lib/onboarding";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
-import { Users, Calendar, ChevronDown, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp } from "lucide-react";
+import { Users, Calendar, ChevronDown, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Plantation, TeamLeader, TodayStats } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { FadeIn } from "@/components/ui/Skeleton";
+import GuidedTour from "@/components/GuidedTour";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -40,6 +41,8 @@ export default function DashboardPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [recentEntries, setRecentEntries] = useState<any[]>([]);
   const [weeklyTrend, setWeeklyTrend] = useState<{ date: string; day: string; bunches: number; tons: number }[]>([]);
+  const [showTour, setShowTour] = useState(false);
+  const [hasEntriesToday, setHasEntriesToday] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -54,8 +57,8 @@ export default function DashboardPage() {
     try {
       const hasPlantation = await hasCompletedOnboarding(user.id);
       if (!hasPlantation) {
-        console.log("Onboarding not completed, redirecting...");
-        router.push("/onboarding/plantation");
+        setPlantations([]);
+        setChecking(false);
         return;
       }
       const allPlantations = await getAllUserPlantations(user.id);
@@ -64,6 +67,11 @@ export default function DashboardPage() {
         setSelectedPlantation(allPlantations[0]);
       }
       setChecking(false);
+
+      // Show guided tour for first-time users
+      if (allPlantations.length > 0 && !localStorage.getItem("palminsight_tour_seen")) {
+        setShowTour(true);
+      }
     } catch (error) {
       console.error("Onboarding check failed:", error);
       setChecking(false);
@@ -101,6 +109,7 @@ export default function DashboardPage() {
     const entries = todayEntries || [];
     const activeLeaders = new Set(entries.filter((e) => e.work_status === "work").map((e) => e.team_leader_id));
 
+    setHasEntriesToday(entries.length > 0);
     setTodayStats({
       bunches: entries.reduce((sum, e) => sum + (e.bunches || 0), 0),
       transported: entries.reduce((sum, e) => sum + (e.tons || 0), 0),
@@ -164,8 +173,50 @@ export default function DashboardPage() {
     );
   }
 
+  // No Plantation Empty State
+  if (plantations.length === 0) {
+    return (
+      <DashboardLayout>
+        <div className="min-h-full overflow-x-hidden flex items-center justify-center p-6" style={{ backgroundColor: "var(--bg-base)" }}>
+          <div className="text-center max-w-md">
+            {/* SVG Illustration */}
+            <div className="flex justify-center mb-6">
+              <svg viewBox="0 0 120 120" className="w-[120px] h-[120px]" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="15" y="70" width="90" height="35" rx="6" stroke="#10b981" strokeOpacity="0.2" fill="#10b981" fillOpacity="0.05" />
+                <path d="M60 15c-3 6-10 12-16 15 6-1 11 2 14 6-7 4-11 10-11 16 2-2 5-4 8-5-2 5 0 10 4 13 1-4 3-7 6-10-2 6 0 11 5 13 1-3 2-7 1-11-4 3-8 4-11 2 4-4 6-10 5-15 5 1 9 1 12-1-6-5-12-11-15-16z" stroke="#10b981" fill="#10b981" fillOpacity="0.15" />
+                <line x1="60" y1="55" x2="60" y2="72" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
+                <line x1="30" y1="78" x2="30" y2="95" stroke="#10b981" strokeOpacity="0.2" strokeDasharray="4 3" />
+                <line x1="90" y1="78" x2="90" y2="95" stroke="#10b981" strokeOpacity="0.2" strokeDasharray="4 3" />
+                <line x1="60" y1="78" x2="60" y2="95" stroke="#10b981" strokeOpacity="0.2" strokeDasharray="4 3" />
+              </svg>
+            </div>
+
+            <h1 className="page-title text-2xl text-white mb-2">
+              Welcome to PalmInsight
+            </h1>
+            <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--text-secondary)" }}>
+              Let&apos;s get your plantation set up. You haven&apos;t added any plantation yet.
+              Start by registering your first plantation block, then add your team
+              leaders to begin tracking productivity.
+            </p>
+
+            <Link
+              href="/onboarding/plantation"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+              style={{ backgroundColor: "#10b981", color: "#050f05" }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Your First Plantation
+            </Link>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
+      {showTour && <GuidedTour onClose={() => { setShowTour(false); localStorage.setItem("palminsight_tour_seen", "true"); }} />}
       <div className="min-h-full overflow-x-hidden" style={{ backgroundColor: "var(--bg-base)" }}>
         {/* Green Header Banner */}
         <div className="relative" style={{ background: "linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)", zIndex: 50 }}>
@@ -184,7 +235,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-3 mb-1">
                   <Tractor className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: "#34d399" }} />
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
+                  <h1 className="page-title text-xl sm:text-2xl lg:text-3xl text-white tracking-tight">
                     {getGreeting()}, {profile?.full_name || (user?.user_metadata as Record<string, string>)?.full_name || user?.email?.split("@")[0] || ""}
                   </h1>
                 </div>
@@ -210,7 +261,7 @@ export default function DashboardPage() {
                   </button>
 
                   {showDropdown && (
-                    <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border overflow-hidden shadow-2xl bg-[var(--bg-card)] border-[var(--border-default)] z-[9999]" style={{ zIndex: 1000 }}>
+                    <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden shadow-2xl bg-[var(--bg-card)] card-glow z-[9999]" style={{ zIndex: 1000 }}>
                       {plantations.map((p) => (
                         <button
                           key={p.id}
@@ -251,12 +302,12 @@ export default function DashboardPage() {
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
           {/* Plantation Details Card */}
           {selectedPlantation && (
-            <div className="rounded-2xl border p-4 sm:p-6 mb-4 sm:mb-6 -mt-4 relative shadow-lg" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <div className="card-glow rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 -mt-4 relative shadow-lg" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
                   <Sprout className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
                 </div>
-                <h2 className="text-base font-semibold text-white">Plantation Details</h2>
+                <h2 className="section-heading text-base text-white">Plantation Details</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
                 <div>
@@ -299,7 +350,7 @@ export default function DashboardPage() {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-              <h2 className="text-lg font-semibold text-white">Today's Overview</h2>
+              <h2 className="section-heading text-lg text-white">Today's Overview</h2>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
@@ -308,7 +359,7 @@ export default function DashboardPage() {
                 { label: "Backlogs", value: todayStats.backlogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
                 { label: "Teams Active", value: `${todayStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
               ].map((s) => (
-                <div key={s.label} className="relative rounded-2xl p-3 sm:p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                <div key={s.label} className="card-glow relative rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
                   {/* Decorative blob */}
                   <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-30 blur-xl" style={{ backgroundColor: s.color }} />
                   <div className="relative z-10">
@@ -323,6 +374,25 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+
+            {/* No entries today notice */}
+            {!hasEntriesToday && (
+              <div className="mt-3 card-glow rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3" style={{ backgroundColor: "var(--bg-card)" }}>
+                <span className="text-lg">📋</span>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-white">No harvest data logged today.</p>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>Go to Teams to record today&apos;s entries.</p>
+                </div>
+                <Link
+                  href="/team"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0"
+                  style={{ backgroundColor: "rgba(16,185,129,0.12)", color: "#10b981" }}
+                >
+                  Go to Teams
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Weekly Trend */}
@@ -330,9 +400,9 @@ export default function DashboardPage() {
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <BarChart3 className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-                <h2 className="text-base sm:text-lg font-semibold text-white">Weekly Trend</h2>
+                <h2 className="section-heading text-base sm:text-lg text-white">Weekly Trend</h2>
               </div>
-              <div className="rounded-2xl border p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+              <div className="card-glow rounded-2xl p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#10b981" }} />
@@ -365,13 +435,13 @@ export default function DashboardPage() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <TrendingUp className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-              <h2 className="text-base sm:text-lg font-semibold text-white">Quick Actions</h2>
+              <h2 className="section-heading text-base sm:text-lg text-white">Quick Actions</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Link
                 href="/team"
-                className="group flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 border transition-all hover:scale-[1.01] min-h-[44px]"
-                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
+                className="group card-glow flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 transition-all hover:scale-[1.01] min-h-[44px]"
+                style={{ backgroundColor: "var(--bg-card)" }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
                   <Users className="w-6 h-6 text-white" />
@@ -384,8 +454,8 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/reports"
-                className="group flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 border transition-all hover:scale-[1.01] min-h-[44px]"
-                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
+                className="group card-glow flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 transition-all hover:scale-[1.01] min-h-[44px]"
+                style={{ backgroundColor: "var(--bg-card)" }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8b5cf6, #a855f7)" }}>
                   <BarChart3 className="w-6 h-6 text-white" />
@@ -403,9 +473,9 @@ export default function DashboardPage() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <ClipboardList className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
-              <h2 className="text-base sm:text-lg font-semibold text-white">Recent Entries</h2>
+              <h2 className="section-heading text-base sm:text-lg text-white">Recent Entries</h2>
             </div>
-            <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
               {recentEntries.length === 0 ? (
                 <div className="p-6 sm:p-8 text-center">
                   <ClipboardList className="w-10 h-10 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.1)" }} />

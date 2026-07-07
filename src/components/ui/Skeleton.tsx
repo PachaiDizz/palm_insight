@@ -39,7 +39,7 @@ export function FadeIn({ children, delay = 0 }: { children: ReactNode; delay?: n
 
 export function StatCardSkeleton() {
   return (
-    <div className="relative rounded-2xl p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+    <div className="card-glow relative rounded-2xl p-5 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
       <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10 blur-xl" style={{ backgroundColor: "var(--text-muted)" }} />
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-3">
@@ -54,7 +54,7 @@ export function StatCardSkeleton() {
 
 export function PlantationCardSkeleton() {
   return (
-    <div className="rounded-2xl border p-4 sm:p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+    <div className="card-glow rounded-2xl p-4 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="mb-4">
@@ -96,7 +96,7 @@ export function LeaderCardSkeleton() {
   return (
     <div className="w-full max-w-full md:max-w-[420px]">
       <Skeleton className="w-24 h-6 rounded-lg mx-auto mb-5" />
-      <div className="w-full rounded-2xl border p-4 sm:p-8" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+      <div className="card-glow w-full rounded-2xl p-4 sm:p-8" style={{ backgroundColor: "var(--bg-card)" }}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <Skeleton className="w-14 h-14 rounded-xl" />
@@ -126,7 +126,7 @@ export function LeaderCardSkeleton() {
 
 export function BlockCardSkeleton() {
   return (
-    <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+    <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
       <div className="flex items-center justify-between mb-3">
         <Skeleton className="w-10 h-10 rounded-xl" />
         <Skeleton className="w-20 h-6 rounded-full" />
@@ -143,7 +143,7 @@ export function BlockCardSkeleton() {
 
 export function ChartSkeleton({ height = 300 }: { height?: number }) {
   return (
-    <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+    <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
       <Skeleton className="w-32 h-4 mb-4" />
       <Skeleton className="w-full h-[300px]" style={{ height }} />
     </div>
@@ -152,7 +152,7 @@ export function ChartSkeleton({ height = 300 }: { height?: number }) {
 
 export function TableSkeleton({ rows = 5, cols = 8 }: { rows?: number; cols?: number }) {
   return (
-    <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+    <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
       <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
         <Skeleton className="w-40 h-4" />
       </div>
@@ -185,7 +185,7 @@ export function DashboardSkeleton() {
       </div>
 
       {/* Plantation details card */}
-      <div className="rounded-2xl border p-4 sm:p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+      <div className="card-glow rounded-2xl p-4 sm:p-6" style={{ backgroundColor: "var(--bg-card)" }}>
         <div className="flex items-center gap-2 mb-4 sm:mb-5">
           <Skeleton className="w-9 h-9 rounded-xl" />
           <Skeleton className="w-36 h-4" />
@@ -222,7 +222,7 @@ export function DashboardSkeleton() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {[1,2].map(i => (
-            <div key={i} className="rounded-2xl border p-4 sm:p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <div key={i} className="card-glow rounded-2xl p-4 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="flex items-center gap-4">
                 <Skeleton className="w-12 h-12 rounded-xl" />
                 <div className="flex-1">
@@ -242,7 +242,7 @@ export function DashboardSkeleton() {
           <Skeleton className="w-5 h-5" />
           <Skeleton className="w-36 h-5" />
         </div>
-        <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+        <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
           <div className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>
             {[1,2,3,4,5].map(i => (
               <div key={i} className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-3.5">

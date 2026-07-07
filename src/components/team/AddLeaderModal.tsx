@@ -38,10 +38,10 @@ export default function AddLeaderModal({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="rounded-2xl border p-6 w-full max-w-md mx-4"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
+            className="card-glow rounded-2xl p-6 w-full max-w-md mx-4"
+            style={{ backgroundColor: "var(--bg-card)" }}
           >
-            <h2 className="text-xl font-bold text-white mb-5">Add Team Leader</h2>
+            <h2 className="section-heading text-xl text-white mb-5">Add Team Leader</h2>
             <form onSubmit={onSubmit} className="space-y-3">
               {selectedBlockId && (
                 <div className="p-3 rounded-xl" style={{ backgroundColor: "rgba(16,185,129,0.08)" }}>

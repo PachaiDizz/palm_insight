@@ -4,7 +4,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle } from "lucide-react";
+import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle, Bell, BellOff } from "lucide-react";
+import { getNotificationPrefs, saveNotificationPrefs } from "@/components/notifications/notificationHelpers";
+import type { NotificationPrefs } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 
 export default function SettingsPage() {
@@ -22,6 +24,14 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Notification prefs
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(getNotificationPrefs());
+  const [pushSupported] = useState(() => "Notification" in window);
+  const [pushPermission, setPushPermission] = useState(() => {
+    if ("Notification" in window) return Notification.permission;
+    return "denied";
+  });
 
   const handleSaveName = async () => {
     if (!user || !displayName.trim()) return;
@@ -110,6 +120,27 @@ export default function SettingsPage() {
     window.location.reload();
   };
 
+  const toggleNotifPref = (key: keyof NotificationPrefs) => {
+    const updated = { ...notifPrefs, [key]: !notifPrefs[key] };
+    setNotifPrefs(updated);
+    saveNotificationPrefs(updated);
+  };
+
+  const requestPushPermission = async () => {
+    if ("Notification" in window && Notification.permission === "default") {
+      const permission = await Notification.requestPermission();
+      setPushPermission(permission);
+      if (permission === "granted") {
+        toggleNotifPref("browserPush");
+        new Notification("PalmInsight", {
+          body: "You will now receive harvest reminders and alerts.",
+          icon: "/icons/icon-192x192.png",
+          badge: "/icons/icon-72x72.png",
+        });
+      }
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6 max-w-4xl mx-auto">
@@ -119,8 +150,8 @@ export default function SettingsPage() {
 
           {/* ===== Account Section ===== */}
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Account</h2>
-            <div className="rounded-2xl border p-5 space-y-4" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Account</h2>
+            <div className="card-glow rounded-2xl p-5 space-y-4" style={{ backgroundColor: "var(--bg-card)" }}>
 
               {/* Display Name */}
               <div className="flex items-center gap-3">
@@ -215,10 +246,82 @@ export default function SettingsPage() {
             </div>
           </section>
 
+          {/* ===== Notifications Section ===== */}
+          <section>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Notifications</h2>
+            <div className="card-glow rounded-2xl p-5 space-y-0" style={{ backgroundColor: "var(--bg-card)" }}>
+              {([
+                { key: "dailyReminder" as const, label: "Daily Harvest Reminder", desc: "Remind me when no entries are logged by 10AM" },
+                { key: "lowProductivity" as const, label: "Low Productivity Alerts", desc: "Alert when a leader's output drops significantly" },
+                { key: "checkinReminder" as const, label: "Check-in Reminders", desc: "Remind me if a leader hasn't logged in 3+ days" },
+              ]).map((item, i) => (
+                <div key={item.key}>
+                  {i > 0 && <div className="border-t my-3" style={{ borderColor: "var(--border-default)" }} />}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium text-white">{item.label}</div>
+                      <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{item.desc}</div>
+                    </div>
+                    <button
+                      onClick={() => toggleNotifPref(item.key)}
+                      className="relative w-12 h-6 rounded-full transition-colors"
+                      style={{ backgroundColor: notifPrefs[item.key] ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.1)" }}
+                      aria-label={`Toggle ${item.label}`}
+                    >
+                      <div
+                        className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform bg-white"
+                        style={{ transform: notifPrefs[item.key] ? "translateX(24px)" : "translateX(0)" }}
+                      />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <div className="border-t my-3" style={{ borderColor: "var(--border-default)" }} />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(16,185,129,0.15)" }}>
+                    {notifPrefs.browserPush ? <Bell className="w-5 h-5" style={{ color: "var(--accent-green)" }} /> : <BellOff className="w-5 h-5" style={{ color: "var(--text-muted)" }} />}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-white">Browser Push Notifications</div>
+                    <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                      {pushPermission === "granted" ? "Enabled" : pushPermission === "denied" ? "Blocked by browser" : "Receive alerts even when the app is not open"}
+                    </div>
+                  </div>
+                </div>
+                {pushPermission === "granted" ? (
+                  <button
+                    onClick={() => toggleNotifPref("browserPush")}
+                    className="relative w-12 h-6 rounded-full transition-colors"
+                    style={{ backgroundColor: notifPrefs.browserPush ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.1)" }}
+                    aria-label="Toggle browser push notifications"
+                  >
+                    <div
+                      className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform bg-white"
+                      style={{ transform: notifPrefs.browserPush ? "translateX(24px)" : "translateX(0)" }}
+                    />
+                  </button>
+                ) : pushPermission === "default" ? (
+                  <button
+                    onClick={requestPushPermission}
+                    className="px-4 py-2 rounded-xl text-sm font-medium"
+                    style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}
+                  >
+                    Enable Push Notifications
+                  </button>
+                ) : (
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>Blocked</span>
+                )}
+              </div>
+            </div>
+          </section>
+
           {/* ===== Appearance Section ===== */}
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Appearance</h2>
-            <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Appearance</h2>
+            <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(139,92,246,0.15)" }}>
@@ -246,9 +349,9 @@ export default function SettingsPage() {
 
           {/* ===== Data Management Section ===== */}
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Data Management</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Data Management</h2>
             <div className="space-y-3">
-              <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+              <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(59,130,246,0.15)" }}>
@@ -265,7 +368,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+              <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
                     <Upload className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
@@ -281,7 +384,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--accent-red-border)" }}>
+              <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--accent-red-border)" }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(239,68,68,0.15)" }}>

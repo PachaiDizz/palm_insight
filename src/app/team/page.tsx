@@ -415,7 +415,7 @@ function TeamsContent() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Team Management</h1>
+            <h1 className="page-title text-2xl sm:text-3xl text-white tracking-tight">Team Management</h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               {selectedBlock ? `${selectedP?.rancangan}, Peringkat ${selectedP?.peringkat} — Block ${selectedP?.block}` : "Select a block to manage team leaders."}
             </p>
@@ -453,7 +453,7 @@ function TeamsContent() {
         <AnimatePresence mode="wait">
           {plantations.length === 0 ? (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
-              className="rounded-2xl border p-12 text-center" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+              className="card-glow rounded-2xl p-12 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
               <MapPin className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations set. Complete onboarding first.</p>
             </motion.div>
@@ -491,18 +491,18 @@ function TeamsContent() {
               <motion.div key="detail-view" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="mt-8">
                 <motion.button whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.08)" }} whileTap={{ scale: 0.97 }}
                   onClick={handleBackToOrgChart}
-                  className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ color: "var(--text-muted)", border: "1px solid rgba(6,78,59,0.3)" }}>
+                  className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ color: "var(--text-muted)", border: "1px solid rgba(16,185,129,0.12)" }}>
                   <ChevronLeft className="w-4 h-4" /> Back to all blocks
                 </motion.button>
 
-                <div className="rounded-2xl border p-6 mb-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                <div className="card-glow rounded-2xl p-6 mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="flex items-start justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(16,185,129,0.12)" }}>
                         <Users className="w-7 h-7" style={{ color: "var(--accent-green)" }} />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white">{viewingLeader.name}</h2>
+                        <h2 className="page-title text-2xl text-white">{viewingLeader.name}</h2>
                         {viewingLeader.phone && (<div className="flex items-center gap-2 mt-1"><Phone className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} /><span className="text-sm" style={{ color: "var(--text-muted)" }}>{viewingLeader.phone}</span></div>)}
                       </div>
                     </div>
@@ -520,7 +520,7 @@ function TeamsContent() {
                     { label: "Total Tonnage", value: `${detailStats.totalTons} ton`, icon: Truck, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
                     { label: "Total Backlogs", value: detailStats.totalBacklogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
                   ].map((s) => (
-                    <div key={s.label} className="relative rounded-2xl p-3 sm:p-5 border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                    <div key={s.label} className="card-glow relative rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
                       <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-20 blur-xl" style={{ backgroundColor: s.color }} />
                       <div className="relative z-10">
                         <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -538,14 +538,14 @@ function TeamsContent() {
                     { label: "Avg Tons/Day", value: detailStats.avgTons, color: "var(--accent-green)" },
                     { label: "Avg Workers/Day", value: detailStats.avgWorkers, color: "var(--accent-blue)" },
                   ].map((s) => (
-                    <div key={s.label} className="rounded-2xl p-4 sm:p-5 border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                    <div key={s.label} className="card-glow rounded-2xl p-4 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                       <div className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>{s.label}</div>
                       <div className="text-xl sm:text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className="rounded-2xl border p-4 mb-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                <div className="card-glow rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
                     <div className="flex items-center gap-2">
                       <button onClick={detailPrevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)", border: "1px solid rgba(16,185,129,0.2)" }}><ChevronLeft className="w-4 h-4" /></button>
@@ -558,15 +558,15 @@ function TeamsContent() {
                     </div>
                     <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)" }}>{detailFilteredEntries.length} entries</span>
                   </div>
-                  <div className="flex items-end gap-3 pt-3" style={{ borderTop: "1px solid rgba(6,78,59,0.3)" }}>
+                  <div className="flex items-end gap-3 pt-3" style={{ borderTop: "1px solid rgba(16,185,129,0.12)" }}>
                     <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>From</label><input type="date" value={detailDateFrom} onChange={(e) => setDetailDateFrom(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-white outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
                     <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>To</label><input type="date" value={detailDateTo} onChange={(e) => setDetailDateTo(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-white outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
                     {(detailDateFrom || detailDateTo) && (<button onClick={() => { setDetailDateFrom(""); setDetailDateTo(""); }} className="px-3 py-2 rounded-xl text-xs font-medium transition-colors" style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)", border: "1px solid rgba(239,68,68,0.2)" }}>Clear</button>)}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-                  <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-default)" }}><BarChart3 className="w-4 h-4" style={{ color: "var(--accent-green)" }} /><h3 className="text-sm font-semibold text-white">All Entries</h3></div>
+                <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
+                  <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-default)" }}><BarChart3 className="w-4 h-4" style={{ color: "var(--accent-green)" }} /><h3 className="card-title text-sm text-white">All Entries</h3></div>
                   {detailFilteredEntries.length === 0 ? (
                     <div className="p-12 text-center"><Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.1)" }} /><p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries found for this period.</p></div>
                   ) : (
@@ -583,7 +583,7 @@ function TeamsContent() {
                             const isNoWork = e.work_status === "no_work";
                             const isLast = idx === detailFilteredEntries.length - 1;
                             return (
-                              <tr key={e.id} style={{ borderBottom: isLast ? "none" : "1px solid rgba(6,78,59,0.15)" }}>
+                              <tr key={e.id} style={{ borderBottom: isLast ? "none" : "1px solid rgba(16,185,129,0.08)" }}>
                                 <td className="px-4 py-3 text-sm text-center" style={{ color: "var(--text-muted)" }}>{idx + 1}</td>
                                 <td className="px-4 py-3 text-sm text-white font-medium whitespace-nowrap">{e.date ? e.date.split("-").reverse().join("/") : "-"}</td>
                                 <td className="px-4 py-3 whitespace-nowrap"><span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)", color: isNoWork ? "#f87171" : "#10b981" }}>{isNoWork ? "No Work" : "Work"}</span></td>
@@ -603,7 +603,7 @@ function TeamsContent() {
                         </tbody>
                       </table>
                       {/* Mobile cards */}
-                      <div className="md:hidden divide-y" style={{ borderColor: "rgba(6,78,59,0.15)" }}>
+                      <div className="md:hidden divide-y" style={{ borderColor: "rgba(16,185,129,0.08)" }}>
                         {detailFilteredEntries.map((e: DailyEntry, idx: number) => {
                           const isNoWork = e.work_status === "no_work";
                           return (

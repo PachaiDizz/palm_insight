@@ -77,7 +77,7 @@ export default function TeamSetupPage() {
 
   const inputStyle = {
     backgroundColor: "var(--bg-input)",
-    border: "1px solid rgba(6,78,59,0.4)",
+    border: "1px solid rgba(16,185,129,0.15)",
     color: "white",
   };
 
@@ -85,8 +85,8 @@ export default function TeamSetupPage() {
     <PageTransition>
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--bg-base)" }}>
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(6, 78, 59, 0.2)" }} />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]" style={{ backgroundColor: "rgba(5, 46, 22, 0.2)" }} />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.08)" }} />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.06)" }} />
       </div>
 
       <motion.div
@@ -101,7 +101,7 @@ export default function TeamSetupPage() {
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ backgroundColor: "rgba(16,185,129,0.3)", color: "var(--accent-green)" }}>✓</div>
             <span className="text-sm font-medium" style={{ color: "var(--accent-green)" }}>Plantation</span>
           </div>
-          <div className="flex-1 h-px" style={{ backgroundColor: "rgba(6,78,59,0.4)" }} />
+          <div className="flex-1 h-px" style={{ backgroundColor: "rgba(16,185,129,0.15)" }} />
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: "linear-gradient(to right, #059669, #16a34a)" }}>2</div>
             <span className="text-sm font-medium text-white">Team</span>
@@ -117,7 +117,7 @@ export default function TeamSetupPage() {
             <span className="font-bold text-lg text-white">PalmInsight</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-white mt-6 mb-1">Team Details</h1>
+          <h1 className="page-title text-2xl text-white mt-6 mb-1">Team Details</h1>
           <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>Add your team leaders. You can add as many as needed.</p>
 
           {error && (
@@ -145,7 +145,7 @@ export default function TeamSetupPage() {
               type="button"
               onClick={addLeader}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm transition-all border border-dashed mb-6"
-              style={{ borderColor: "rgba(6,78,59,0.5)", color: "rgba(255,255,255,0.6)", backgroundColor: "rgba(6,78,59,0.1)" }}
+              style={{ borderColor: "rgba(16,185,129,0.15)", color: "rgba(255,255,255,0.6)", backgroundColor: "rgba(16,185,129,0.08)" }}
             >
               <Plus className="w-4 h-4" />
               <span>Add Team Leader</span>

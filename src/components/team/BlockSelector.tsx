@@ -29,7 +29,7 @@ const blockCardVariants = {
 export default function BlockSelector({ plantations, teamLeaders, blockLastEntries, blockWorkersToday, onSelectBlock }: BlockSelectorProps) {
   if (plantations.length === 0) {
     return (
-      <div className="rounded-2xl border p-12 text-center" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+      <div className="card-glow rounded-2xl p-12 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
         <MapPin className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations set. Complete onboarding first.</p>
       </div>
@@ -38,7 +38,7 @@ export default function BlockSelector({ plantations, teamLeaders, blockLastEntri
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h2 className="section-heading text-lg text-white mb-4 flex items-center gap-2">
         <MapPin className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
         Select Block
       </h2>
@@ -58,8 +58,8 @@ export default function BlockSelector({ plantations, teamLeaders, blockLastEntri
                 whileHover={{ scale: 1.02, backgroundColor: "rgba(16,185,129,0.12)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectBlock(p.id)}
-                className="rounded-2xl border p-4 sm:p-5 text-left cursor-pointer min-h-[44px]"
-                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
+                className="card-glow rounded-2xl p-4 sm:p-5 text-left cursor-pointer min-h-[44px]"
+                style={{ backgroundColor: "var(--bg-card)" }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>

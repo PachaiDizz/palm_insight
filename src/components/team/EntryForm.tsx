@@ -60,7 +60,7 @@ export default function EntryForm({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
       className="rounded-3xl border overflow-hidden mt-8"
-      style={{ backgroundColor: "rgba(17,26,17,0.8)", borderColor: "rgba(6,78,59,0.25)", backdropFilter: "blur(20px)" }}
+      style={{ backgroundColor: "rgba(19,31,19,0.8)", borderColor: "rgba(16,185,129,0.12)", backdropFilter: "blur(20px)" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -75,7 +75,7 @@ export default function EntryForm({
               <Save className="w-5 h-5 text-[var(--accent-green)]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">New Entry</h2>
+              <h2 className="section-heading text-base text-white">New Entry</h2>
               <p className="text-xs text-[rgba(255,255,255,0.45)]">{leader.name} — Block {plantation?.block}</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function EntryForm({
           </label>
           <input
             type="date"
-            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
+            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
             value={date}
             onChange={(e) => onDateChange(e.target.value)}
           />
@@ -158,7 +158,7 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
                   value={numWorkers}
                   onChange={(e) => onNumWorkersChange(e.target.value)}
                   placeholder="0"
@@ -170,7 +170,7 @@ export default function EntryForm({
                   Lot
                 </label>
                 <input
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
                   value={lot}
                   onChange={(e) => onLotChange(e.target.value)}
                   placeholder="e.g. A1"
@@ -186,7 +186,7 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
                   value={bunches}
                   onChange={(e) => onBunchesChange(e.target.value)}
                   placeholder="0"
@@ -199,7 +199,7 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
                   value={tons}
                   onChange={(e) => onTonsChange(e.target.value)}
                   placeholder="0.0"
@@ -212,7 +212,7 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
                   value={backlogs}
                   onChange={(e) => onBacklogsChange(e.target.value)}
                   placeholder="0"
@@ -228,7 +228,7 @@ export default function EntryForm({
             Notes
           </label>
           <textarea
-            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-emerald-500/50 min-h-15"
+            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50 min-h-15"
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
             placeholder={workStatus === "work" ? "Any additional notes..." : "Reason for no work..."}

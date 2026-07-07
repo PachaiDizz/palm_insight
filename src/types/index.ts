@@ -50,3 +50,24 @@ export interface TodayStats {
   backlogs: number;
   teamsActive: number;
 }
+
+export type NotificationType = "daily_reminder" | "low_productivity" | "checkin_reminder";
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  is_read: boolean;
+  plantation_id: string | null;
+  team_leader_id: string | null;
+  created_at: string;
+}
+
+export interface NotificationPrefs {
+  dailyReminder: boolean;
+  lowProductivity: boolean;
+  checkinReminder: boolean;
+  browserPush: boolean;
+}

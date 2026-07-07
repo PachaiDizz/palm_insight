@@ -18,7 +18,7 @@ export default function TeamLeaderCard({ index, name, phone, notes, onChange, on
   };
 
   return (
-    <div className="rounded-2xl border p-5 relative bg-[#0d150d]">
+    <div className="card-glow rounded-2xl p-5 relative" style={{ backgroundColor: "var(--bg-card)" }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
