@@ -73,10 +73,10 @@ export async function fetchLatestEntriesForLeaders(leaderIds: string[]): Promise
 
 export function computeLeaderStats(entries: DailyEntry[]) {
   const workDays = entries.filter((e) => e.work_status === "work");
-  const totalBunches = workDays.reduce((sum, e) => sum + (e.bunches || 0), 0);
-  const totalTons = workDays.reduce((sum, e) => sum + (e.tons || 0), 0);
-  const totalBacklogs = workDays.reduce((sum, e) => sum + (e.backlogs || 0), 0);
-  const totalWorkers = workDays.reduce((sum, e) => sum + (e.num_workers || 0), 0);
+  const totalBunches = workDays.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0);
+  const totalTons = entries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0);
+  const totalBacklogs = workDays.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0);
+  const totalWorkers = workDays.reduce((sum, e) => sum + (Number(e.num_workers) || 0), 0);
 
   return {
     totalEntries: entries.length,
@@ -86,7 +86,7 @@ export function computeLeaderStats(entries: DailyEntry[]) {
     totalTons,
     totalBacklogs,
     avgBunches: workDays.length > 0 ? Math.round(totalBunches / workDays.length) : 0,
-    avgTons: workDays.length > 0 ? (totalTons / workDays.length).toFixed(1) : "0",
+    avgTons: workDays.length > 0 ? (totalTons / workDays.length).toFixed(2) : "0.00",
     avgWorkers: workDays.length > 0 ? Math.round(totalWorkers / workDays.length) : 0,
   };
 }

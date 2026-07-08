@@ -149,10 +149,10 @@ function TeamsContent() {
     const entries = (data || []) as DailyEntry[];
     setLeaderEntries(entries);
     const workDays = entries.filter((e) => e.work_status === "work");
-    const totalBunches = workDays.reduce((sum, e) => sum + (e.bunches || 0), 0);
-    const totalTons = workDays.reduce((sum, e) => sum + (e.tons || 0), 0);
-    const totalBacklogs = workDays.reduce((sum, e) => sum + (e.backlogs || 0), 0);
-    const totalWorkers = workDays.reduce((sum, e) => sum + (e.num_workers || 0), 0);
+    const totalBunches = workDays.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0);
+    const totalTons = entries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0);
+    const totalBacklogs = workDays.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0);
+    const totalWorkers = workDays.reduce((sum, e) => sum + (Number(e.num_workers) || 0), 0);
     setLeaderStats({
       totalEntries: entries.length, workDays: workDays.length, totalBunches, totalTons, totalBacklogs,
       avgBunches: workDays.length > 0 ? Math.round(totalBunches / workDays.length) : 0,
@@ -355,10 +355,10 @@ function TeamsContent() {
     });
     setDetailFilteredEntries(filtered);
     const workDays = filtered.filter((e) => e.work_status === "work");
-    const totalBunches = workDays.reduce((s, e) => s + (e.bunches || 0), 0);
-    const totalTons = workDays.reduce((s, e) => s + (e.tons || 0), 0);
-    const totalBacklogs = workDays.reduce((s, e) => s + (e.backlogs || 0), 0);
-    const totalWorkers = workDays.reduce((s, e) => s + (e.num_workers || 0), 0);
+    const totalBunches = workDays.reduce((s, e) => s + (Number(e.bunches) || 0), 0);
+    const totalTons = filtered.reduce((s, e) => s + (Number(e.tons) || 0), 0);
+    const totalBacklogs = workDays.reduce((s, e) => s + (Number(e.backlogs) || 0), 0);
+    const totalWorkers = workDays.reduce((s, e) => s + (Number(e.num_workers) || 0), 0);
     setDetailStats({
       totalEntries: filtered.length, workDays: workDays.length, noWorkDays: filtered.length - workDays.length,
       totalBunches, totalTons, totalBacklogs,

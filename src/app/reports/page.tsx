@@ -62,20 +62,25 @@ export default function ReportsPage() {
   });
 
   // Stats
+  const workOnly = filteredEntries.filter((e) => e.work_status === "work");
   const stats = {
     totalEntries: filteredEntries.length,
-    totalBunches: filteredEntries.reduce((sum, e) => sum + (e.bunches || 0), 0),
-    totalTons: filteredEntries.reduce((sum, e) => sum + (e.tons || 0), 0),
-    totalBacklogs: filteredEntries.reduce((sum, e) => sum + (e.backlogs || 0), 0),
-    workDays: filteredEntries.filter((e) => e.work_status === "work").length,
+    totalBunches: workOnly.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
+    totalTons: filteredEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
+    totalBacklogs: workOnly.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0),
+    workDays: workOnly.length,
     noWorkDays: filteredEntries.filter((e) => e.work_status !== "work").length,
   };
 
   // Daily chart data
   const dailyData = filteredEntries.reduce((acc: Record<string, { date: string; bunches: number; tons: number }>, e: DailyEntry) => {
     if (!acc[e.date]) acc[e.date] = { date: e.date, bunches: 0, tons: 0 };
-    acc[e.date].bunches += e.bunches || 0;
-    acc[e.date].tons += e.tons || 0;
+    // Tons from all entries (work + no_work)
+    acc[e.date].tons += Number(e.tons) || 0;
+    // Bunches only from work days
+    if (e.work_status === "work") {
+      acc[e.date].bunches += Number(e.bunches) || 0;
+    }
     return acc;
   }, {});
   const chartData = Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date));

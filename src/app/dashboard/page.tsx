@@ -1,17 +1,19 @@
 "use client";
 import { useAuth } from "@/components/AuthProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { hasCompletedOnboarding, getAllUserPlantations, getUserTeamLeaders } from "@/lib/onboarding";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
-import { Users, Calendar, ChevronDown, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
+import { Users, Calendar, ChevronDown, ChevronLeft, ChevronRight, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Plantation, TeamLeader, TodayStats } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { FadeIn } from "@/components/ui/Skeleton";
 import GuidedTour from "@/components/GuidedTour";
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -26,8 +28,12 @@ function getFormattedDate() {
   return now.toLocaleDateString("en-MY", options);
 }
 
-function getTodayString() {
-  return new Date().toISOString().split("T")[0];
+function getMonthRange(year: number, month: number) {
+  const mm = String(month + 1).padStart(2, "0");
+  const startDate = `${year}-${mm}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const endDate = `${year}-${mm}-${String(lastDay).padStart(2, "0")}`;
+  return { startDate, endDate };
 }
 
 export default function DashboardPage() {
@@ -37,12 +43,32 @@ export default function DashboardPage() {
   const [plantations, setPlantations] = useState<Plantation[]>([]);
   const [selectedPlantation, setSelectedPlantation] = useState<Plantation | null>(null);
   const [teamLeaders, setTeamLeaders] = useState<TeamLeader[]>([]);
-  const [todayStats, setTodayStats] = useState<TodayStats>({ bunches: 0, transported: 0, backlogs: 0, teamsActive: 0 });
+  const [monthlyStats, setMonthlyStats] = useState<TodayStats>({ bunches: 0, transported: 0, backlogs: 0, teamsActive: 0 });
+  const [todayPulse, setTodayPulse] = useState({ bunches: 0, tons: 0, teamsLogged: 0 });
   const [showDropdown, setShowDropdown] = useState(false);
   const [recentEntries, setRecentEntries] = useState<any[]>([]);
   const [weeklyTrend, setWeeklyTrend] = useState<{ date: string; day: string; bunches: number; tons: number }[]>([]);
   const [showTour, setShowTour] = useState(false);
   const [hasEntriesToday, setHasEntriesToday] = useState(true);
+
+  // Monthly filter state — default to current month
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const prevMonth = useCallback(() => {
+    setSelectedMonth((m) => {
+      if (m === 0) { setSelectedYear((y) => y - 1); return 11; }
+      return m - 1;
+    });
+  }, []);
+
+  const nextMonth = useCallback(() => {
+    setSelectedMonth((m) => {
+      if (m === 11) { setSelectedYear((y) => y + 1); return 0; }
+      return m + 1;
+    });
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -68,7 +94,6 @@ export default function DashboardPage() {
       }
       setChecking(false);
 
-      // Show guided tour for first-time users
       if (allPlantations.length > 0 && !localStorage.getItem("palminsight_tour_seen")) {
         setShowTour(true);
       }
@@ -78,85 +103,119 @@ export default function DashboardPage() {
     }
   }
 
+  // Reload data when plantation or month changes
   useEffect(() => {
     if (selectedPlantation && user) {
-      loadTodayStats(selectedPlantation);
-      loadRecentEntries();
-      loadWeeklyTrend();
+      loadMonthlyStats(selectedPlantation);
+      loadTodayPulse(selectedPlantation);
+      loadRecentEntries(selectedPlantation);
+      loadMonthlyTrend(selectedPlantation);
     }
-  }, [selectedPlantation]);
+  }, [selectedPlantation, selectedMonth, selectedYear]);
 
-  // Fallback: if checking never resolves, show dashboard with empty data
+  // Fallback
   useEffect(() => {
     if (!checking && !selectedPlantation && user) {
       console.log("No plantation found, showing empty dashboard");
     }
   }, [checking, selectedPlantation, user]);
 
-  async function loadTodayStats(p: Plantation) {
+  async function loadMonthlyStats(p: Plantation) {
     if (!user || !p) return;
-    const today = getTodayString();
+    const { startDate, endDate } = getMonthRange(selectedYear, selectedMonth);
     const leaders = await getUserTeamLeaders(user.id, p.id);
     setTeamLeaders(leaders);
 
-    const { data: todayEntries } = await supabase
+    const { data: entries } = await supabase
       .from("daily_entries")
-      .select("*")
+      .select("bunches, tons, backlogs, team_leader_id, work_status")
       .eq("user_id", user.id)
       .eq("plantation_id", p.id)
-      .eq("date", today);
+      .gte("date", startDate)
+      .lte("date", endDate);
 
-    const entries = todayEntries || [];
-    const activeLeaders = new Set(entries.filter((e) => e.work_status === "work").map((e) => e.team_leader_id));
+    const allEntries = entries || [];
+    const workEntries = allEntries.filter((e) => e.work_status === "work");
+    const activeLeaders = new Set(workEntries.map((e) => e.team_leader_id));
 
-    setHasEntriesToday(entries.length > 0);
-    setTodayStats({
-      bunches: entries.reduce((sum, e) => sum + (e.bunches || 0), 0),
-      transported: entries.reduce((sum, e) => sum + (e.tons || 0), 0),
-      backlogs: entries.reduce((sum, e) => sum + (e.backlogs || 0), 0),
+    setHasEntriesToday(allEntries.length > 0);
+    setMonthlyStats({
+      bunches: workEntries.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
+      transported: allEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
+      backlogs: workEntries.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0),
       teamsActive: activeLeaders.size,
     });
   }
 
-  async function loadRecentEntries() {
-    if (!user) return;
+  async function loadTodayPulse(p: Plantation) {
+    if (!user || !p) return;
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data: todayEntries } = await supabase
+      .from("daily_entries")
+      .select("bunches, tons, team_leader_id, work_status")
+      .eq("user_id", user.id)
+      .eq("plantation_id", p.id)
+      .eq("date", today);
+
+    const allToday = todayEntries || [];
+    const workToday = allToday.filter((e) => e.work_status === "work");
+    const teamsLogged = new Set(workToday.map((e) => e.team_leader_id));
+
+    setTodayPulse({
+      bunches: workToday.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
+      tons: allToday.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
+      teamsLogged: teamsLogged.size,
+    });
+  }
+
+  async function loadRecentEntries(p: Plantation) {
+    if (!user || !p) return;
+    const { startDate, endDate } = getMonthRange(selectedYear, selectedMonth);
+
     const { data } = await supabase
       .from("daily_entries")
       .select("*, team_leaders(name), plantations(block)")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
+      .eq("plantation_id", p.id)
+      .gte("date", startDate)
+      .lte("date", endDate)
+      .order("date", { ascending: false })
+      .limit(10);
     setRecentEntries(data || []);
   }
 
-  async function loadWeeklyTrend() {
-    if (!user) return;
-    const sixDaysAgo = new Date();
-    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
-    const dateStr = sixDaysAgo.toISOString().split("T")[0];
+  async function loadMonthlyTrend(p: Plantation) {
+    if (!user || !p) return;
+    const { startDate, endDate } = getMonthRange(selectedYear, selectedMonth);
 
     const { data } = await supabase
       .from("daily_entries")
-      .select("date, bunches, tons")
+      .select("date, bunches, tons, work_status")
       .eq("user_id", user.id)
-      .gte("date", dateStr)
+      .eq("plantation_id", p.id)
+      .gte("date", startDate)
+      .lte("date", endDate)
       .order("date", { ascending: true });
 
+    // Build a map for every day in the month
     const dayMap: Record<string, { date: string; day: string; bunches: number; tons: number }> = {};
-    const today = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
+    const start = new Date(selectedYear, selectedMonth, 1);
+    const end = new Date(selectedYear, selectedMonth + 1, 0);
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const key = d.toISOString().split("T")[0];
-      const dayLabel = d.toLocaleDateString("en-US", { weekday: "short" });
-      dayMap[key] = { date: dayLabel, day: dayLabel, bunches: 0, tons: 0 };
+      const dayNum = d.getDate();
+      dayMap[key] = { date: String(dayNum), day: String(dayNum), bunches: 0, tons: 0 };
     }
 
     (data || []).forEach((e: any) => {
       const key = e.date;
-      if (dayMap[key]) {
-        dayMap[key].bunches += e.bunches || 0;
-        dayMap[key].tons += e.tons || 0;
+      if (!dayMap[key]) return;
+      // Tons from all entries (work + no_work) — transport delivers regardless
+      dayMap[key].tons += Number(e.tons) || 0;
+      // Bunches only from work days
+      if (e.work_status === "work") {
+        dayMap[key].bunches += Number(e.bunches) || 0;
       }
     });
 
@@ -179,7 +238,6 @@ export default function DashboardPage() {
       <DashboardLayout>
         <div className="min-h-full overflow-x-hidden flex items-center justify-center p-6" style={{ backgroundColor: "var(--bg-base)" }}>
           <div className="text-center max-w-md">
-            {/* SVG Illustration */}
             <div className="flex justify-center mb-6">
               <svg viewBox="0 0 120 120" className="w-[120px] h-[120px]" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="15" y="70" width="90" height="35" rx="6" stroke="#f59e0b" strokeOpacity="0.2" fill="#f59e0b" fillOpacity="0.05" />
@@ -218,9 +276,8 @@ export default function DashboardPage() {
     <DashboardLayout>
       {showTour && <GuidedTour onClose={() => { setShowTour(false); localStorage.setItem("palminsight_tour_seen", "true"); }} />}
       <div className="min-h-full overflow-x-hidden" style={{ backgroundColor: "var(--bg-base)" }}>
-        {/* Green Header Banner */}
+        {/* Header Banner */}
         <div className="relative" style={{ background: "var(--bg-header)", zIndex: 50 }}>
-          {/* Decorative blobs */}
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20" style={{ backgroundColor: "#818cf8" }} />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15" style={{ backgroundColor: "#a5b4fc" }} />
           <div className="absolute top-8 right-1/3 w-32 h-32 rounded-full opacity-10" style={{ backgroundColor: "#c7d2fe" }} />
@@ -244,14 +301,14 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-          {/* Plantation Selector */}
-          {plantations.length > 1 ? (
-            <div className="relative z-[9999]">
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all hover:bg-white/10"
-                style={{ backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }}
-              >
+              {/* Plantation Selector */}
+              {plantations.length > 1 ? (
+                <div className="relative z-[9999]">
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all hover:bg-white/10"
+                    style={{ backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }}
+                  >
                     <MapPin className="w-4 h-4 text-amber-300" />
                     <div className="text-left">
                       <div className="text-xs text-amber-200/60">Current Plantation</div>
@@ -343,24 +400,58 @@ export default function DashboardPage() {
                   <div className="text-sm font-medium text-theme">{selectedPlantation.area_hectare ? `${selectedPlantation.area_hectare} ha` : "-"}</div>
                 </div>
               </div>
+
+              {/* Today Pulse */}
+              <div className="mt-4 pt-4 flex flex-wrap items-center gap-2 text-xs" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                <span className="font-medium text-theme">Today:</span>
+                <span style={{ color: "var(--text-secondary)" }}>{todayPulse.bunches} bunches</span>
+                <span style={{ color: "var(--text-muted)" }}>&middot;</span>
+                <span style={{ color: "var(--text-secondary)" }}>{Number(todayPulse.tons).toFixed(2)} ton</span>
+                <span style={{ color: "var(--text-muted)" }}>&middot;</span>
+                <span style={{ color: "var(--text-secondary)" }}>{todayPulse.teamsLogged} team{todayPulse.teamsLogged !== 1 ? "s" : ""} logged</span>
+              </div>
             </div>
           )}
 
-          {/* Today's Overview */}
+          {/* Month Selector */}
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={prevMonth}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm font-semibold text-theme min-w-[140px] text-center">
+                {MONTH_NAMES[selectedMonth]} {selectedYear}
+              </span>
+              <button
+                onClick={nextMonth}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div />
+          </div>
+
+          {/* Monthly Overview */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="section-heading text-lg text-theme">Today's Overview</h2>
+              <h2 className="section-heading text-lg text-theme">Monthly Overview</h2>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {[
-                { label: "Total Bunches", value: todayStats.bunches, icon: Sprout, color: "var(--accent-purple)", bg: "rgba(139,92,246,0.12)" },
-                { label: "Transported", value: `${Number(todayStats.transported).toFixed(2)} ton`, icon: Truck, color: "var(--accent-primary)", bg: "var(--accent-subtle)" },
-                { label: "Backlogs", value: todayStats.backlogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
-                { label: "Teams Active", value: `${todayStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
+                { label: "Total Bunches", value: monthlyStats.bunches, icon: Sprout, color: "var(--accent-purple)", bg: "rgba(139,92,246,0.12)" },
+                { label: "Transported", value: `${Number(monthlyStats.transported).toFixed(2)} ton`, icon: Truck, color: "var(--accent-primary)", bg: "var(--accent-subtle)" },
+                { label: "Backlogs", value: monthlyStats.backlogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
+                { label: "Teams Active", value: `${monthlyStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
               ].map((s) => (
-                <div key={s.label} className="card-glow relative rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
-                  {/* Decorative blob */}
+                <div key={s.label} className="card-glow relative rounded-2xl p-3 sm:p-4 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-30 blur-xl" style={{ backgroundColor: s.color }} />
                   <div className="relative z-10">
                     <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -375,13 +466,13 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            {/* No entries today notice */}
+            {/* No entries notice */}
             {!hasEntriesToday && (
               <div className="mt-3 card-glow rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3" style={{ backgroundColor: "var(--bg-card)" }}>
                 <span className="text-lg">📋</span>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-theme">No harvest data logged today.</p>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>Go to Teams to record today&apos;s entries.</p>
+                  <p className="text-sm font-medium text-theme">No harvest data logged for {MONTH_NAMES[selectedMonth]} {selectedYear}.</p>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>Go to Teams to record entries.</p>
                 </div>
                 <Link
                   href="/team"
@@ -395,12 +486,12 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Weekly Trend */}
+          {/* Monthly Trend Chart */}
           {weeklyTrend.length > 0 && (
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <BarChart3 className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-                <h2 className="section-heading text-base sm:text-lg text-theme">Weekly Trend</h2>
+                <h2 className="section-heading text-base sm:text-lg text-theme">Monthly Trend</h2>
               </div>
               <div className="card-glow rounded-2xl p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center gap-4 mb-4">
@@ -413,17 +504,17 @@ export default function DashboardPage() {
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>Tons</span>
                   </div>
                 </div>
-                <div style={{ height: 180 }}>
+                <div style={{ height: 220 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={weeklyTrend} barGap={2}>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} width={35} />
+                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} width={35} />
                       <Tooltip
                         contentStyle={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 12, fontSize: 12 }}
                         cursor={{ fill: "rgba(255,255,255,0.03)" }}
                       />
-                      <Bar dataKey="bunches" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                      <Bar dataKey="tons" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                      <Bar dataKey="bunches" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                      <Bar dataKey="tons" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -473,13 +564,13 @@ export default function DashboardPage() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <ClipboardList className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="section-heading text-base sm:text-lg text-theme">Recent Entries</h2>
+              <h2 className="section-heading text-base sm:text-lg text-theme">Recent Entries — {MONTH_NAMES[selectedMonth]} {selectedYear}</h2>
             </div>
             <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
               {recentEntries.length === 0 ? (
                 <div className="p-6 sm:p-8 text-center">
                   <ClipboardList className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries logged yet — go to Teams to add one.</p>
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries for {MONTH_NAMES[selectedMonth]} {selectedYear} — go to Teams to add one.</p>
                 </div>
               ) : (
                 <div className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>

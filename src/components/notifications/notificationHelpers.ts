@@ -122,8 +122,8 @@ export async function checkLowProductivity(userId: string) {
 
     if (thisWeekEntries.length === 0 || prevEntries.length === 0) continue;
 
-    const thisWeekAvg = thisWeekEntries.reduce((sum, e) => sum + (e.tons || 0), 0) / thisWeekEntries.length;
-    const prevAvg = prevEntries.reduce((sum, e) => sum + (e.tons || 0), 0) / prevEntries.length;
+    const thisWeekAvg = thisWeekEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0) / thisWeekEntries.length;
+    const prevAvg = prevEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0) / prevEntries.length;
 
     if (prevAvg > 0 && thisWeekAvg < prevAvg * 0.6) {
       const { data: inserted } = await supabase

@@ -57,12 +57,13 @@ export default function DailyEntriesPage() {
     return true;
   });
 
+  const workOnly = filteredEntries.filter((e) => e.work_status === "work");
   const stats = {
     total: filteredEntries.length,
-    workDays: filteredEntries.filter((e) => e.work_status === "work").length,
-    totalBunches: filteredEntries.reduce((sum, e) => sum + (e.bunches || 0), 0),
-    totalTons: filteredEntries.reduce((sum, e) => sum + (e.tons || 0), 0),
-    totalBacklogs: filteredEntries.reduce((sum, e) => sum + (e.backlogs || 0), 0),
+    workDays: workOnly.length,
+    totalBunches: workOnly.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
+    totalTons: filteredEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
+    totalBacklogs: workOnly.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0),
   };
 
   const prevMonth = () => {

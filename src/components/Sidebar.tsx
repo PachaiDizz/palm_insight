@@ -38,11 +38,11 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
 
   return (
     <aside
-      className={`h-screen flex-col border-r transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"} bg-[var(--bg-card)] min-w-[72px]`}
+      className={`h-screen flex-col border-r transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"} bg-[var(--bg-card)] min-w-[72px] overflow-visible`}
       style={{ borderColor: "var(--border-default)" }}
     >
       {/* Logo */}
-      <div className="flex items-center justify-between gap-3 px-5 py-5 border-b" style={{ borderColor: "var(--border-default)" }}>
+      <div className="flex items-center justify-between gap-3 px-5 py-5 border-b overflow-visible" style={{ borderColor: "var(--border-default)" }}>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#f59e0b] to-[#d97706]">
             <Leaf className="w-5 h-5 text-theme" />
