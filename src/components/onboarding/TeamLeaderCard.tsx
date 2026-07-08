@@ -21,10 +21,10 @@ export default function TeamLeaderCard({ index, name, phone, notes, onChange, on
     <div className="card-glow rounded-2xl p-5 relative" style={{ backgroundColor: "var(--bg-card)" }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
-            <Leaf className="w-4 h-4" style={{ color: "var(--accent-green)" }} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+            <Leaf className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
           </div>
-          <span className="text-sm font-medium text-white">Team Leader #{index + 1}</span>
+          <span className="text-sm font-medium text-theme">Team Leader #{index + 1}</span>
         </div>
         <button
           type="button"
@@ -44,7 +44,7 @@ export default function TeamLeaderCard({ index, name, phone, notes, onChange, on
             value={name}
             onChange={(e) => onChange(index, "name", e.target.value)}
             className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 transition-all"
-            style={{ ...inputStyle, "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+            style={{ ...inputStyle, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
             required
           />
         </div>
@@ -55,7 +55,7 @@ export default function TeamLeaderCard({ index, name, phone, notes, onChange, on
             value={phone}
             onChange={(e) => onChange(index, "phone", e.target.value)}
             className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 transition-all"
-            style={{ ...inputStyle, "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+            style={{ ...inputStyle, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
           />
         </div>
         <div>
@@ -65,7 +65,7 @@ export default function TeamLeaderCard({ index, name, phone, notes, onChange, on
             value={notes}
             onChange={(e) => onChange(index, "notes", e.target.value)}
             className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 transition-all"
-            style={{ ...inputStyle, "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+            style={{ ...inputStyle, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
           />
         </div>
       </div>

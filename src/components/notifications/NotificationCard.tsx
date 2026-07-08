@@ -75,8 +75,8 @@ export default function NotificationCard({ notification, onMarkAsRead, onDismiss
         !notification.is_read ? "border-l-2" : ""
       }`}
       style={{
-        borderLeftColor: !notification.is_read ? "var(--accent-green)" : undefined,
-        backgroundColor: !notification.is_read ? "rgba(16,185,129,0.04)" : undefined,
+        borderLeftColor: !notification.is_read ? "var(--accent-primary)" : undefined,
+        backgroundColor: !notification.is_read ? "rgba(99,102,241,0.04)" : undefined,
       }}
     >
       <div
@@ -88,7 +88,7 @@ export default function NotificationCard({ notification, onMarkAsRead, onDismiss
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium text-white leading-snug">{notification.title}</p>
+          <p className="text-sm font-medium text-theme leading-snug">{notification.title}</p>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -113,7 +113,7 @@ export default function NotificationCard({ notification, onMarkAsRead, onDismiss
               handleAction();
             }}
             className="text-[11px] font-medium px-2 py-1 rounded-lg transition-colors hover:bg-white/5"
-            style={{ color: "var(--accent-green)" }}
+            style={{ color: "var(--accent-primary)" }}
           >
             {config.actionLabel} →
           </button>

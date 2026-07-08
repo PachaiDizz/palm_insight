@@ -194,8 +194,8 @@ export default function PlantationsPage() {
               action={
                 <button
                   onClick={() => { resetForm(); setEditing(null); setShowModal(true); }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:scale-[1.02]"
-                  style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-theme transition-all hover:scale-[1.02]"
+                  style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}
                 >
                   <Plus className="w-4 h-4" /> Add Plantation
                 </button>
@@ -214,24 +214,24 @@ export default function PlantationsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="mb-4">
-                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Basic Information</div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Basic Information</div>
                           <div className="grid grid-cols-3 gap-4">
                             <div>
                               <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Rancangan</div>
-                              <div className="text-sm font-medium text-white">{p.rancangan || "-"}</div>
+                              <div className="text-sm font-medium text-theme">{p.rancangan || "-"}</div>
                             </div>
                             <div>
                               <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Peringkat</div>
-                              <div className="text-sm font-medium text-white">{p.peringkat || "-"}</div>
+                              <div className="text-sm font-medium text-theme">{p.peringkat || "-"}</div>
                             </div>
                             <div>
                               <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Block</div>
-                              <div className="text-sm font-medium text-white">{p.block || "-"}</div>
+                              <div className="text-sm font-medium text-theme">{p.block || "-"}</div>
                             </div>
                           </div>
                         </div>
                         <div className="mb-4">
-                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Management Details</div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Management Details</div>
                           <div className="grid grid-cols-4 gap-4">
                             <div>
                               <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Ketua Block</div>
@@ -252,8 +252,8 @@ export default function PlantationsPage() {
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Area Information</div>
-                          <div className="text-sm font-medium text-white">{p.area_hectare ? `${p.area_hectare} ha` : "-"}</div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Area Information</div>
+                          <div className="text-sm font-medium text-theme">{p.area_hectare ? `${p.area_hectare} ha` : "-"}</div>
                         </div>
 
                         <div className="flex items-center gap-4 mt-4 pt-4" style={{ borderTop: "1px solid var(--border-default)" }}>
@@ -267,7 +267,7 @@ export default function PlantationsPage() {
                           <Link
                             href={`/team?block=${p.id}`}
                             className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-[1.03]"
-                            style={{ backgroundColor: "rgba(16,185,129,0.15)", color: "var(--accent-green)" }}
+                            style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
                           >
                             Go to Teams →
                           </Link>
@@ -293,52 +293,52 @@ export default function PlantationsPage() {
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="card-glow rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "var(--bg-card)" }}>
-              <h2 className="section-heading text-xl text-white mb-5">{editing ? "Edit" : "Add"} Plantation</h2>
+              <h2 className="section-heading text-xl text-theme mb-5">{editing ? "Edit" : "Add"} Plantation</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Basic Information</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Basic Information</div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <input placeholder="Rancangan" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.rancangan ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.rancangan} onChange={(e) => { setFormData({ ...formData, rancangan: e.target.value }); if (fieldErrors.rancangan) setFieldErrors((p) => ({ ...p, rancangan: "" })); }} />
+                      <input placeholder="Rancangan" className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.rancangan ? "#f87171" : "rgba(245,158,11,0.12)" }} value={formData.rancangan} onChange={(e) => { setFormData({ ...formData, rancangan: e.target.value }); if (fieldErrors.rancangan) setFieldErrors((p) => ({ ...p, rancangan: "" })); }} />
                       {fieldErrors.rancangan && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.rancangan}</p>}
                     </div>
                     <div>
-                      <input type="number" min="0" placeholder="Peringkat" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.peringkat ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.peringkat} onChange={(e) => { setFormData({ ...formData, peringkat: e.target.value }); if (fieldErrors.peringkat) setFieldErrors((p) => ({ ...p, peringkat: "" })); }} />
+                      <input type="number" min="0" placeholder="Peringkat" className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.peringkat ? "#f87171" : "rgba(245,158,11,0.12)" }} value={formData.peringkat} onChange={(e) => { setFormData({ ...formData, peringkat: e.target.value }); if (fieldErrors.peringkat) setFieldErrors((p) => ({ ...p, peringkat: "" })); }} />
                       {fieldErrors.peringkat && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.peringkat}</p>}
                     </div>
                     <div>
-                      <input type="number" min="0" placeholder="Block" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.block ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.block} onChange={(e) => { setFormData({ ...formData, block: e.target.value }); if (fieldErrors.block) setFieldErrors((p) => ({ ...p, block: "" })); }} />
+                      <input type="number" min="0" placeholder="Block" className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.block ? "#f87171" : "rgba(245,158,11,0.12)" }} value={formData.block} onChange={(e) => { setFormData({ ...formData, block: e.target.value }); if (fieldErrors.block) setFieldErrors((p) => ({ ...p, block: "" })); }} />
                       {fieldErrors.block && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.block}</p>}
                     </div>
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Management Details</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Management Details</div>
                   <div className="grid grid-cols-2 gap-3">
                     {["ketua_block", "biro_ladang", "penyelia", "mandor"].map((field) => (
                       <div key={field}>
-                        <input placeholder={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors[field] ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData[field as keyof typeof formData]} onChange={(e) => { setFormData({ ...formData, [field]: e.target.value }); if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" })); }} />
+                        <input placeholder={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors[field] ? "#f87171" : "rgba(245,158,11,0.12)" }} value={formData[field as keyof typeof formData]} onChange={(e) => { setFormData({ ...formData, [field]: e.target.value }); if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" })); }} />
                         {fieldErrors[field] && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors[field]}</p>}
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Area Information</div>
-                  <input type="number" step="0.01" min="0" placeholder="Area (hectare)" className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.area_hectare ? "#f87171" : "rgba(16,185,129,0.12)" }} value={formData.area_hectare} onChange={(e) => { setFormData({ ...formData, area_hectare: e.target.value }); if (fieldErrors.area_hectare) setFieldErrors((p) => ({ ...p, area_hectare: "" })); }} />
+                  <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Area Information</div>
+                  <input type="number" step="0.01" min="0" placeholder="Area (hectare)" className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.area_hectare ? "#f87171" : "rgba(245,158,11,0.12)" }} value={formData.area_hectare} onChange={(e) => { setFormData({ ...formData, area_hectare: e.target.value }); if (fieldErrors.area_hectare) setFieldErrors((p) => ({ ...p, area_hectare: "" })); }} />
                   {fieldErrors.area_hectare && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.area_hectare}</p>}
                 </div>
 
                 {/* Team Leaders Section */}
                 {!editing && (
                   <div>
-                    <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(16,185,129,0.7)" }}>Team Leaders</div>
+                    <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Team Leaders</div>
                     {leaders.length > 0 && (
                       <div className="space-y-2 mb-3">
                         {leaders.map((l) => (
                           <div key={l.id} className="flex items-center justify-between px-4 py-2.5 rounded-xl border" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}>
                             <div>
-                              <span className="text-sm text-white">{l.name}</span>
+                              <span className="text-sm text-theme">{l.name}</span>
                               {l.phone && <span className="text-xs ml-2" style={{ color: "var(--text-muted)" }}>{l.phone}</span>}
                             </div>
                             <button type="button" onClick={() => removeLeader(l.id)} className="p-1 rounded hover:bg-white/10" style={{ color: "var(--accent-red)" }}>
@@ -349,9 +349,9 @@ export default function PlantationsPage() {
                       </div>
                     )}
                     <div className="flex gap-2">
-                      <input placeholder="Leader name" className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderName} onChange={(e) => setNewLeaderName(e.target.value)} />
-                      <input placeholder="Phone (optional)" className="w-36 px-4 py-2.5 rounded-xl text-sm text-white outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderPhone} onChange={(e) => setNewLeaderPhone(e.target.value)} />
-                      <button type="button" onClick={addLeader} className="px-4 py-2.5 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}>Add</button>
+                      <input placeholder="Leader name" className="flex-1 px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderName} onChange={(e) => setNewLeaderName(e.target.value)} />
+                      <input placeholder="Phone (optional)" className="w-36 px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderPhone} onChange={(e) => setNewLeaderPhone(e.target.value)} />
+                      <button type="button" onClick={addLeader} className="px-4 py-2.5 rounded-xl text-sm font-medium" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>Add</button>
                     </div>
                     {leaders.length === 0 && <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>At least 1 team leader is required.</p>}
                   </div>
@@ -359,7 +359,7 @@ export default function PlantationsPage() {
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button type="button" onClick={() => { setShowModal(false); setToast(null); }} className="px-4 py-2 rounded-xl text-sm" style={{ color: "var(--text-muted)" }}>Cancel</button>
-                  <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl text-sm font-medium text-white flex items-center gap-2 disabled:opacity-50" style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}>
+                  <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl text-sm font-medium text-theme flex items-center gap-2 disabled:opacity-50" style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}>
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     {saving ? "Saving..." : editing ? "Update" : "Save"}
                   </button>

@@ -133,7 +133,7 @@ export default function DailyEntriesPage() {
               onClick={exportCSV}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5 bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-secondary)]"
             >
-              <Download className="w-4 h-4 text-[var(--accent-green)]" />
+              <Download className="w-4 h-4 text-[var(--accent-primary)]" />
               Export CSV
             </button>
           }
@@ -143,11 +143,11 @@ export default function DailyEntriesPage() {
         <div className="flex items-center gap-4 mb-6">
           {/* Month Navigator */}
           <div className="flex items-center gap-2">
-            <button onClick={prevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10 bg-[var(--accent-green-light)] text-[var(--accent-green)] border" style={{ borderColor: "var(--accent-green-border)" }}>
+            <button onClick={prevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10 bg-[var(--accent-subtle)] text-[var(--accent-primary)] border" style={{ borderColor: "var(--accent-subtle)" }}>
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-sm font-semibold text-white min-w-[140px] text-center">{formatMonthLabel(currentMonth)}</span>
-            <button onClick={nextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10 bg-[var(--accent-green-light)] text-[var(--accent-green)] border" style={{ borderColor: "var(--accent-green-border)" }}>
+            <span className="text-sm font-semibold text-theme min-w-[140px] text-center">{formatMonthLabel(currentMonth)}</span>
+            <button onClick={nextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10 bg-[var(--accent-subtle)] text-[var(--accent-primary)] border" style={{ borderColor: "var(--accent-subtle)" }}>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -157,7 +157,7 @@ export default function DailyEntriesPage() {
             <select
               value={selectedPlantationId}
               onChange={(e) => setSelectedPlantationId(e.target.value)}
-              className="px-4 py-2.5 rounded-xl text-sm text-white outline-none border appearance-none bg-[var(--bg-card)] border-[var(--border-default)]"
+              className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none bg-[var(--bg-card)] border-[var(--border-default)]"
             >
               <option value="all">All Plantations</option>
               {plantations.map((p) => (
@@ -170,8 +170,8 @@ export default function DailyEntriesPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {[
-            { label: "Total Entries", value: stats.total, icon: Calendar, color: "var(--accent-amber)" },
-            { label: "Work Days", value: stats.workDays, icon: Calendar, color: "var(--accent-green)" },
+            { label: "Total Entries", value: stats.total, icon: Calendar, color: "var(--accent-primary)" },
+            { label: "Work Days", value: stats.workDays, icon: Calendar, color: "var(--accent-primary)" },
             { label: "Total Bunches", value: stats.totalBunches, icon: TrendingUp, color: "var(--accent-purple)" },
             { label: "Total Tons", value: stats.totalTons.toFixed(1), icon: Truck, color: "var(--accent-blue)" },
             { label: "Backlogs", value: stats.totalBacklogs, icon: AlertCircle, color: "var(--accent-amber)" },
@@ -181,7 +181,7 @@ export default function DailyEntriesPage() {
                 <span className="text-xs font-medium text-[var(--text-muted)]">{s.label}</span>
                 <s.icon className="w-4 h-4" style={{ color: s.color }} />
               </div>
-              <div className="text-2xl font-bold text-white">{s.value}</div>
+              <div className="text-2xl font-bold text-theme">{s.value}</div>
             </div>
           ))}
         </div>
@@ -189,8 +189,8 @@ export default function DailyEntriesPage() {
         {/* Entries Table */}
         <div className="card-glow rounded-2xl overflow-hidden bg-[var(--bg-card)]">
           <div className="px-5 py-3 border-b flex items-center justify-between border-[var(--border-default)]">
-            <h3 className="card-title text-sm text-white">All Entries</h3>
-            <span className="text-xs px-2 py-1 rounded-full bg-[var(--accent-green-light)] text-[var(--accent-green)]">
+            <h3 className="card-title text-sm text-theme">All Entries</h3>
+            <span className="text-xs px-2 py-1 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)]">
               {filteredEntries.length} entries
             </span>
           </div>
@@ -205,7 +205,7 @@ export default function DailyEntriesPage() {
               <table className="w-full hidden md:table">
                 <thead>
                   {["Date", "Leader", "Block", "Status", "Workers", "Bunches", "Tons", "Backlogs", "Notes"].map((h) => (
-                    <th key={h} className={`text-left px-5 py-3 text-xs font-medium ${["Date","Bunches","Tons"].includes(h) ? "text-white" : ""} text-[var(--text-muted)]`}>{h}</th>
+                    <th key={h} className={`text-left px-5 py-3 text-xs font-medium ${["Date","Bunches","Tons"].includes(h) ? "text-theme" : ""} text-[var(--text-muted)]`}>{h}</th>
                   ))}
                 </thead>
                 <tbody>
@@ -220,13 +220,13 @@ export default function DailyEntriesPage() {
                           {plantation ? `Block ${plantation.block}` : "-"}
                         </td>
                         <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full ${e.work_status === "work" ? "bg-[var(--accent-green-light)] text-white" : "bg-[rgba(239,68,68,0.2)] text-[#f87171]"}`}>
+                          <span className={`text-xs px-2 py-1 rounded-full ${e.work_status === "work" ? "bg-[var(--accent-green-light)] text-theme" : "bg-[rgba(239,68,68,0.2)] text-[#f87171]"}`}>
                             {e.work_status === "work" ? "Work" : "No Work"}
                           </span>
                         </td>
                         <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.num_workers ?? "-"}</td>
                         <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.bunches ?? "-"}</td>
-                        <td className="px-5 py-3 text-sm font-medium">{e.tons ?? "-"}</td>
+                        <td className="px-5 py-3 text-sm font-medium">{e.tons != null ? Number(e.tons).toFixed(2) : "-"}</td>
                         <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.backlogs ?? "-"}</td>
                         <td className="px-5 py-3 text-sm truncate max-w-[200px]" style={{ color: "var(--text-muted)" }}>{e.notes || "-"}</td>
                       </tr>
@@ -242,8 +242,8 @@ export default function DailyEntriesPage() {
                   return (
                     <div key={e.id} className="p-4 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-white font-medium">{e.date}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${e.work_status === "work" ? "bg-[var(--accent-green-light)] text-white" : "bg-[rgba(239,68,68,0.2)] text-[#f87171]"}`}>
+                        <span className="text-sm text-theme font-medium">{e.date}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${e.work_status === "work" ? "bg-[var(--accent-green-light)] text-theme" : "bg-[rgba(239,68,68,0.2)] text-[#f87171]"}`}>
                           {e.work_status === "work" ? "Work" : "No Work"}
                         </span>
                       </div>
@@ -251,7 +251,7 @@ export default function DailyEntriesPage() {
                       <div className="grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
                         <div>Workers: {e.num_workers ?? "-"}</div>
                         <div>Bunches: {e.bunches ?? "-"}</div>
-                        <div>Tons: {e.tons ?? "-"}</div>
+                        <div>Tons: {e.tons != null ? Number(e.tons).toFixed(2) : "-"}</div>
                         <div>Backlogs: {e.backlogs ?? "-"}</div>
                         {e.notes && <div className="col-span-2 truncate" style={{ color: "var(--text-muted)" }}>Notes: {e.notes}</div>}
                       </div>

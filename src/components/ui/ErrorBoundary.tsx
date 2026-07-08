@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           <h2 className="section-heading text-lg mb-2" style={{ color: "var(--text-primary)" }}>Something went wrong</h2>
           <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{this.state.error?.message || "An unexpected error occurred."}</p>
           <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)" }}>
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
             <RefreshCw className="w-4 h-4" /> Try again
           </button>
         </div>

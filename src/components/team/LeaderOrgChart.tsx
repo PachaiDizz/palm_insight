@@ -68,15 +68,15 @@ export default function LeaderOrgChart({
           Back to all blocks
         </motion.button>
           <div
-            className="card-glow rounded-2xl p-8 text-center w-full max-w-[400px] bg-[rgba(16,185,129,0.08)]"
+            className="card-glow rounded-2xl p-8 text-center w-full max-w-[400px] bg-[rgba(245,158,11,0.08)]"
         >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[var(--accent-green-light)]">
-              <MapPin className="w-6 h-6 text-[var(--accent-green)]" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[var(--accent-subtle)]">
+              <MapPin className="w-6 h-6 text-[var(--accent-primary)]" />
             </div>
             <div className="text-sm uppercase tracking-wider mb-2 text-[var(--text-muted)]">
               {selectedPlantation.rancangan}, Peringkat {selectedPlantation.peringkat}
             </div>
-            <div className="text-3xl font-bold text-white">
+            <div className="text-3xl font-bold text-theme">
               Block {selectedPlantation.block}
             </div>
             <div className="text-sm mt-3 text-[var(--text-muted)]">
@@ -97,7 +97,7 @@ export default function LeaderOrgChart({
             <svg width="2" height="48" className="overflow-visible">
               <motion.line
                 x1="1" y1="0" x2="1" y2="48"
-                stroke="rgba(16,185,129,0.3)"
+                stroke="rgba(245,158,11,0.3)"
                 strokeWidth="2"
                 variants={connectorVariants}
                 initial="hidden"
@@ -112,7 +112,7 @@ export default function LeaderOrgChart({
               <motion.div
                 className="hidden md:block absolute top-0 h-px origin-center"
                 style={{
-                  backgroundColor: "rgba(16,185,129,0.3)",
+                  backgroundColor: "rgba(245,158,11,0.3)",
                   left: "15%",
                   right: "15%",
                 }}
@@ -134,14 +134,14 @@ export default function LeaderOrgChart({
                     variants={leaderCardVariants}
                     initial="hidden"
                     animate="visible"
-                    whileHover={{ scale: 1.02, backgroundColor: "rgba(16,185,129,0.06)" }}
+                    whileHover={{ scale: 1.02, backgroundColor: "rgba(245,158,11,0.06)" }}
                     className="flex flex-col items-center shrink-0 w-full max-w-full md:max-w-[420px]"
                   >
                     {/* Vertical stub from horizontal line to card — hidden on mobile */}
                     <svg width="2" height="24" className="overflow-visible hidden md:block">
                       <motion.line
                         x1="1" y1="0" x2="1" y2="24"
-                        stroke="rgba(16,185,129,0.3)"
+                        stroke="rgba(245,158,11,0.3)"
                         strokeWidth="2"
                         initial={{ pathLength: 0, opacity: 0 }}
                         animate={{ pathLength: 1, opacity: 1 }}
@@ -152,11 +152,11 @@ export default function LeaderOrgChart({
                     <div className="card-glow w-full rounded-2xl p-4 sm:p-8 bg-[var(--bg-card)]">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-[rgba(16,185,129,0.12)]">
-                            <svg className="w-7 h-7 text-[var(--accent-green)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                          <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-[rgba(245,158,11,0.12)]">
+                            <svg className="w-7 h-7 text-[var(--accent-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                           </div>
                           <div>
-                            <div className="text-base font-semibold text-white">{leader.name}</div>
+                            <div className="text-base font-semibold text-theme">{leader.name}</div>
                             {leader.phone && (
                               <div className="flex items-center gap-1 mt-1">
 <Phone className="w-4 h-4 text-[var(--text-muted)]" />
@@ -174,30 +174,30 @@ export default function LeaderOrgChart({
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                        <div className="p-3 sm:p-4 rounded-xl bg-[rgba(16,185,129,0.08)]">
+                        <div className="p-3 sm:p-4 rounded-xl bg-[rgba(245,158,11,0.08)]">
                           <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Total Workers</div>
-                          <div className="text-base sm:text-lg font-bold text-white">{totalWorkers}</div>
+                          <div className="text-base sm:text-lg font-bold text-theme">{totalWorkers}</div>
                         </div>
                         <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-purple-light)]">
                           <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Additional</div>
-                          <div className="text-base sm:text-lg font-bold text-white">0</div>
+                          <div className="text-base sm:text-lg font-bold text-theme">0</div>
                         </div>
                         <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-amber-light)]">
                           <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Total Lots</div>
-                          <div className="text-base sm:text-lg font-bold text-white uppercase">{totalLots}</div>
+                          <div className="text-base sm:text-lg font-bold text-theme uppercase">{totalLots}</div>
                         </div>
                         <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-blue-light)]">
                           <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Loose Fruit</div>
-                          <div className="text-base sm:text-lg font-bold text-white">0</div>
+                          <div className="text-base sm:text-lg font-bold text-theme">0</div>
                         </div>
                       </div>
 
                       <div className="flex gap-2 sm:gap-3">
                         <motion.button
-                          whileHover={{ scale: 1.03, backgroundColor: "rgba(16,185,129,0.18)" }}
+                          whileHover={{ scale: 1.03, backgroundColor: "rgba(245,158,11,0.18)" }}
                           whileTap={{ scale: 0.97 }}
                           onClick={() => onSelectLeader(leader)}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium transition-all bg-[var(--accent-green-light)] text-[var(--accent-green)] min-h-[44px]"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium transition-all bg-[var(--accent-subtle)] text-[var(--accent-primary)] min-h-[44px]"
                         >
                           <Save className="w-3.5 h-3.5" />
                           Add Entry

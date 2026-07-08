@@ -38,8 +38,8 @@ export default function BlockSelector({ plantations, teamLeaders, blockLastEntri
 
   return (
     <div>
-      <h2 className="section-heading text-lg text-white mb-4 flex items-center gap-2">
-        <MapPin className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
+      <h2 className="section-heading text-lg text-theme mb-4 flex items-center gap-2">
+        <MapPin className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
         Select Block
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -55,24 +55,24 @@ export default function BlockSelector({ plantations, teamLeaders, blockLastEntri
                 animate="visible"
                 exit="exit"
                 layout
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(16,185,129,0.12)" }}
+                whileHover={{ scale: 1.02, backgroundColor: "rgba(245,158,11,0.12)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectBlock(p.id)}
                 className="card-glow rounded-2xl p-4 sm:p-5 text-left cursor-pointer min-h-[44px]"
                 style={{ backgroundColor: "var(--bg-card)" }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
-                    <MapPin className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                    <MapPin className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)" }}>
+                  <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
                     {lCount} leader{lCount !== 1 ? "s" : ""}
                   </span>
                 </div>
                 <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
                   {p.rancangan}, Peringkat {p.peringkat}
                 </div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-theme">
                   Block {p.block}
                 </div>
                 <div className="mt-3 space-y-1">

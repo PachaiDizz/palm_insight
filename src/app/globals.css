@@ -9,66 +9,77 @@
 /* Base tokens */
 @layer base {
   :root, .dark {
-    --background: 150 25% 7%;
+    --background: 230 20% 7%;
     --foreground: 210 40% 98%;
-    --card: 150 25% 9%;
+    --card: 230 16% 10%;
     --card-foreground: 210 40% 98%;
-    --popover: 150 25% 9%;
+    --popover: 230 16% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 160 84% 39%;
-    --primary-foreground: 355 100% 97%;
-    --secondary: 150 20% 12%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 16% 15%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 150 20% 12%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 150 20% 12%;
+    --muted: 230 16% 15%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 230 16% 15%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 50 96% 85%;
-    --border: 150 20% 12%;
-    --input: 150 20% 12%;
-    --ring: 160 84% 39%;
+    --border: 230 12% 14%;
+    --input: 230 12% 14%;
+    --ring: 38 92% 50%;
     --radius: 0.75rem;
 
     /* App-specific tokens */
-    --bg-base: #0f1a0f;
-    --bg-card: #131f13;
-    --bg-card-hover: #172217;
-    --bg-input: #0c150c;
-    --bg-elevated: #1a2a1a;
-    --border-subtle: rgba(16, 185, 129, 0.08);
-    --border-default: rgba(16, 185, 129, 0.12);
+    --bg-base: #0b0d13;
+    --bg-card: #13161f;
+    --bg-card-hover: #181c27;
+    --bg-input: #090b10;
+    --bg-elevated: #1c2030;
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-default: rgba(255, 255, 255, 0.08);
     --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-muted: rgba(255, 255, 255, 0.4);
-    --accent-primary: #10b981;
-    --accent-hover: #059669;
-    --accent-subtle: rgba(16, 185, 129, 0.08);
-    --accent-green: #10b981;
-    --accent-green-light: rgba(16, 185, 129, 0.1);
-    --accent-green-border: rgba(16, 185, 129, 0.2);
-    --border-card: rgba(16, 185, 129, 0.08);
-    --border-card-hover: rgba(16, 185, 129, 0.15);
-    --accent-purple: #8b5cf6;
-    --accent-purple-light: rgba(139, 92, 246, 0.1);
-    --accent-blue: #3b82f6;
-    --accent-blue-light: rgba(59, 130, 246, 0.1);
+    --text-secondary: rgba(255, 255, 255, 0.65);
+    --text-muted: rgba(255, 255, 255, 0.35);
+    --accent-primary: #f59e0b;
+    --accent-hover: #d97706;
+    --accent-subtle: rgba(245, 158, 11, 0.08);
+    --accent-green: #22c55e;
+    --accent-green-light: rgba(34, 197, 94, 0.1);
+    --accent-green-border: rgba(34, 197, 94, 0.2);
+    --accent-purple: #a78bfa;
+    --accent-purple-light: rgba(167, 139, 250, 0.1);
+    --accent-blue: #6366f1;
+    --accent-blue-light: rgba(99, 102, 241, 0.1);
     --accent-amber: #f59e0b;
     --accent-amber-light: rgba(245, 158, 11, 0.1);
     --accent-red: #f87171;
     --accent-red-light: rgba(239, 68, 68, 0.1);
     --accent-red-border: rgba(239, 68, 68, 0.2);
+    --border-card: rgba(255, 255, 255, 0.05);
+    --border-card-hover: rgba(255, 255, 255, 0.1);
+    --text-on-gradient: #ffffff;
+    --bg-header: linear-gradient(135deg, #1e1b4b 0%, #1e293b 50%, #0f172a 100%);
+    --bg-input-field: #090b10;
+    --border-input-field: rgba(255, 255, 255, 0.1);
+    --bg-nav: #0b0d13;
+    --border-nav: rgba(255, 255, 255, 0.06);
+    --icon-inactive: #4a5568;
+    --hover-subtle: rgba(255, 255, 255, 0.05);
+    --border-table-row: rgba(245, 158, 11, 0.08);
+    --text-chart-axis: rgba(255, 255, 255, 0.5);
+    --bg-tooltip: #131f13;
   }
 
   .light {
     --background: 0 0% 100%;
     --foreground: 222 84% 4.9%;
-    --card: 0 0% 100%;
+    --card: 0 0% 98%;
     --card-foreground: 222 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 84% 4.9%;
-    --primary: 160 84% 39%;
-    --primary-foreground: 355 100% 97%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 84% 4.9%;
     --muted: 210 40% 96%;
@@ -79,30 +90,41 @@
     --destructive-foreground: 50 96% 85%;
     --border: 214 31% 91%;
     --input: 214 31% 91%;
-    --ring: 160 84% 39%;
+    --ring: 38 92% 50%;
 
     /* App-specific tokens */
     --bg-base: #ffffff;
-    --bg-card: #f8faf8;
-    --bg-input: #f0f4f0;
+    --bg-card: #f8f9fb;
+    --bg-input: #f1f3f5;
     --bg-elevated: #ffffff;
-    --border-subtle: rgba(0, 0, 0, 0.08);
-    --border-default: rgba(0, 0, 0, 0.12);
-    --text-primary: #0a1a0a;
-    --text-secondary: rgba(0, 0, 0, 0.6);
-    --text-muted: rgba(0, 0, 0, 0.4);
-    --accent-green: #10b981;
-    --accent-green-light: rgba(16, 185, 129, 0.1);
-    --accent-green-border: rgba(16, 185, 129, 0.2);
-    --accent-purple: #8b5cf6;
-    --accent-purple-light: rgba(139, 92, 246, 0.1);
-    --accent-blue: #3b82f6;
-    --accent-blue-light: rgba(59, 130, 246, 0.1);
-    --accent-amber: #f59e0b;
-    --accent-amber-light: rgba(245, 158, 11, 0.1);
-    --accent-red: #f87171;
-    --accent-red-light: rgba(239, 68, 68, 0.1);
-    --accent-red-border: rgba(239, 68, 68, 0.2);
+    --border-subtle: rgba(0, 0, 0, 0.06);
+    --border-default: rgba(0, 0, 0, 0.1);
+    --text-primary: #0f172a;
+    --text-secondary: rgba(15, 23, 42, 0.6);
+    --text-muted: rgba(15, 23, 42, 0.4);
+    --accent-green: #16a34a;
+    --accent-green-light: rgba(22, 163, 74, 0.08);
+    --accent-green-border: rgba(22, 163, 74, 0.2);
+    --accent-purple: #7c3aed;
+    --accent-purple-light: rgba(124, 58, 237, 0.08);
+    --accent-blue: #4f46e5;
+    --accent-blue-light: rgba(79, 70, 229, 0.08);
+    --accent-amber: #d97706;
+    --accent-amber-light: rgba(217, 119, 6, 0.08);
+    --accent-red: #dc2626;
+    --accent-red-light: rgba(220, 38, 38, 0.08);
+    --accent-red-border: rgba(220, 38, 38, 0.2);
+    --text-on-gradient: #0f172a;
+    --bg-header: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 50%, #f8fafc 100%);
+    --bg-input-field: #f1f3f5;
+    --border-input-field: rgba(0, 0, 0, 0.12);
+    --bg-nav: #ffffff;
+    --border-nav: rgba(0, 0, 0, 0.08);
+    --icon-inactive: #64748b;
+    --hover-subtle: rgba(0, 0, 0, 0.03);
+    --border-table-row: rgba(0, 0, 0, 0.06);
+    --text-chart-axis: rgba(0, 0, 0, 0.5);
+    --bg-tooltip: #ffffff;
   }
 
   .dark {
@@ -143,6 +165,7 @@ body {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .card-title {
@@ -175,7 +198,7 @@ body {
 .card-glow {
   border: 1px solid var(--border-card);
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.02),
     0 4px 24px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -184,7 +207,7 @@ body {
 .card-glow:hover {
   border-color: var(--border-card-hover);
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
     0 8px 32px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -198,8 +221,25 @@ body {
 }
 
 .light .card-glow:hover {
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: rgba(0, 0, 0, 0.12);
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
     0 8px 24px rgba(0, 0, 0, 0.06);
 }
+
+/* Theme-aware input styling */
+input, select, textarea {
+  color: var(--text-primary) !important;
+}
+input::placeholder, textarea::placeholder {
+  opacity: 0.5;
+}
+select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Theme-aware text utility — replaces hardcoded text-white */
+.text-theme { color: var(--text-primary); }
+.text-theme-muted { color: var(--text-muted); }
+.text-theme-secondary { color: var(--text-secondary); }

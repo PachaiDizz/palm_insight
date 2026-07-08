@@ -21,8 +21,8 @@ export default function EmptyLeaderState({ onAdd }: EmptyLeaderStateProps) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
         onClick={onAdd}
-        className="px-4 py-2 rounded-xl text-sm font-medium text-white transition-all"
-        style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}
+        className="px-4 py-2 rounded-xl text-sm font-medium text-theme transition-all"
+        style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}
       >
         Add First Leader
       </motion.button>

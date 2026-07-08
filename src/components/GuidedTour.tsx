@@ -8,9 +8,9 @@ const steps = [
   {
     icon: (
       <svg viewBox="0 0 120 120" className="w-20 h-20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="60" cy="60" r="50" stroke="#10b981" strokeOpacity="0.2" />
-        <path d="M60 20c-3 6-10 12-16 15 6-1 11 2 14 6-7 4-11 10-11 16 2-2 5-4 8-5-2 5 0 10 4 13 1-4 3-7 6-10-2 6 0 11 5 13 1-3 2-7 1-11-4 3-8 4-11 2 4-4 6-10 5-15 5 1 9 1 12-1-6-5-12-11-15-16z" stroke="#10b981" fill="#10b981" fillOpacity="0.15" />
-        <line x1="60" y1="55" x2="60" y2="95" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="60" cy="60" r="50" stroke="#f59e0b" strokeOpacity="0.2" />
+        <path d="M60 20c-3 6-10 12-16 15 6-1 11 2 14 6-7 4-11 10-11 16 2-2 5-4 8-5-2 5 0 10 4 13 1-4 3-7 6-10-2 6 0 11 5 13 1-3 2-7 1-11-4 3-8 4-11 2 4-4 6-10 5-15 5 1 9 1 12-1-6-5-12-11-15-16z" stroke="#f59e0b" fill="#f59e0b" fillOpacity="0.15" />
+        <line x1="60" y1="55" x2="60" y2="95" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
     title: "Welcome to PalmInsight!",
@@ -19,11 +19,11 @@ const steps = [
   {
     icon: (
       <svg viewBox="0 0 120 120" className="w-20 h-20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="15" y="25" width="90" height="70" rx="12" stroke="#10b981" strokeOpacity="0.2" />
-        <rect x="25" y="35" width="35" height="18" rx="4" stroke="#10b981" fill="#10b981" fillOpacity="0.15" />
+        <rect x="15" y="25" width="90" height="70" rx="12" stroke="#f59e0b" strokeOpacity="0.2" />
+        <rect x="25" y="35" width="35" height="18" rx="4" stroke="#f59e0b" fill="#f59e0b" fillOpacity="0.15" />
         <rect x="65" y="35" width="30" height="18" rx="4" stroke="#3b82f6" fill="#3b82f6" fillOpacity="0.15" />
-        <rect x="25" y="60" width="70" height="8" rx="3" stroke="#10b981" strokeOpacity="0.3" />
-        <rect x="25" y="75" width="50" height="8" rx="3" stroke="#10b981" strokeOpacity="0.2" />
+        <rect x="25" y="60" width="70" height="8" rx="3" stroke="#f59e0b" strokeOpacity="0.3" />
+        <rect x="25" y="75" width="50" height="8" rx="3" stroke="#f59e0b" strokeOpacity="0.2" />
       </svg>
     ),
     title: "Your Dashboard",
@@ -32,11 +32,11 @@ const steps = [
   {
     icon: (
       <svg viewBox="0 0 120 120" className="w-20 h-20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="60" cy="35" r="12" stroke="#10b981" fill="#10b981" fillOpacity="0.15" />
+        <circle cx="60" cy="35" r="12" stroke="#f59e0b" fill="#f59e0b" fillOpacity="0.15" />
         <circle cx="35" cy="80" r="10" stroke="#3b82f6" fill="#3b82f6" fillOpacity="0.15" />
         <circle cx="85" cy="80" r="10" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity="0.15" />
-        <line x1="60" y1="47" x2="35" y2="70" stroke="#10b981" strokeOpacity="0.3" />
-        <line x1="60" y1="47" x2="85" y2="70" stroke="#10b981" strokeOpacity="0.3" />
+        <line x1="60" y1="47" x2="35" y2="70" stroke="#f59e0b" strokeOpacity="0.3" />
+        <line x1="60" y1="47" x2="85" y2="70" stroke="#f59e0b" strokeOpacity="0.3" />
       </svg>
     ),
     title: "Manage Your Teams",
@@ -45,13 +45,13 @@ const steps = [
   {
     icon: (
       <svg viewBox="0 0 120 120" className="w-20 h-20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="15" y="30" width="90" height="65" rx="10" stroke="#10b981" strokeOpacity="0.2" />
-        <polyline points="25,80 40,60 55,70 70,45 85,55 95,38" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="40" cy="60" r="3" fill="#10b981" />
-        <circle cx="55" cy="70" r="3" fill="#10b981" />
-        <circle cx="70" cy="45" r="3" fill="#10b981" />
-        <circle cx="85" cy="55" r="3" fill="#10b981" />
-        <circle cx="95" cy="38" r="3" fill="#10b981" />
+        <rect x="15" y="30" width="90" height="65" rx="10" stroke="#f59e0b" strokeOpacity="0.2" />
+        <polyline points="25,80 40,60 55,70 70,45 85,55 95,38" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="40" cy="60" r="3" fill="#f59e0b" />
+        <circle cx="55" cy="70" r="3" fill="#f59e0b" />
+        <circle cx="70" cy="45" r="3" fill="#f59e0b" />
+        <circle cx="85" cy="55" r="3" fill="#f59e0b" />
+        <circle cx="95" cy="38" r="3" fill="#f59e0b" />
       </svg>
     ),
     title: "Track Performance",
@@ -81,8 +81,8 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
           className="relative w-full max-w-md rounded-2xl p-8 text-center"
           style={{
             backgroundColor: "var(--bg-card)",
-            border: "1px solid rgba(16,185,129,0.15)",
-            boxShadow: "0 0 0 1px rgba(16,185,129,0.08), 0 24px 48px rgba(0,0,0,0.4)",
+            border: "1px solid rgba(245,158,11,0.15)",
+            boxShadow: "0 0 0 1px rgba(245,158,11,0.08), 0 24px 48px rgba(0,0,0,0.4)",
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -102,7 +102,7 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* Title */}
-          <h2 className="section-heading text-xl text-white mb-3">
+          <h2 className="section-heading text-xl text-theme mb-3">
             {steps[step].title}
           </h2>
 
@@ -117,7 +117,7 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
               <button
                 onClick={onClose}
                 className="w-full px-6 py-3 rounded-xl text-sm font-semibold transition-all"
-                style={{ backgroundColor: "#10b981", color: "#050f05" }}
+                style={{ backgroundColor: "#f59e0b", color: "#050f05" }}
               >
                 Get Started →
               </button>
@@ -127,7 +127,7 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
                   onClick={() => setStep((s) => s - 1)}
                   disabled={step === 0}
                   className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-30"
-                  style={{ backgroundColor: "rgba(255,255,255,0.05)", color: "var(--text-secondary)" }}
+                  style={{ backgroundColor: "var(--hover-subtle)", color: "var(--text-secondary)" }}
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Back
@@ -135,7 +135,7 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
                 <button
                   onClick={() => setStep((s) => s + 1)}
                   className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all"
-                  style={{ backgroundColor: "#10b981", color: "#050f05" }}
+                  style={{ backgroundColor: "#f59e0b", color: "#050f05" }}
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />
@@ -152,7 +152,7 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
                 onClick={() => setStep(i)}
                 className="w-2 h-2 rounded-full transition-all"
                 style={{
-                  backgroundColor: i === step ? "#10b981" : "rgba(255,255,255,0.15)",
+                  backgroundColor: i === step ? "#f59e0b" : "var(--text-muted)",
                   width: i === step ? 20 : 8,
                 }}
                 aria-label={`Go to step ${i + 1}`}

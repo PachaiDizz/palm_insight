@@ -60,7 +60,7 @@ export default function EntryForm({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
       className="rounded-3xl border overflow-hidden mt-8"
-      style={{ backgroundColor: "rgba(19,31,19,0.8)", borderColor: "rgba(16,185,129,0.12)", backdropFilter: "blur(20px)" }}
+      style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(245,158,11,0.12)", backdropFilter: "blur(20px)" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -68,22 +68,22 @@ export default function EntryForm({
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
         className="rounded-3xl border overflow-hidden mt-8 bg-[var(--bg-card)] border-[var(--border-default)] backdrop-blur-md"
       >
-        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-30 blur-2xl bg-[var(--accent-green)]" />
+        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-30 blur-2xl bg-[var(--accent-primary)]" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--accent-green-light)]">
-              <Save className="w-5 h-5 text-[var(--accent-green)]" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--accent-subtle)]">
+              <Save className="w-5 h-5 text-[var(--accent-primary)]" />
             </div>
             <div>
-              <h2 className="section-heading text-base text-white">New Entry</h2>
-              <p className="text-xs text-[rgba(255,255,255,0.45)]">{leader.name} — Block {plantation?.block}</p>
+              <h2 className="section-heading text-base text-theme">New Entry</h2>
+              <p className="text-xs text-[var(--text-muted)]">{leader.name} — Block {plantation?.block}</p>
             </div>
           </div>
           {savedId && (
             <motion.span
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--accent-green-light)] text-[var(--accent-green)]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--accent-subtle)] text-[var(--accent-primary)]"
             >
               <CheckCircle className="w-3.5 h-3.5" /> Saved
             </motion.span>
@@ -113,7 +113,7 @@ export default function EntryForm({
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
             className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl"
             style={workStatus === "work"
-              ? { background: "linear-gradient(135deg, rgba(16,185,129,0.25), rgba(16,185,129,0.15))", border: "1px solid rgba(16,185,129,0.3)" }
+              ? { background: "linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.15))", border: "1px solid rgba(245,158,11,0.3)" }
               : { background: "linear-gradient(135deg, rgba(239,68,68,0.25), rgba(239,68,68,0.15))", border: "1px solid rgba(239,68,68,0.3)" }
             }
           />
@@ -121,7 +121,7 @@ export default function EntryForm({
             type="button"
             onClick={() => onWorkStatusChange("work")}
             className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10 min-h-[44px]"
-            style={{ color: workStatus === "work" ? "#10b981" : "rgba(255,255,255,0.35)" }}
+            style={{ color: workStatus === "work" ? "#f59e0b" : "var(--text-muted)" }}
           >
             Work Day
           </button>
@@ -137,12 +137,12 @@ export default function EntryForm({
         {/* Date */}
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
-            <Calendar className="w-3.5 h-3.5 text-[var(--accent-green)]" />
+            <Calendar className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
             Date
           </label>
           <input
             type="date"
-            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
+            className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
             value={date}
             onChange={(e) => onDateChange(e.target.value)}
           />
@@ -158,7 +158,7 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
                   value={numWorkers}
                   onChange={(e) => onNumWorkersChange(e.target.value)}
                   placeholder="0"
@@ -170,7 +170,7 @@ export default function EntryForm({
                   Lot
                 </label>
                 <input
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
                   value={lot}
                   onChange={(e) => onLotChange(e.target.value)}
                   placeholder="e.g. A1"
@@ -181,12 +181,12 @@ export default function EntryForm({
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
-                  <TrendingUp className="w-3.5 h-3.5 text-[var(--accent-green)]" />
+                  <TrendingUp className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
                   Bunches
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
                   value={bunches}
                   onChange={(e) => onBunchesChange(e.target.value)}
                   placeholder="0"
@@ -198,11 +198,12 @@ export default function EntryForm({
                   Tons
                 </label>
                 <input
-                  type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
+                  type="text"
+                  inputMode="decimal"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
                   value={tons}
                   onChange={(e) => onTonsChange(e.target.value)}
-                  placeholder="0.0"
+                  placeholder="0.00"
                 />
               </div>
               <div>
@@ -212,7 +213,7 @@ export default function EntryForm({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
                   value={backlogs}
                   onChange={(e) => onBacklogsChange(e.target.value)}
                   placeholder="0"
@@ -222,13 +223,31 @@ export default function EntryForm({
           </>
         )}
 
+        {workStatus === "no_work" && (
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
+              <Truck className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+              Tons (Transport)
+            </label>
+            <input
+              type="text"
+              inputMode="decimal"
+              className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
+              value={tons}
+              onChange={(e) => onTonsChange(e.target.value)}
+              placeholder="0.00"
+            />
+            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Transport may still bring fruit even when workers are off.</p>
+          </div>
+        )}
+
         {/* Notes */}
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
             Notes
           </label>
           <textarea
-            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#10b981]/50 min-h-15"
+            className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50 min-h-15"
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
             placeholder={workStatus === "work" ? "Any additional notes..." : "Reason for no work..."}
@@ -249,12 +268,12 @@ export default function EntryForm({
             </motion.button>
           )}
           <motion.button
-            whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(16,185,129,0.3)" }}
+            whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(245,158,11,0.3)" }}
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={saving}
-            className="relative flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-            style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
+            className="relative flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl text-sm font-bold text-theme transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? "Saving..." : "Save Entry"}

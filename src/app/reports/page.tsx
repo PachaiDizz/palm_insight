@@ -82,7 +82,7 @@ export default function ReportsPage() {
 
   // Status pie chart
   const pieData = [
-    { name: "Work Days", value: stats.workDays, color: "var(--accent-green)" },
+    { name: "Work Days", value: stats.workDays, color: "var(--accent-primary)" },
     { name: "No Work", value: stats.noWorkDays, color: "#ef4444" },
   ];
 
@@ -148,7 +148,7 @@ export default function ReportsPage() {
               action={
                 <div className="flex items-center gap-3">
                   <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
-                    <FileSpreadsheet className="w-4 h-4" style={{ color: "var(--accent-green)" }} />
+                    <FileSpreadsheet className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                     CSV
                   </button>
                   <button onClick={exportJSON} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
@@ -165,7 +165,7 @@ export default function ReportsPage() {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="px-4 py-2.5 rounded-xl text-sm text-white outline-none border appearance-none"
+                className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 {months.map((m, i) => (
@@ -176,7 +176,7 @@ export default function ReportsPage() {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-4 py-2.5 rounded-xl text-sm text-white outline-none border appearance-none"
+                className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 {[2024, 2025, 2026, 2027].map((y) => (
@@ -191,7 +191,7 @@ export default function ReportsPage() {
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm"
                     style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
                   >
-                    <Filter className="w-4 h-4" style={{ color: "var(--accent-green)" }} />
+                    <Filter className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                     {selectedPlantationId === "all" ? "All Plantations" : `Block ${selectedP?.block}`}
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -199,9 +199,9 @@ export default function ReportsPage() {
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowPlantFilter(false)} />
                       <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border overflow-hidden z-50 shadow-xl" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-                        <button onClick={() => { setSelectedPlantationId("all"); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 border-b" style={{ color: selectedPlantationId === "all" ? "#10b981" : "white", borderColor: "var(--border-subtle)" }}>All Plantations</button>
+                        <button onClick={() => { setSelectedPlantationId("all"); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 border-b" style={{ color: selectedPlantationId === "all" ? "#6366f1" : "white", borderColor: "var(--border-subtle)" }}>All Plantations</button>
                         {plantations.map((p) => (
-                          <button key={p.id} onClick={() => { setSelectedPlantationId(p.id); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 border-b last:border-b-0" style={{ color: selectedPlantationId === p.id ? "#10b981" : "white", borderColor: "var(--border-subtle)" }}>
+                          <button key={p.id} onClick={() => { setSelectedPlantationId(p.id); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 border-b last:border-b-0" style={{ color: selectedPlantationId === p.id ? "#6366f1" : "white", borderColor: "var(--border-subtle)" }}>
                             {p.rancangan} · Block {p.block}
                           </button>
                         ))}
@@ -215,10 +215,10 @@ export default function ReportsPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {[
-                { label: "Total Entries", value: stats.totalEntries, icon: Calendar, color: "var(--accent-amber)" },
+                { label: "Total Entries", value: stats.totalEntries, icon: Calendar, color: "var(--accent-primary)" },
                 { label: "Total Bunches", value: stats.totalBunches, icon: TrendingUp, color: "var(--accent-purple)" },
-                { label: "Total Tons", value: stats.totalTons.toFixed(1), icon: TrendingUp, color: "var(--accent-green)" },
-                { label: "Work Days", value: stats.workDays, icon: Calendar, color: "var(--accent-green)" },
+                { label: "Total Tons", value: stats.totalTons.toFixed(2), icon: TrendingUp, color: "var(--accent-primary)" },
+                { label: "Work Days", value: stats.workDays, icon: Calendar, color: "var(--accent-primary)" },
                 { label: "No Work Days", value: stats.noWorkDays, icon: Calendar, color: "#ef4444" },
                 { label: "Total Backlogs", value: stats.totalBacklogs, icon: TrendingUp, color: "var(--accent-amber)" },
               ].map((s) => (
@@ -227,7 +227,7 @@ export default function ReportsPage() {
                     <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{s.label}</span>
                     <s.icon className="w-4 h-4" style={{ color: s.color }} />
                   </div>
-                  <div className="text-2xl font-bold text-white">{s.value}</div>
+                  <div className="text-2xl font-bold text-theme">{s.value}</div>
                 </div>
               ))}
             </div>
@@ -235,16 +235,16 @@ export default function ReportsPage() {
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
               <div className="lg:col-span-2 card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
-                <h3 className="card-title text-sm text-white mb-4">Daily Production</h3>
+                <h3 className="card-title text-sm text-theme mb-4">Daily Production</h3>
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,185,129,0.12)" />
-                      <XAxis dataKey="date" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
-                      <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
-                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(16,185,129,0.12)", borderRadius: "12px" }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,158,11,0.12)" />
+                      <XAxis dataKey="date" tick={{ fill: "var(--text-chart-axis)", fontSize: 10 }} />
+                      <YAxis tick={{ fill: "var(--text-chart-axis)", fontSize: 10 }} />
+                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(245,158,11,0.12)", borderRadius: "12px" }} />
                       <Bar dataKey="bunches" fill="#8b5cf6" name="Bunches" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="tons" fill="#10b981" name="Tons" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="tons" fill="#f59e0b" name="Tons" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -254,7 +254,7 @@ export default function ReportsPage() {
                 )}
               </div>
               <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
-                <h3 className="card-title text-sm text-white mb-4">Work Status</h3>
+                <h3 className="card-title text-sm text-theme mb-4">Work Status</h3>
                 {stats.workDays + stats.noWorkDays > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -263,7 +263,7 @@ export default function ReportsPage() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(16,185,129,0.12)", borderRadius: "12px" }} />
+                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(245,158,11,0.12)", borderRadius: "12px" }} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
@@ -273,7 +273,7 @@ export default function ReportsPage() {
                 )}
                 <div className="flex justify-center gap-4 mt-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--accent-green)" }} />
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--accent-primary)" }} />
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>Work ({stats.workDays})</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -287,11 +287,11 @@ export default function ReportsPage() {
             {/* Entries Table */}
             <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
-                <h3 className="card-title text-sm text-white">All Entries — {months[selectedMonth]} {selectedYear}</h3>
+                <h3 className="card-title text-sm text-theme">All Entries — {months[selectedMonth]} {selectedYear}</h3>
               </div>
               {filteredEntries.length === 0 ? (
                 <div className="p-12 text-center">
-                  <Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
+                  <Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries for this period.</p>
                 </div>
               ) : (
@@ -315,19 +315,19 @@ export default function ReportsPage() {
                         const leader = e.team_leaders as TeamLeader | undefined;
                         return (
                           <tr key={e.id} className="border-b last:border-b-0" style={{ borderColor: "var(--border-subtle)" }}>
-                            <td className="px-5 py-3 text-sm text-white">{e.date}</td>
+                            <td className="px-5 py-3 text-sm text-theme">{e.date}</td>
                             <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{leader?.name || "-"}</td>
                             <td className="px-5 py-3 text-sm uppercase" style={{ color: "var(--text-secondary)" }}>
                               {leader?.plantations ? `Block ${leader.plantations.block}` : "-"}
                             </td>
                             <td className="px-5 py-3">
-                              <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: e.work_status === "work" ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)", color: e.work_status === "work" ? "#10b981" : "#f87171" }}>
+                              <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: e.work_status === "work" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)", color: e.work_status === "work" ? "#22c55e" : "#f87171" }}>
                                 {e.work_status === "work" ? "Work" : "No Work"}
                               </span>
                             </td>
                             <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.num_workers}</td>
                             <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.bunches}</td>
-                            <td className="px-5 py-3 text-sm font-medium text-white">{e.tons}</td>
+                            <td className="px-5 py-3 text-sm font-medium text-theme">{e.tons != null ? Number(e.tons).toFixed(2) : "-"}</td>
                             <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.backlogs}</td>
                           </tr>
                         );
@@ -341,8 +341,8 @@ export default function ReportsPage() {
                       return (
                         <div key={e.id} className="p-4 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-white font-medium">{e.date}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: e.work_status === "work" ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)", color: e.work_status === "work" ? "#10b981" : "#f87171" }}>
+                            <span className="text-sm text-theme font-medium">{e.date}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: e.work_status === "work" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)", color: e.work_status === "work" ? "#22c55e" : "#f87171" }}>
                               {e.work_status === "work" ? "Work" : "No Work"}
                             </span>
                           </div>
@@ -350,7 +350,7 @@ export default function ReportsPage() {
                           <div className="grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
                             <div>Workers: {e.num_workers ?? "-"}</div>
                             <div>Bunches: {e.bunches ?? "-"}</div>
-                            <div>Tons: {e.tons ?? "-"}</div>
+                            <div>Tons: {e.tons != null ? Number(e.tons).toFixed(2) : "-"}</div>
                             <div>Backlogs: {e.backlogs ?? "-"}</div>
                           </div>
                         </div>

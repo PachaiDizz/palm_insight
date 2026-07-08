@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{ user, loading, profile, fetchProfile }}>
       {loading ? (
         <div className="flex justify-center items-center h-screen">
-          <Loader2 className="animate-spin text-green-600" size={40} />
+          <Loader2 className="animate-spin text-amber-500" size={40} />
         </div>
       ) : children}
     </AuthContext.Provider>

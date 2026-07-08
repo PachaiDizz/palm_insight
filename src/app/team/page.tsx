@@ -156,7 +156,7 @@ function TeamsContent() {
     setLeaderStats({
       totalEntries: entries.length, workDays: workDays.length, totalBunches, totalTons, totalBacklogs,
       avgBunches: workDays.length > 0 ? Math.round(totalBunches / workDays.length) : 0,
-      avgTons: workDays.length > 0 ? (totalTons / workDays.length).toFixed(1) : "0",
+      avgTons: workDays.length > 0 ? (totalTons / workDays.length).toFixed(2) : "0.00",
       avgWorkers: workDays.length > 0 ? Math.round(totalWorkers / workDays.length) : 0,
     });
   }
@@ -205,9 +205,9 @@ function TeamsContent() {
     const entryData = {
       work_status: workStatus, date,
       num_workers: workStatus === "work" ? parseInt(numWorkers) || 0 : null,
-      lot: lot || null,
+      lot: workStatus === "work" ? (lot || null) : null,
       bunches: workStatus === "work" ? parseInt(bunches) || 0 : null,
-      tons: workStatus === "work" ? parseFloat(tons) || 0 : null,
+      tons: parseFloat(tons) || 0,
       backlogs: workStatus === "work" ? parseInt(backlogs) || 0 : null,
       notes: notes || null,
     };
@@ -232,7 +232,7 @@ function TeamsContent() {
     setNumWorkers(entry.work_status === "work" ? String(entry.num_workers || "") : "");
     setLot(entry.lot || "");
     setBunches(entry.work_status === "work" ? String(entry.bunches || "") : "");
-    setTons(entry.work_status === "work" ? String(entry.tons || "") : "");
+    setTons(entry.tons != null ? String(entry.tons) : "");
     setBacklogs(entry.work_status === "work" ? String(entry.backlogs || "") : "");
     setNotes(entry.notes || "");
     setSavedId(`de_${Date.now()}`);
@@ -363,7 +363,7 @@ function TeamsContent() {
       totalEntries: filtered.length, workDays: workDays.length, noWorkDays: filtered.length - workDays.length,
       totalBunches, totalTons, totalBacklogs,
       avgBunches: workDays.length > 0 ? Math.round(totalBunches / workDays.length) : 0,
-      avgTons: workDays.length > 0 ? (totalTons / workDays.length).toFixed(1) : "0",
+      avgTons: workDays.length > 0 ? (totalTons / workDays.length).toFixed(2) : "0.00",
       avgWorkers: workDays.length > 0 ? Math.round(totalWorkers / workDays.length) : 0,
     });
   }, [detailMonth, detailDateFrom, detailDateTo, detailEntries, viewingLeader]);
@@ -386,9 +386,9 @@ function TeamsContent() {
     const { error } = await supabase.from("daily_entries").update({
       work_status: detailEditWorkStatus, date: detailEditDate,
       num_workers: detailEditWorkStatus === "work" ? parseInt(detailEditNumWorkers) || 0 : null,
-      lot: detailEditLot || null,
+      lot: detailEditWorkStatus === "work" ? (detailEditLot || null) : null,
       bunches: detailEditWorkStatus === "work" ? parseInt(detailEditBunches) || 0 : null,
-      tons: detailEditWorkStatus === "work" ? parseFloat(detailEditTons) || 0 : null,
+      tons: parseFloat(detailEditTons) || 0,
       backlogs: detailEditWorkStatus === "work" ? parseInt(detailEditBacklogs) || 0 : null,
       notes: detailEditNotes || null,
     }).eq("id", detailEditEntry.id);
@@ -415,14 +415,14 @@ function TeamsContent() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}>
-            <h1 className="page-title text-2xl sm:text-3xl text-white tracking-tight">Team Management</h1>
+            <h1 className="page-title text-2xl sm:text-3xl text-theme tracking-tight">Team Management</h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               {selectedBlock ? `${selectedP?.rancangan}, Peringkat ${selectedP?.peringkat} — Block ${selectedP?.block}` : "Select a block to manage team leaders."}
             </p>
           </motion.div>
           {!selectedBlock && (
-            <motion.button whileHover={{ scale: 1.05, boxShadow: "0 4px 20px rgba(16,185,129,0.3)" }} whileTap={{ scale: 0.95 }} onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all" style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}>
+            <motion.button whileHover={{ scale: 1.05, boxShadow: "0 4px 20px rgba(245,158,11,0.3)" }} whileTap={{ scale: 0.95 }} onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-theme transition-all" style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}>
               <Plus className="w-4 h-4" /> Add Leader
             </motion.button>
           )}
@@ -433,10 +433,10 @@ function TeamsContent() {
           {selectedLeader && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3, ease: "easeOut" }} className="mb-6">
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, ease: "easeOut", delay: 0.05 }} className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-emerald-400" />
-                <input type="date" className="px-3 py-2 rounded border text-sm text-white outline-none" style={{ backgroundColor: "var(--bg-elevated)", borderColor: "#2d4a2d", minWidth: "140px" }} value={date} onChange={(e) => { setDate(e.target.value); setShowFilterPanel(false); }} />
-                <motion.button whileHover={{ scale: 1.03, backgroundColor: "var(--accent-green-light)" }} whileTap={{ scale: 0.97 }} onClick={() => setShowFilterPanel(!showFilterPanel)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)" }}>
+                <Calendar className="w-4 h-4 text-amber-400" />
+                <input type="date" className="px-3 py-2 rounded border text-sm text-theme outline-none" style={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border-default)", minWidth: "140px" }} value={date} onChange={(e) => { setDate(e.target.value); setShowFilterPanel(false); }} />
+                <motion.button whileHover={{ scale: 1.03, backgroundColor: "var(--accent-subtle)" }} whileTap={{ scale: 0.97 }} onClick={() => setShowFilterPanel(!showFilterPanel)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
                   <Calendar className="w-4 h-4" /> Filter by Date
                 </motion.button>
               </motion.div>
@@ -454,7 +454,7 @@ function TeamsContent() {
           {plantations.length === 0 ? (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
               className="card-glow rounded-2xl p-12 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
-              <MapPin className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
+              <MapPin className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations set. Complete onboarding first.</p>
             </motion.div>
           ) : !selectedBlock ? (
@@ -491,33 +491,33 @@ function TeamsContent() {
               <motion.div key="detail-view" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="mt-8">
                 <motion.button whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.08)" }} whileTap={{ scale: 0.97 }}
                   onClick={handleBackToOrgChart}
-                  className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ color: "var(--text-muted)", border: "1px solid rgba(16,185,129,0.12)" }}>
+                  className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ color: "var(--text-muted)", border: "1px solid rgba(245,158,11,0.12)" }}>
                   <ChevronLeft className="w-4 h-4" /> Back to all blocks
                 </motion.button>
 
                 <div className="card-glow rounded-2xl p-6 mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="flex items-start justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(16,185,129,0.12)" }}>
-                        <Users className="w-7 h-7" style={{ color: "var(--accent-green)" }} />
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                        <Users className="w-7 h-7" style={{ color: "var(--accent-primary)" }} />
                       </div>
                       <div>
-                        <h2 className="page-title text-2xl text-white">{viewingLeader.name}</h2>
+                        <h2 className="page-title text-2xl text-theme">{viewingLeader.name}</h2>
                         {viewingLeader.phone && (<div className="flex items-center gap-2 mt-1"><Phone className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} /><span className="text-sm" style={{ color: "var(--text-muted)" }}>{viewingLeader.phone}</span></div>)}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-green-light)" }}><MapPin className="w-4 h-4" style={{ color: "var(--accent-green)" }} /><span className="text-sm font-medium text-white">Block {plantation?.block}</span></div>
-                      <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-green-light)" }}><span className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>{plantation?.rancangan}</span></div>
-                      <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-green-light)" }}><span className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Peringkat {plantation?.peringkat}</span></div>
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><MapPin className="w-4 h-4" style={{ color: "var(--accent-primary)" }} /><span className="text-sm font-medium text-theme">Block {plantation?.block}</span></div>
+                      <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><span className="text-sm" style={{ color: "var(--text-secondary)" }}>{plantation?.rancangan}</span></div>
+                      <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><span className="text-sm" style={{ color: "var(--text-secondary)" }}>Peringkat {plantation?.peringkat}</span></div>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  {[{ label: "Working Days", value: detailStats.workDays, icon: Calendar, color: "var(--accent-green)", bg: "rgba(16,185,129,0.12)" },
+                  {[{ label: "Working Days", value: detailStats.workDays, icon: Calendar, color: "var(--accent-primary)", bg: "var(--accent-subtle)" },
                     { label: "Total Bunches", value: detailStats.totalBunches, icon: TrendingUp, color: "var(--accent-purple)", bg: "rgba(139,92,246,0.12)" },
-                    { label: "Total Tonnage", value: `${detailStats.totalTons} ton`, icon: Truck, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
+                    { label: "Total Tonnage", value: `${Number(detailStats.totalTons).toFixed(2)} ton`, icon: Truck, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
                     { label: "Total Backlogs", value: detailStats.totalBacklogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
                   ].map((s) => (
                     <div key={s.label} className="card-glow relative rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
@@ -527,7 +527,7 @@ function TeamsContent() {
                           <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{s.label}</span>
                           <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: s.bg }}><s.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: s.color }} /></div>
                         </div>
-                        <div className="text-xl sm:text-3xl font-bold text-white">{s.value}</div>
+                        <div className="text-xl sm:text-3xl font-bold text-theme">{s.value}</div>
                       </div>
                     </div>
                   ))}
@@ -535,7 +535,7 @@ function TeamsContent() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
                   {[{ label: "Avg Bunches/Day", value: detailStats.avgBunches, color: "var(--accent-purple)" },
-                    { label: "Avg Tons/Day", value: detailStats.avgTons, color: "var(--accent-green)" },
+                    { label: "Avg Tons/Day", value: detailStats.avgTons, color: "var(--accent-primary)" },
                     { label: "Avg Workers/Day", value: detailStats.avgWorkers, color: "var(--accent-blue)" },
                   ].map((s) => (
                     <div key={s.label} className="card-glow rounded-2xl p-4 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
@@ -548,27 +548,27 @@ function TeamsContent() {
                 <div className="card-glow rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
                     <div className="flex items-center gap-2">
-                      <button onClick={detailPrevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)", border: "1px solid rgba(16,185,129,0.2)" }}><ChevronLeft className="w-4 h-4" /></button>
+                      <button onClick={detailPrevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)", border: "1px solid rgba(245,158,11,0.2)" }}><ChevronLeft className="w-4 h-4" /></button>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--accent-green)" }} />
-                        <input type="month" value={detailMonth} onChange={(e) => setDetailMonth(e.target.value)} className="pl-9 pr-3 py-2 rounded-xl border text-sm text-white outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)", color: "white" }} />
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                        <input type="month" value={detailMonth} onChange={(e) => setDetailMonth(e.target.value)} className="pl-9 pr-3 py-2 rounded-xl border text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)", color: "white" }} />
                       </div>
-                      <button onClick={detailNextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)", border: "1px solid rgba(16,185,129,0.2)" }}><ChevronDown className="w-4 h-4 rotate-[-90deg]" /></button>
-                      <span className="text-sm font-semibold text-white ml-1">{detailFormatMonthLabel(detailMonth)}</span>
+                      <button onClick={detailNextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)", border: "1px solid rgba(245,158,11,0.2)" }}><ChevronDown className="w-4 h-4 rotate-[-90deg]" /></button>
+                      <span className="text-sm font-semibold text-theme ml-1">{detailFormatMonthLabel(detailMonth)}</span>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-green-light)", color: "var(--accent-green)" }}>{detailFilteredEntries.length} entries</span>
+                    <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>{detailFilteredEntries.length} entries</span>
                   </div>
-                  <div className="flex items-end gap-3 pt-3" style={{ borderTop: "1px solid rgba(16,185,129,0.12)" }}>
-                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>From</label><input type="date" value={detailDateFrom} onChange={(e) => setDetailDateFrom(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-white outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
-                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>To</label><input type="date" value={detailDateTo} onChange={(e) => setDetailDateTo(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-white outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
+                  <div className="flex items-end gap-3 pt-3" style={{ borderTop: "1px solid rgba(245,158,11,0.12)" }}>
+                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>From</label><input type="date" value={detailDateFrom} onChange={(e) => setDetailDateFrom(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
+                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>To</label><input type="date" value={detailDateTo} onChange={(e) => setDetailDateTo(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
                     {(detailDateFrom || detailDateTo) && (<button onClick={() => { setDetailDateFrom(""); setDetailDateTo(""); }} className="px-3 py-2 rounded-xl text-xs font-medium transition-colors" style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)", border: "1px solid rgba(239,68,68,0.2)" }}>Clear</button>)}
                   </div>
                 </div>
 
                 <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
-                  <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-default)" }}><BarChart3 className="w-4 h-4" style={{ color: "var(--accent-green)" }} /><h3 className="card-title text-sm text-white">All Entries</h3></div>
+                  <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-default)" }}><BarChart3 className="w-4 h-4" style={{ color: "var(--accent-primary)" }} /><h3 className="card-title text-sm text-theme">All Entries</h3></div>
                   {detailFilteredEntries.length === 0 ? (
-                    <div className="p-12 text-center"><Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.1)" }} /><p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries found for this period.</p></div>
+                    <div className="p-12 text-center"><Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--text-muted)" }} /><p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries found for this period.</p></div>
                   ) : (
                      <div className="rounded-xl border bg-[var(--bg-elevated)]/50">
                        {/* Desktop table */}
@@ -583,14 +583,14 @@ function TeamsContent() {
                             const isNoWork = e.work_status === "no_work";
                             const isLast = idx === detailFilteredEntries.length - 1;
                             return (
-                              <tr key={e.id} style={{ borderBottom: isLast ? "none" : "1px solid rgba(16,185,129,0.08)" }}>
+                              <tr key={e.id} style={{ borderBottom: isLast ? "none" : "1px solid rgba(245,158,11,0.08)" }}>
                                 <td className="px-4 py-3 text-sm text-center" style={{ color: "var(--text-muted)" }}>{idx + 1}</td>
-                                <td className="px-4 py-3 text-sm text-white font-medium whitespace-nowrap">{e.date ? e.date.split("-").reverse().join("/") : "-"}</td>
-                                <td className="px-4 py-3 whitespace-nowrap"><span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)", color: isNoWork ? "#f87171" : "#10b981" }}>{isNoWork ? "No Work" : "Work"}</span></td>
+                                <td className="px-4 py-3 text-sm text-theme font-medium whitespace-nowrap">{e.date ? e.date.split("-").reverse().join("/") : "-"}</td>
+                                <td className="px-4 py-3 whitespace-nowrap"><span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)", color: isNoWork ? "#f87171" : "#22c55e" }}>{isNoWork ? "No Work" : "Work"}</span></td>
                                 <td className="px-4 py-3 text-sm text-right" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.num_workers ?? "-")}</td>
                                 <td className="px-4 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.lot || "-")}</td>
                                 <td className="px-4 py-3 text-sm text-right" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.bunches ?? "-")}</td>
-                                <td className="px-4 py-3 text-sm font-medium text-white text-right">{isNoWork ? "-" : (e.tons || "-")}</td>
+                                <td className="px-4 py-3 text-sm font-medium text-theme text-right">{e.tons != null && e.tons !== 0 ? Number(e.tons).toFixed(2) : "-"}</td>
                                 <td className="px-4 py-3 text-sm text-right" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.backlogs || "-")}</td>
                                 <td className="px-4 py-3 text-sm truncate max-w-[200px]" style={{ color: "var(--text-muted)" }}>{e.notes || "-"}</td>
                                 <td className="px-4 py-3"><div className="flex items-center justify-center gap-1">
@@ -603,15 +603,15 @@ function TeamsContent() {
                         </tbody>
                       </table>
                       {/* Mobile cards */}
-                      <div className="md:hidden divide-y" style={{ borderColor: "rgba(16,185,129,0.08)" }}>
+                      <div className="md:hidden divide-y" style={{ borderColor: "rgba(245,158,11,0.08)" }}>
                         {detailFilteredEntries.map((e: DailyEntry, idx: number) => {
                           const isNoWork = e.work_status === "no_work";
                           return (
                             <div key={e.id} className="p-4 space-y-2">
                               <div className="flex items-center justify-between">
-                                <span className="text-sm text-white font-medium">{e.date ? e.date.split("-").reverse().join("/") : "-"}</span>
+                                <span className="text-sm text-theme font-medium">{e.date ? e.date.split("-").reverse().join("/") : "-"}</span>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)", color: isNoWork ? "#f87171" : "#10b981" }}>{isNoWork ? "No Work" : "Work"}</span>
+                                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)", color: isNoWork ? "#f87171" : "#22c55e" }}>{isNoWork ? "No Work" : "Work"}</span>
                                   <button onClick={() => handleDetailEditEntry(e)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-blue)" }}><Edit2 className="w-3.5 h-3.5" /></button>
                                   <button onClick={() => handleDetailDeleteEntry(e.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-red)" }}><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
@@ -620,7 +620,7 @@ function TeamsContent() {
                                 <div>Workers: {isNoWork ? "-" : (e.num_workers ?? "-")}</div>
                                 <div>Lot: {isNoWork ? "-" : (e.lot || "-")}</div>
                                 <div>Bunches: {isNoWork ? "-" : (e.bunches ?? "-")}</div>
-                                <div>Tons: {isNoWork ? "-" : (e.tons || "-")}</div>
+                                <div>Tons: {e.tons != null && e.tons !== 0 ? Number(e.tons).toFixed(2) : "-"}</div>
                                 <div>Backlogs: {isNoWork ? "-" : (e.backlogs || "-")}</div>
                                 {e.notes && <div className="col-span-3 truncate" style={{ color: "var(--text-muted)" }}>Notes: {e.notes}</div>}
                               </div>

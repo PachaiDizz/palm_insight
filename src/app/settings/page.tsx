@@ -150,35 +150,35 @@ export default function SettingsPage() {
 
           {/* ===== Account Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Account</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Account</h2>
             <div className="card-glow rounded-2xl p-5 space-y-4" style={{ backgroundColor: "var(--bg-card)" }}>
 
               {/* Display Name */}
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(16,185,129,0.15)" }}>
-                  <User className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                  <User className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-white">Display Name</div>
+                  <div className="text-sm font-medium text-theme">Display Name</div>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full mt-1 px-3 py-2 rounded-xl text-sm text-white outline-none border"
+                    className="w-full mt-1 px-3 py-2 rounded-xl text-sm text-theme outline-none border"
                     style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
                   />
                 </div>
                 <button
                   onClick={handleSaveName}
                   disabled={savingName || !displayName.trim()}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-white disabled:opacity-50"
-                  style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-theme disabled:opacity-50"
+                  style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
                 >
                   {savingName ? "Saving..." : "Save"}
                 </button>
               </div>
               {nameMessage && (
-                <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: nameMessage.type === "success" ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)", color: nameMessage.type === "success" ? "var(--accent-green)" : "var(--accent-red)" }}>
+                <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: nameMessage.type === "success" ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)", color: nameMessage.type === "success" ? "var(--accent-primary)" : "var(--accent-red)" }}>
                   {nameMessage.type === "success" ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
                   {nameMessage.text}
                 </div>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
                   <Mail className="w-5 h-5" style={{ color: "var(--accent-blue)" }} />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-white">Email</div>
+                  <div className="text-sm font-medium text-theme">Email</div>
                   <div className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>{user?.email || "-"}</div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function SettingsPage() {
                     <Lock className="w-5 h-5" style={{ color: "var(--accent-amber)" }} />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white">Change Password</div>
+                    <div className="text-sm font-medium text-theme">Change Password</div>
                     <div className="text-xs" style={{ color: "var(--text-muted)" }}>Update your password</div>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                     placeholder="New Password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none border placeholder:opacity-40"
+                    className="w-full px-3 py-2 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40"
                     style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
                   />
                   <input
@@ -224,20 +224,20 @@ export default function SettingsPage() {
                     placeholder="Confirm Password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none border placeholder:opacity-40"
+                    className="w-full px-3 py-2 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40"
                     style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
                   />
                   <button
                     onClick={handleUpdatePassword}
                     disabled={updatingPassword || !newPassword || !confirmPassword}
-                    className="px-4 py-2 rounded-xl text-sm font-medium text-white disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl text-sm font-medium text-theme disabled:opacity-50"
                     style={{ backgroundColor: "rgba(245,158,11,0.2)", color: "var(--accent-amber)" }}
                   >
                     {updatingPassword ? "Updating..." : "Update Password"}
                   </button>
                 </div>
                 {passwordMessage && (
-                  <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg mt-3" style={{ backgroundColor: passwordMessage.type === "success" ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)", color: passwordMessage.type === "success" ? "var(--accent-green)" : "var(--accent-red)" }}>
+                  <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg mt-3" style={{ backgroundColor: passwordMessage.type === "success" ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)", color: passwordMessage.type === "success" ? "var(--accent-primary)" : "var(--accent-red)" }}>
                     {passwordMessage.type === "success" ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
                     {passwordMessage.text}
                   </div>
@@ -248,7 +248,7 @@ export default function SettingsPage() {
 
           {/* ===== Notifications Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Notifications</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Notifications</h2>
             <div className="card-glow rounded-2xl p-5 space-y-0" style={{ backgroundColor: "var(--bg-card)" }}>
               {([
                 { key: "dailyReminder" as const, label: "Daily Harvest Reminder", desc: "Remind me when no entries are logged by 10AM" },
@@ -259,13 +259,13 @@ export default function SettingsPage() {
                   {i > 0 && <div className="border-t my-3" style={{ borderColor: "var(--border-default)" }} />}
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-white">{item.label}</div>
+                      <div className="text-sm font-medium text-theme">{item.label}</div>
                       <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{item.desc}</div>
                     </div>
                     <button
                       onClick={() => toggleNotifPref(item.key)}
                       className="relative w-12 h-6 rounded-full transition-colors"
-                      style={{ backgroundColor: notifPrefs[item.key] ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.1)" }}
+                      style={{ backgroundColor: notifPrefs[item.key] ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.1)" }}
                       aria-label={`Toggle ${item.label}`}
                     >
                       <div
@@ -281,11 +281,11 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(16,185,129,0.15)" }}>
-                    {notifPrefs.browserPush ? <Bell className="w-5 h-5" style={{ color: "var(--accent-green)" }} /> : <BellOff className="w-5 h-5" style={{ color: "var(--text-muted)" }} />}
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                    {notifPrefs.browserPush ? <Bell className="w-5 h-5" style={{ color: "var(--accent-primary)" }} /> : <BellOff className="w-5 h-5" style={{ color: "var(--text-muted)" }} />}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white">Browser Push Notifications</div>
+                    <div className="text-sm font-medium text-theme">Browser Push Notifications</div>
                     <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                       {pushPermission === "granted" ? "Enabled" : pushPermission === "denied" ? "Blocked by browser" : "Receive alerts even when the app is not open"}
                     </div>
@@ -295,7 +295,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => toggleNotifPref("browserPush")}
                     className="relative w-12 h-6 rounded-full transition-colors"
-                    style={{ backgroundColor: notifPrefs.browserPush ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.1)" }}
+                    style={{ backgroundColor: notifPrefs.browserPush ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.1)" }}
                     aria-label="Toggle browser push notifications"
                   >
                     <div
@@ -307,7 +307,7 @@ export default function SettingsPage() {
                   <button
                     onClick={requestPushPermission}
                     className="px-4 py-2 rounded-xl text-sm font-medium"
-                    style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}
+                    style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
                   >
                     Enable Push Notifications
                   </button>
@@ -320,7 +320,7 @@ export default function SettingsPage() {
 
           {/* ===== Appearance Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Appearance</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Appearance</h2>
             <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -328,14 +328,14 @@ export default function SettingsPage() {
                     {theme === "dark" ? <Sun className="w-5 h-5" style={{ color: "var(--accent-purple)" }} /> : <Moon className="w-5 h-5" style={{ color: "var(--accent-purple)" }} />}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white">Theme</div>
+                    <div className="text-sm font-medium text-theme">Theme</div>
                     <div className="text-xs" style={{ color: "var(--text-muted)" }}>{theme === "dark" ? "Dark mode" : "Light mode"}</div>
                   </div>
                 </div>
                 <button
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="relative w-12 h-6 rounded-full transition-colors"
-                  style={{ backgroundColor: theme === "dark" ? "rgba(16,185,129,0.3)" : "rgba(139,92,246,0.3)" }}
+                  style={{ backgroundColor: theme === "dark" ? "rgba(245,158,11,0.3)" : "rgba(139,92,246,0.3)" }}
                   aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 >
                   <div
@@ -349,7 +349,7 @@ export default function SettingsPage() {
 
           {/* ===== Data Management Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-green)" }}>Data Management</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Data Management</h2>
             <div className="space-y-3">
               <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center justify-between">
@@ -358,11 +358,11 @@ export default function SettingsPage() {
                       <Download className="w-5 h-5" style={{ color: "var(--accent-blue)" }} />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-white">Export Data</div>
+                      <div className="text-sm font-medium text-theme">Export Data</div>
                       <div className="text-xs" style={{ color: "var(--text-muted)" }}>Download all data as JSON</div>
                     </div>
                   </div>
-                  <button onClick={handleExport} className="px-4 py-2 rounded-xl text-sm font-medium text-white" style={{ backgroundColor: "rgba(59,130,246,0.2)", color: "var(--accent-blue)" }}>
+                  <button onClick={handleExport} className="px-4 py-2 rounded-xl text-sm font-medium text-theme" style={{ backgroundColor: "rgba(59,130,246,0.2)", color: "var(--accent-blue)" }}>
                     Download
                   </button>
                 </div>
@@ -370,14 +370,14 @@ export default function SettingsPage() {
 
               <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-green-light)" }}>
-                    <Upload className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                    <Upload className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-white">Restore Data</div>
+                    <div className="text-sm font-medium text-theme">Restore Data</div>
                     <div className="text-xs" style={{ color: "var(--text-muted)" }}>{importing ? "Restoring..." : "Import from JSON backup"}</div>
                   </div>
-                  <label className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "var(--accent-green)" }}>
+                  <label className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
                     Choose File
                     <input type="file" accept=".json" onChange={handleImport} className="hidden" />
                   </label>
@@ -391,7 +391,7 @@ export default function SettingsPage() {
                       <Trash2 className="w-5 h-5" style={{ color: "var(--accent-red)" }} />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-white">Danger Zone</div>
+                      <div className="text-sm font-medium text-theme">Danger Zone</div>
                       <div className="text-xs" style={{ color: "var(--text-muted)" }}>Permanently delete all data</div>
                     </div>
                   </div>

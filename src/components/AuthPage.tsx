@@ -119,9 +119,9 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ backgroundColor: "var(--bg-base)" }}>
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.12)" }} />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ backgroundColor: "rgba(245, 158, 11, 0.12)" }} />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]" style={{ backgroundColor: "rgba(120, 53, 15, 0.2)" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[150px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.08)" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[150px]" style={{ backgroundColor: "rgba(245, 158, 11, 0.08)" }} />
       </div>
 
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
@@ -129,18 +129,18 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
       <div className="w-full max-w-[440px]">
         <motion.div
           className="relative z-10 rounded-3xl shadow-2xl overflow-hidden border"
-          style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(16, 185, 129, 0.12)", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)" }}
+          style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(245, 158, 11, 0.12)", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)" }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           <div className="p-8 pb-6">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: "linear-gradient(to bottom right, #10b981, #16a34a)", boxShadow: "0 10px 15px -3px rgba(16, 185, 129, 0.2)" }}>
-                <Leaf className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: "linear-gradient(to bottom right, #f59e0b, #f59e0b)", boxShadow: "0 10px 15px -3px rgba(245, 158, 11, 0.2)" }}>
+                <Leaf className="w-5 h-5 text-theme" />
               </div>
               <div>
-                <span className="font-bold text-xl text-white tracking-tight block leading-tight">PalmInsight</span>
+                <span className="font-bold text-xl text-theme tracking-tight block leading-tight">PalmInsight</span>
                 <span className="text-[11px] font-medium tracking-wider uppercase" style={{ color: "var(--text-muted)" }}>Plantation Tracker</span>
               </div>
             </div>
@@ -151,9 +151,9 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-5 p-3.5 rounded-xl text-sm flex items-center gap-3"
-                style={{ backgroundColor: "var(--accent-green-light)", border: "1px solid rgba(16,185,129,0.2)", color: "#34d399" }}
+                style={{ backgroundColor: "var(--accent-green-light)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}
               >
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(16,185,129,0.2)" }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(34,197,94,0.2)" }}>
                   <CheckCircle className="w-3.5 h-3.5" />
                 </div>
                 <span>Email confirmed! You can now sign in.</span>
@@ -170,14 +170,14 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                   transition={{ duration: 0.35 }}
                   className="text-center py-6"
                 >
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "linear-gradient(to bottom right, #10b981, #16a34a)", boxShadow: "0 10px 15px -3px rgba(16,185,129,0.2)" }}>
-                    <Mail className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "linear-gradient(to bottom right, #f59e0b, #f59e0b)", boxShadow: "0 10px 15px -3px rgba(245,158,11,0.2)" }}>
+                    <Mail className="w-8 h-8 text-theme" />
                   </div>
-                  <h2 className="section-heading text-xl text-white mb-2">Check your email</h2>
-                  <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <h2 className="section-heading text-xl text-theme mb-2">Check your email</h2>
+                  <p className="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>
                     We sent a confirmation link to:
                   </p>
-                  <p className="text-sm font-semibold text-green-400 mb-5">{email}</p>
+                  <p className="text-sm font-semibold text-amber-400 mb-5">{email}</p>
                   <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                     Click the link in the email to activate your account, then come back to sign in. Check your spam folder if you don&apos;t see it.
                   </p>
@@ -199,8 +199,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                   exit="exit"
                 >
                   <div className="mb-6">
-                    <h1 className="page-title text-2xl text-white tracking-tight">Welcome back</h1>
-                    <p className="mt-1.5 text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Sign in to manage your plantations</p>
+                    <h1 className="page-title text-2xl text-theme tracking-tight">Welcome back</h1>
+                    <p className="mt-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>Sign in to manage your plantations</p>
                   </div>
 
                   {error && (
@@ -216,7 +216,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
 
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Email</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Email</label>
                       <div className="relative">
                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -224,15 +224,15 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           placeholder="name@company.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pl-11 pr-4 py-2.5 rounded-xl text-white text-sm focus:outline-none focus:ring-2 transition-all"
-                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(16,185,129,0.15)", color: "white", "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+                          className="w-full pl-11 pr-4 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
+                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(245,158,11,0.15)", color: "var(--text-primary)", "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                           required
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Password</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -240,8 +240,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full pl-11 pr-12 py-2.5 rounded-xl text-white text-sm focus:outline-none focus:ring-2 transition-all"
-                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(16,185,129,0.15)", color: "white", "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+                          className="w-full pl-11 pr-12 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
+                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(245,158,11,0.15)", color: "var(--text-primary)", "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                           required
                         />
                         <button
@@ -257,7 +257,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
 
                     <div className="flex items-center justify-between pt-1">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 rounded" style={{ borderColor: "rgba(16,185,129,0.3)", backgroundColor: "var(--bg-input)" }} />
+                        <input type="checkbox" className="w-4 h-4 rounded" style={{ borderColor: "rgba(245,158,11,0.3)", backgroundColor: "var(--bg-input)" }} />
                         <span className="text-sm" style={{ color: "var(--text-muted)" }}>Remember me</span>
                       </label>
                       <button type="button" className="text-sm font-medium transition-colors" style={{ color: "var(--accent-amber)" }}>
@@ -268,8 +268,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-                      style={{ background: "linear-gradient(to right, #059669, #16a34a)", boxShadow: "0 10px 15px -3px rgba(16,185,129,0.2)" }}
+                      className="w-full flex items-center justify-center gap-2 text-theme py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+                      style={{ background: "linear-gradient(to right, #d97706, #f59e0b)", boxShadow: "0 10px 15px -3px rgba(245,158,11,0.2)" }}
                     >
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Sign in</span><ArrowRight className="w-4 h-4" /></>}
                     </button>
@@ -285,8 +285,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                   exit="exit"
                 >
                   <div className="mb-6">
-                    <h1 className="page-title text-2xl text-white tracking-tight">Create account</h1>
-                    <p className="mt-1.5 text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Start tracking your plantation data</p>
+                    <h1 className="page-title text-2xl text-theme tracking-tight">Create account</h1>
+                    <p className="mt-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>Start tracking your plantation data</p>
                   </div>
 
                   {error && (
@@ -302,7 +302,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
 
                   <form onSubmit={handleRegister} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Username</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Username</label>
                       <div className="relative">
                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -310,15 +310,15 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           placeholder="Enter your username"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full pl-11 pr-4 py-2.5 rounded-xl text-white text-sm focus:outline-none focus:ring-2 transition-all"
-                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(16,185,129,0.15)", color: "white", "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+                          className="w-full pl-11 pr-4 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
+                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(245,158,11,0.15)", color: "var(--text-primary)", "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                           required
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Email</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Email</label>
                       <div className="relative">
                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -326,15 +326,15 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           placeholder="name@company.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pl-11 pr-4 py-2.5 rounded-xl text-white text-sm focus:outline-none focus:ring-2 transition-all"
-                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(16,185,129,0.15)", color: "white", "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+                          className="w-full pl-11 pr-4 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
+                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(245,158,11,0.15)", color: "var(--text-primary)", "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                           required
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Password</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -342,8 +342,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           placeholder="Create a strong password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full pl-11 pr-12 py-2.5 rounded-xl text-white text-sm focus:outline-none focus:ring-2 transition-all"
-                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(16,185,129,0.15)", color: "white", "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+                          className="w-full pl-11 pr-12 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
+                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(245,158,11,0.15)", color: "var(--text-primary)", "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                           required
                         />
                         <button
@@ -358,7 +358,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Confirm Password</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Confirm Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -366,8 +366,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           placeholder="Confirm your password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full pl-11 pr-12 py-2.5 rounded-xl text-white text-sm focus:outline-none focus:ring-2 transition-all"
-                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(16,185,129,0.15)", color: "white", "--tw-ring-color": "rgba(16,185,129,0.3)" } as React.CSSProperties}
+                          className="w-full pl-11 pr-12 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
+                          style={{ backgroundColor: "var(--bg-input)", border: "1px solid rgba(245,158,11,0.15)", color: "var(--text-primary)", "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                           required
                         />
                         <button
@@ -384,8 +384,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-                      style={{ background: "linear-gradient(to right, #059669, #16a34a)", boxShadow: "0 10px 15px -3px rgba(16,185,129,0.2)" }}
+                      className="w-full flex items-center justify-center gap-2 text-theme py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+                      style={{ background: "linear-gradient(to right, #d97706, #f59e0b)", boxShadow: "0 10px 15px -3px rgba(245,158,11,0.2)" }}
                     >
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Create account</span><ArrowRight className="w-4 h-4" /></>}
                     </button>
@@ -396,7 +396,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
           </div>
 
           {!registered && (
-            <div className="px-8 py-5 border-t" style={{ backgroundColor: "rgba(16,185,129,0.08)", borderColor: "var(--border-default)" }}>
+            <div className="px-8 py-5 border-t" style={{ backgroundColor: "rgba(245,158,11,0.08)", borderColor: "var(--border-default)" }}>
               <p className="text-center text-sm" style={{ color: "var(--text-muted)" }}>
                 {mode === "login" ? (
                   <>

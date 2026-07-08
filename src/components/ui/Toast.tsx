@@ -34,15 +34,15 @@ export default function Toast({ toast, onDismiss, duration = 3000, position = "t
           className={`fixed ${position === "top-right" ? "top-6 right-6" : "bottom-6 right-6"} z-[100] flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg`}
           style={{
             backgroundColor: "var(--bg-card)",
-            borderColor: toast.type === "success" ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)",
+            borderColor: toast.type === "success" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
           }}
         >
           {toast.type === "success" ? (
-            <CheckCircle className="w-5 h-5" style={{ color: "var(--accent-green)" }} />
+            <CheckCircle className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
           ) : (
             <AlertCircle className="w-5 h-5" style={{ color: "var(--accent-red)" }} />
           )}
-          <span className="text-sm text-white">{toast.message}</span>
+          <span className="text-sm text-theme">{toast.message}</span>
           <button
             onClick={onDismiss}
             className="ml-2 p-1 rounded hover:bg-white/10"

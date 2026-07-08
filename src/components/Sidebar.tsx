@@ -44,10 +44,10 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       {/* Logo */}
       <div className="flex items-center justify-between gap-3 px-5 py-5 border-b" style={{ borderColor: "var(--border-default)" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#10b981] to-[#16a34a]">
-            <Leaf className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#f59e0b] to-[#d97706]">
+            <Leaf className="w-5 h-5 text-theme" />
           </div>
-          {!collapsed && <span className="font-bold text-lg text-white tracking-tight">PalmInsight</span>}
+          {!collapsed && <span className="font-bold text-lg text-theme tracking-tight">PalmInsight</span>}
         </div>
         {!collapsed && (
           <div className="relative">
@@ -74,8 +74,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[44px] ${isActive ? "bg-[rgba(16,185,129,0.15)]" : ""}`}
-              style={{ color: isActive ? "#10b981" : "rgba(255,255,255,0.5)" }}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[44px] ${isActive ? "bg-[rgba(99,102,241,0.15)]" : ""}`}
+              style={{ color: isActive ? "#6366f1" : "var(--icon-inactive)" }}
             >
               <item.icon className="w-5 h-5 shrink-0" />
               {!collapsed && <span>{item.label}</span>}
@@ -88,7 +88,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       <div className="px-3 py-4 border-t space-y-2" style={{ borderColor: "var(--border-default)" }}>
         {!collapsed && (
           <div className="px-3 py-2">
-            <div className="text-sm font-medium text-white truncate">{profile?.full_name || user?.email}</div>
+            <div className="text-sm font-medium text-theme truncate">{profile?.full_name || user?.email}</div>
             <div className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{user?.email}</div>
           </div>
         )}

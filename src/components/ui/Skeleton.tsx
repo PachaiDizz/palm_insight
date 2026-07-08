@@ -9,7 +9,7 @@ interface SkeletonProps {
 }
 
 const shimmerStyle: React.CSSProperties = {
-  background: "linear-gradient(90deg, #1a2a1a 25%, #243324 50%, #1a2a1a 75%)",
+  background: "linear-gradient(90deg, var(--bg-input) 25%, var(--bg-elevated) 50%, var(--bg-input) 75%)",
   backgroundSize: "200% 100%",
   animation: "skeleton-shimmer 1.5s ease-in-out infinite",
   borderRadius: "0.75rem",
@@ -109,7 +109,7 @@ export function LeaderCardSkeleton() {
         </div>
         <div className="grid grid-cols-2 gap-4 mb-6">
           {[1,2,3,4].map(i => (
-            <div key={i} className="p-4 rounded-xl" style={{ backgroundColor: "rgba(16,185,129,0.08)" }}>
+            <div key={i} className="p-4 rounded-xl" style={{ backgroundColor: "rgba(99,102,241,0.08)" }}>
               <Skeleton className="w-20 h-2.5 mb-2" />
               <Skeleton className="w-12 h-5" />
             </div>
@@ -173,7 +173,7 @@ export function DashboardSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header banner skeleton */}
-      <div className="rounded-2xl p-4 sm:p-6" style={{ background: "linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)" }}>
+      <div className="rounded-2xl p-4 sm:p-6" style={{ background: "var(--bg-header)" }}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <Skeleton className="w-36 h-5 mb-2" style={{ backgroundColor: "rgba(255,255,255,0.15)" }} />

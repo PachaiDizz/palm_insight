@@ -46,8 +46,8 @@ export default function NotificationPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
         <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4" style={{ color: "var(--accent-green)" }} />
-          <span className="text-sm font-semibold text-white">Notifications</span>
+          <Bell className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+          <span className="text-sm font-semibold text-theme">Notifications</span>
           {unreadCount > 0 && (
             <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 font-medium">
               {unreadCount}
@@ -58,7 +58,7 @@ export default function NotificationPanel({
           <button
             onClick={onMarkAllAsRead}
             className="flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-lg transition-colors hover:bg-white/5"
-            style={{ color: "var(--accent-green)" }}
+            style={{ color: "var(--accent-primary)" }}
           >
             <CheckCheck className="w-3.5 h-3.5" />
             Mark all read

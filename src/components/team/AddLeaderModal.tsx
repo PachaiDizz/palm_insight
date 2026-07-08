@@ -41,17 +41,17 @@ export default function AddLeaderModal({
             className="card-glow rounded-2xl p-6 w-full max-w-md mx-4"
             style={{ backgroundColor: "var(--bg-card)" }}
           >
-            <h2 className="section-heading text-xl text-white mb-5">Add Team Leader</h2>
+            <h2 className="section-heading text-xl text-theme mb-5">Add Team Leader</h2>
             <form onSubmit={onSubmit} className="space-y-3">
               {selectedBlockId && (
-                <div className="p-3 rounded-xl" style={{ backgroundColor: "rgba(16,185,129,0.08)" }}>
+                <div className="p-3 rounded-xl" style={{ backgroundColor: "rgba(245,158,11,0.08)" }}>
                   <span className="text-xs" style={{ color: "var(--text-muted)" }}>Adding to:</span>
-                  <div className="text-sm font-medium text-white">Block {selectedPlantation?.block} — {selectedPlantation?.rancangan}</div>
+                  <div className="text-sm font-medium text-theme">Block {selectedPlantation?.block} — {selectedPlantation?.rancangan}</div>
                 </div>
               )}
               <input
                 placeholder="Name"
-                className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border"
+                className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border"
                 style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
                 value={name}
                 onChange={(e) => onNameChange(e.target.value)}
@@ -59,14 +59,14 @@ export default function AddLeaderModal({
               />
               <input
                 placeholder="Phone (optional)"
-                className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border"
+                className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border"
                 style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
                 value={phone}
                 onChange={(e) => onPhoneChange(e.target.value)}
               />
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-sm" style={{ color: "var(--text-muted)" }}>Cancel</button>
-                <button type="submit" disabled={saving || !selectedBlockId} className="px-4 py-2 rounded-xl text-sm font-medium text-white flex items-center gap-2 disabled:opacity-50" style={{ background: "linear-gradient(to right, #10b981, #16a34a)" }}>
+                <button type="submit" disabled={saving || !selectedBlockId} className="px-4 py-2 rounded-xl text-sm font-medium text-theme flex items-center gap-2 disabled:opacity-50" style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}>
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   {saving ? "Saving..." : "Add"}
                 </button>

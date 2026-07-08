@@ -122,15 +122,15 @@ function Navbar() {
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#0f1a0f]/80 backdrop-blur-xl border-b border-white/5"
+          ? "bg-[#0b0d13]/80 backdrop-blur-xl border-b border-white/5"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center group-hover:bg-[#10b981]/15 transition-colors">
-            <TreePalm className="w-4.5 h-4.5 text-[#10b981]" />
+          <div className="w-8 h-8 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center group-hover:bg-[#f59e0b]/15 transition-colors">
+            <TreePalm className="w-4.5 h-4.5 text-[#f59e0b]" />
           </div>
           <span className="text-[15px] font-semibold tracking-tight text-white">
             PalmInsight
@@ -147,7 +147,7 @@ function Navbar() {
           </Link>
           <Link
             href="/register"
-            className="px-4 py-2 text-sm font-medium text-[#050f05] bg-[#10b981] hover:bg-[#059669] rounded-lg transition-all"
+            className="px-4 py-2 text-sm font-medium text-[#1a1200] bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-all"
           >
             Get Started
           </Link>
@@ -168,7 +168,7 @@ function Navbar() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sm:hidden bg-[#0f1a0f]/95 backdrop-blur-xl border-b border-white/5 px-5 pb-4"
+          className="sm:hidden bg-[#0b0d13]/95 backdrop-blur-xl border-b border-white/5 px-5 pb-4"
         >
           <Link
             href="/login"
@@ -179,7 +179,7 @@ function Navbar() {
           </Link>
           <Link
             href="/register"
-            className="block mt-1 py-2.5 text-sm font-medium text-center text-[#050f05] bg-[#10b981] rounded-lg"
+            className="block mt-1 py-2.5 text-sm font-medium text-center text-[#1a1200] bg-[#f59e0b] rounded-lg"
             onClick={() => setMobileOpen(false)}
           >
             Get Started
@@ -196,8 +196,8 @@ function Hero() {
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#10b981]/[0.06] rounded-full blur-[120px]" />
-        <div className="absolute top-1/4 left-1/3 w-[400px] h-[400px] bg-[#10b981]/[0.04] rounded-full blur-[80px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#f59e0b]/[0.06] rounded-full blur-[120px]" />
+        <div className="absolute top-1/4 left-1/3 w-[400px] h-[400px] bg-[#f59e0b]/[0.04] rounded-full blur-[80px]" />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-5 text-center">
@@ -206,7 +206,7 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#10b981]/20 bg-[#10b981]/[0.06] text-[#10b981] text-xs font-medium mb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#f59e0b]/20 bg-[#f59e0b]/[0.06] text-[#f59e0b] text-xs font-medium mb-8">
             <LeafIcon className="w-3.5 h-3.5" />
             Built for Malaysian Palm Oil Estates
           </div>
@@ -222,7 +222,7 @@ function Hero() {
           <br />
           Manage Your Teams.
           <br />
-          <span className="text-[#10b981]">Grow Smarter.</span>
+          <span className="text-[#f59e0b]">Grow Smarter.</span>
         </motion.h1>
 
         <motion.p
@@ -244,7 +244,7 @@ function Hero() {
         >
           <Link
             href="/register"
-            className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-[#050f05] bg-[#10b981] hover:bg-[#059669] rounded-xl transition-all"
+            className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-[#1a1200] bg-[#f59e0b] hover:bg-[#d97706] rounded-xl transition-all"
           >
             Get Started — It&apos;s Free
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -284,8 +284,8 @@ function Features() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f, i) => (
             <FadeIn key={f.title} delay={i * 0.06}>
-              <div className="group h-full p-6 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:border-[#10b981]/20 hover:bg-[#10b981]/[0.03] transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center text-[#10b981] mb-4 group-hover:bg-[#10b981]/15 transition-colors">
+              <div className="group h-full p-6 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:border-[#f59e0b]/20 hover:bg-[#f59e0b]/[0.03] transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center text-[#f59e0b] mb-4 group-hover:bg-[#f59e0b]/15 transition-colors">
                   {f.icon}
                 </div>
                 <h3 className="card-title text-[15px] text-white mb-2">{f.title}</h3>
@@ -314,7 +314,7 @@ function HowItWorks() {
           {steps.map((s, i) => (
             <FadeIn key={s.num} delay={i * 0.1}>
               <div className="relative text-center px-6 py-8">
-                <div className="w-12 h-12 rounded-full bg-[#10b981]/10 border border-[#10b981]/25 flex items-center justify-center text-[#10b981] text-lg font-bold mx-auto mb-5">
+                <div className="w-12 h-12 rounded-full bg-[#f59e0b]/10 border border-[#f59e0b]/25 flex items-center justify-center text-[#f59e0b] text-lg font-bold mx-auto mb-5">
                   {s.num}
                 </div>
                 <h3 className="card-title text-base text-white mb-2">{s.title}</h3>
@@ -334,11 +334,11 @@ function Stats() {
     <section className="relative py-20">
       <div className="max-w-5xl mx-auto px-5">
         <FadeIn>
-          <div className="rounded-2xl bg-[#10b981]/[0.08] border border-[#10b981]/10 px-6 py-12 sm:px-12">
+          <div className="rounded-2xl bg-[#f59e0b]/[0.08] border border-[#f59e0b]/10 px-6 py-12 sm:px-12">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
               {stats.map((s) => (
                 <div key={s.value}>
-                  <p className="text-xl sm:text-2xl font-bold text-[#10b981]">{s.value}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-[#f59e0b]">{s.value}</p>
                   <p className="mt-1.5 text-sm text-white/40">{s.desc}</p>
                 </div>
               ))}
@@ -365,7 +365,7 @@ function CTA() {
           </p>
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 text-sm font-semibold text-[#050f05] bg-[#10b981] hover:bg-[#059669] rounded-xl transition-all"
+            className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 text-sm font-semibold text-[#1a1200] bg-[#f59e0b] hover:bg-[#d97706] rounded-xl transition-all"
           >
             Create Your Free Account
             <ArrowRight className="w-4 h-4" />
@@ -382,8 +382,8 @@ function Footer() {
     <footer className="border-t border-white/5 py-10">
       <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center">
-            <TreePalm className="w-3.5 h-3.5 text-[#10b981]" />
+          <div className="w-7 h-7 rounded-md bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center">
+            <TreePalm className="w-3.5 h-3.5 text-[#f59e0b]" />
           </div>
           <div>
             <span className="text-sm font-semibold text-white">PalmInsight</span>
@@ -413,7 +413,7 @@ function Footer() {
 /* ─── Main ─── */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0f1a0f] text-white antialiased">
+    <div className="min-h-screen bg-[#0b0d13] text-white antialiased">
       <Navbar />
       <main id="main-content">
         <Hero />
