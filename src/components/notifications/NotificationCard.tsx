@@ -13,22 +13,22 @@ interface NotificationCardProps {
 const typeConfig = {
   daily_reminder: {
     icon: ClipboardList,
-    color: "#f59e0b",
-    bgColor: "rgba(245,158,11,0.1)",
+    color: "var(--accent-primary)",
+    bgColor: "var(--accent-primary-light)",
     actionLabel: "Go to Teams",
     actionHref: "/team",
   },
   low_productivity: {
     icon: TrendingDown,
-    color: "#ef4444",
-    bgColor: "rgba(239,68,68,0.1)",
+    color: "var(--accent-red)",
+    bgColor: "var(--accent-red-light)",
     actionLabel: "View Details",
     actionHref: "", // dynamic
   },
   checkin_reminder: {
     icon: Users,
-    color: "#3b82f6",
-    bgColor: "rgba(59,130,246,0.1)",
+    color: "var(--accent-blue)",
+    bgColor: "var(--accent-blue-light)",
     actionLabel: "View Details",
     actionHref: "", // dynamic
   },

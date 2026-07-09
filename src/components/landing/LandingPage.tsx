@@ -13,6 +13,9 @@ import {
   ArrowRight,
   Menu,
   X,
+  Home,
+  Sprout,
+  Settings,
 } from "lucide-react";
 
 function FadeIn({
@@ -122,17 +125,17 @@ function Navbar() {
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#0b0d13]/80 backdrop-blur-xl border-b border-white/5"
+          ? "bg-[var(--bg-nav-scrolled)] backdrop-blur-xl border-b border-[var(--border-subtle)]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center group-hover:bg-[#f59e0b]/15 transition-colors">
-            <TreePalm className="w-4.5 h-4.5 text-[#f59e0b]" />
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent-primary-light)] border border-[var(--accent-primary-border)] flex items-center justify-center group-hover:bg-[var(--accent-primary)]/15 transition-colors">
+            <TreePalm className="w-4.5 h-4.5 text-[var(--accent-primary)]" />
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-white">
+          <span className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)]">
             PalmInsight
           </span>
         </Link>
@@ -141,13 +144,13 @@ function Navbar() {
         <div className="hidden sm:flex items-center gap-3">
           <Link
             href="/login"
-            className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all"
+            className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] rounded-lg transition-all"
           >
             Login
           </Link>
           <Link
             href="/register"
-            className="px-4 py-2 text-sm font-medium text-[#1a1200] bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-all"
+            className="px-4 py-2 text-sm font-medium text-[var(--text-on-accent)] bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] rounded-lg transition-all"
           >
             Get Started
           </Link>
@@ -156,7 +159,7 @@ function Navbar() {
         {/* Mobile toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="sm:hidden p-2 text-white/60 hover:text-white"
+          className="sm:hidden p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -168,18 +171,18 @@ function Navbar() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sm:hidden bg-[#0b0d13]/95 backdrop-blur-xl border-b border-white/5 px-5 pb-4"
+          className="sm:hidden bg-[var(--bg-nav-scrolled)] backdrop-blur-xl border-b border-[var(--border-subtle)] px-5 pb-4"
         >
           <Link
             href="/login"
-            className="block py-2.5 text-sm text-white/70 hover:text-white"
+            className="block py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             onClick={() => setMobileOpen(false)}
           >
             Login
           </Link>
           <Link
             href="/register"
-            className="block mt-1 py-2.5 text-sm font-medium text-center text-[#1a1200] bg-[#f59e0b] rounded-lg"
+            className="block mt-1 py-2.5 text-sm font-medium text-center text-[var(--text-on-accent)] bg-[var(--accent-primary)] rounded-lg"
             onClick={() => setMobileOpen(false)}
           >
             Get Started
@@ -196,8 +199,8 @@ function Hero() {
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#f59e0b]/[0.06] rounded-full blur-[120px]" />
-        <div className="absolute top-1/4 left-1/3 w-[400px] h-[400px] bg-[#f59e0b]/[0.04] rounded-full blur-[80px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--accent-primary-light)] rounded-full blur-[120px]" />
+        <div className="absolute top-1/4 left-1/3 w-[400px] h-[400px] bg-[var(--accent-primary-light)] rounded-full blur-[80px]" />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-5 text-center">
@@ -206,7 +209,7 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#f59e0b]/20 bg-[#f59e0b]/[0.06] text-[#f59e0b] text-xs font-medium mb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--accent-primary-border)] bg-[var(--accent-primary-light)] text-[var(--accent-primary)] text-xs font-medium mb-8">
             <LeafIcon className="w-3.5 h-3.5" />
             Built for Malaysian Palm Oil Estates
           </div>
@@ -216,20 +219,20 @@ function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-          className="hero-headline text-4xl sm:text-5xl md:text-6xl text-white"
+          className="hero-headline text-4xl sm:text-5xl md:text-6xl text-[var(--text-primary)]"
         >
           Track Your Harvest.
           <br />
           Manage Your Teams.
           <br />
-          <span className="text-[#f59e0b]">Grow Smarter.</span>
+          <span className="text-[var(--accent-primary)]">Grow Smarter.</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-6 text-base sm:text-lg text-white/50 max-w-xl mx-auto leading-relaxed"
+          className="mt-6 text-base sm:text-lg text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed"
         >
           PalmInsight is a productivity tracker built for palm oil plantation supervisors
           and estate managers in Malaysia. Log daily harvests, monitor team performance,
@@ -244,14 +247,14 @@ function Hero() {
         >
           <Link
             href="/register"
-            className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-[#1a1200] bg-[#f59e0b] hover:bg-[#d97706] rounded-xl transition-all"
+            className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-[var(--text-on-accent)] bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] rounded-xl transition-all"
           >
             Get Started — It&apos;s Free
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white/80 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] rounded-xl transition-all"
           >
             Login to Dashboard
           </Link>
@@ -261,10 +264,155 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-5 text-xs text-white/25"
+          className="mt-5 text-xs text-[var(--text-faint)]"
         >
           No credit card required. Free forever.
         </motion.p>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Dashboard Preview (product imagery) ─── */
+const previewBars = [38, 52, 46, 68, 60, 84, 72, 90, 66, 78, 96, 80, 100, 86, 74, 92];
+const previewStats = [
+  { label: "Total Bunches", value: "12,450", accent: true },
+  { label: "Transported", value: "48.20 ton" },
+  { label: "Backlogs", value: "320" },
+  { label: "Teams Active", value: "6 / 8" },
+];
+const previewEntries = [
+  { leader: "Ahmad bin Hassan", block: "Block A", tons: "4.80", bunches: "1,240", work: true },
+  { leader: "Siti binti Omar", block: "Block B", tons: "3.20", bunches: "980", work: true },
+  { leader: "Raj Kumar", block: "Block C", tons: "0.00", bunches: "0", work: false },
+];
+
+function DashboardPreview() {
+  return (
+    <section className="relative -mt-10 sm:-mt-16 z-20 px-5 pb-8">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+          className="relative"
+        >
+          {/* Soft glow behind the window */}
+          <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-[var(--accent-primary-light)] blur-3xl opacity-40" />
+
+          {/* App window */}
+          <div className="rounded-2xl border overflow-hidden bg-[var(--bg-card)] shadow-2xl" style={{ borderColor: "var(--border-default)" }}>
+            {/* Title bar */}
+            <div className="flex items-center gap-3 px-4 h-11 border-b" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--bg-header)" }}>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#ef4444" }} />
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#22c55e" }} />
+              </div>
+              <div className="flex-1 flex justify-center">
+                <div className="px-3 py-1 rounded-md text-[11px] text-[var(--text-muted)] bg-black/20 max-w-[220px] truncate">
+                  palminsight.app/dashboard
+                </div>
+              </div>
+              <TreePalm className="w-4 h-4 text-[var(--accent-primary)]" />
+            </div>
+
+            {/* Body */}
+            <div className="flex">
+              {/* Left rail hint */}
+              <div className="hidden sm:flex flex-col items-center gap-4 py-5 px-3 border-r" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent-primary-light)]">
+                  <TreePalm className="w-4 h-4 text-[var(--accent-primary)]" />
+                </div>
+                {[Home, Sprout, Users, BarChart3, Settings].map((Icon, i) => (
+                  <div
+                    key={i}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: i === 0 ? "var(--accent-primary-light)" : "transparent" }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: i === 0 ? "var(--accent-primary)" : "var(--icon-inactive)" }} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 p-4 sm:p-5 min-w-0">
+                {/* Header */}
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Good Morning</div>
+                    <div className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate">Ahmad &middot; Block A</div>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--accent-primary-light)] text-[var(--accent-primary)] shrink-0">
+                    July 2026
+                  </div>
+                </div>
+
+                {/* Stat cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                  {previewStats.map((s) => (
+                    <div key={s.label} className="rounded-xl p-3 bg-[var(--bg-base)] border" style={{ borderColor: "var(--border-subtle)" }}>
+                      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">{s.label}</div>
+                      <div className="text-sm sm:text-lg font-bold" style={{ color: s.accent ? "var(--chart-bunches)" : "var(--text-primary)" }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chart + recent entries */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                  {/* Bar chart */}
+                  <div className="lg:col-span-2 rounded-xl p-3 sm:p-4 bg-[var(--bg-base)] border" style={{ borderColor: "var(--border-subtle)" }}>
+                    <div className="text-[11px] font-medium text-[var(--text-secondary)] mb-3">Monthly Trend</div>
+                    <div className="relative h-36">
+                      {/* gridlines */}
+                      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                        {[0, 1, 2, 3].map((i) => (
+                          <div key={i} className="w-full h-px" style={{ backgroundColor: "var(--border-subtle)" }} />
+                        ))}
+                      </div>
+                      <div className="absolute inset-0 flex items-end gap-1">
+                        {previewBars.map((h, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 rounded-t-sm"
+                            style={{ height: `${h}%`, background: "linear-gradient(to top, #d97706, #f59e0b)", opacity: 0.9 }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recent entries */}
+                  <div className="rounded-xl p-3 sm:p-4 bg-[var(--bg-base)] border" style={{ borderColor: "var(--border-subtle)" }}>
+                    <div className="text-[11px] font-medium text-[var(--text-secondary)] mb-3">Recent Entries</div>
+                    <div className="space-y-2.5">
+                      {previewEntries.map((e) => (
+                        <div key={e.leader} className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-xs font-medium text-[var(--text-primary)] truncate">{e.leader}</div>
+                            <div className="text-[10px] text-[var(--text-muted)]">{e.block} &middot; {e.tons} ton</div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-xs font-semibold text-[var(--text-primary)]">{e.bunches}</span>
+                            <span
+                              className="px-1.5 py-0.5 rounded-full text-[9px] font-medium"
+                              style={{
+                                backgroundColor: e.work ? "var(--status-work-bg)" : "var(--status-no-work-bg)",
+                                color: e.work ? "var(--status-work)" : "var(--status-no-work)",
+                              }}
+                            >
+                              {e.work ? "Work" : "Off"}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -276,7 +424,7 @@ function Features() {
     <section id="features" className="relative py-24 sm:py-32">
       <div className="max-w-6xl mx-auto px-5">
         <FadeIn className="text-center mb-14">
-          <h2 className="section-heading text-2xl sm:text-3xl tracking-tight text-white">
+          <h2 className="section-heading text-2xl sm:text-3xl tracking-tight text-[var(--text-primary)]">
             Everything You Need to Run Your Plantation
           </h2>
         </FadeIn>
@@ -284,12 +432,12 @@ function Features() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f, i) => (
             <FadeIn key={f.title} delay={i * 0.06}>
-              <div className="group h-full p-6 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:border-[#f59e0b]/20 hover:bg-[#f59e0b]/[0.03] transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center text-[#f59e0b] mb-4 group-hover:bg-[#f59e0b]/15 transition-colors">
+              <div className="group h-full p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-primary-border)] hover:bg-[var(--accent-primary-light)] transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary-light)] border border-[var(--accent-primary-border)] flex items-center justify-center text-[var(--accent-primary)] mb-4 group-hover:bg-[var(--accent-primary)]/15 transition-colors">
                   {f.icon}
                 </div>
-                <h3 className="card-title text-[15px] text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{f.desc}</p>
+                <h3 className="card-title text-[15px] text-[var(--text-primary)] mb-2">{f.title}</h3>
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">{f.desc}</p>
               </div>
             </FadeIn>
           ))}
@@ -305,7 +453,7 @@ function HowItWorks() {
     <section className="relative py-24 sm:py-32">
       <div className="max-w-5xl mx-auto px-5">
         <FadeIn className="text-center mb-14">
-          <h2 className="section-heading text-2xl sm:text-3xl tracking-tight text-white">
+          <h2 className="section-heading text-2xl sm:text-3xl tracking-tight text-[var(--text-primary)]">
             Simple Workflow, Powerful Results
           </h2>
         </FadeIn>
@@ -314,11 +462,11 @@ function HowItWorks() {
           {steps.map((s, i) => (
             <FadeIn key={s.num} delay={i * 0.1}>
               <div className="relative text-center px-6 py-8">
-                <div className="w-12 h-12 rounded-full bg-[#f59e0b]/10 border border-[#f59e0b]/25 flex items-center justify-center text-[#f59e0b] text-lg font-bold mx-auto mb-5">
+                <div className="w-12 h-12 rounded-full bg-[var(--accent-primary-light)] border border-[var(--accent-primary-border)] flex items-center justify-center text-[var(--accent-primary)] text-lg font-bold mx-auto mb-5">
                   {s.num}
                 </div>
-                <h3 className="card-title text-base text-white mb-2">{s.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{s.desc}</p>
+                <h3 className="card-title text-base text-[var(--text-primary)] mb-2">{s.title}</h3>
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">{s.desc}</p>
               </div>
             </FadeIn>
           ))}
@@ -334,12 +482,12 @@ function Stats() {
     <section className="relative py-20">
       <div className="max-w-5xl mx-auto px-5">
         <FadeIn>
-          <div className="rounded-2xl bg-[#f59e0b]/[0.08] border border-[#f59e0b]/10 px-6 py-12 sm:px-12">
+          <div className="rounded-2xl bg-[var(--accent-primary-light)] border border-[var(--accent-primary-border)] px-6 py-12 sm:px-12">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
               {stats.map((s) => (
                 <div key={s.value}>
-                  <p className="text-xl sm:text-2xl font-bold text-[#f59e0b]">{s.value}</p>
-                  <p className="mt-1.5 text-sm text-white/40">{s.desc}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-[var(--accent-primary)]">{s.value}</p>
+                  <p className="mt-1.5 text-sm text-[var(--text-muted)]">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -356,16 +504,16 @@ function CTA() {
     <section className="relative py-24 sm:py-32">
       <div className="max-w-3xl mx-auto px-5 text-center">
         <FadeIn>
-          <h2 className="section-heading text-2xl sm:text-3xl tracking-tight text-white">
+          <h2 className="section-heading text-2xl sm:text-3xl tracking-tight text-[var(--text-primary)]">
             Ready to Take Control of Your Plantation?
           </h2>
-          <p className="mt-4 text-base text-white/40 max-w-lg mx-auto leading-relaxed">
+          <p className="mt-4 text-base text-[var(--text-muted)] max-w-lg mx-auto leading-relaxed">
             Join plantation supervisors already using PalmInsight to track productivity
             and manage their teams efficiently.
           </p>
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 text-sm font-semibold text-[#1a1200] bg-[#f59e0b] hover:bg-[#d97706] rounded-xl transition-all"
+            className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 text-sm font-semibold text-[var(--text-on-accent)] bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] rounded-xl transition-all"
           >
             Create Your Free Account
             <ArrowRight className="w-4 h-4" />
@@ -379,31 +527,31 @@ function CTA() {
 /* ─── Footer ─── */
 function Footer() {
   return (
-    <footer className="border-t border-white/5 py-10">
+    <footer className="border-t border-[var(--border-subtle)] py-10">
       <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center">
-            <TreePalm className="w-3.5 h-3.5 text-[#f59e0b]" />
+          <div className="w-7 h-7 rounded-md bg-[var(--accent-primary-light)] border border-[var(--accent-primary-border)] flex items-center justify-center">
+            <TreePalm className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
           </div>
           <div>
-            <span className="text-sm font-semibold text-white">PalmInsight</span>
-            <span className="text-xs text-white/25 ml-2">Palm Oil Plantation Productivity Tracker</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">PalmInsight</span>
+            <span className="text-xs text-[var(--text-faint)] ml-2">Palm Oil Plantation Productivity Tracker</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-5 text-sm text-white/30">
-          <Link href="/login" className="hover:text-white/60 transition-colors">
+        <div className="flex items-center gap-5 text-sm text-[var(--text-muted)]">
+          <Link href="/login" className="hover:text-[var(--text-muted)] transition-colors">
             Login
           </Link>
-          <Link href="/register" className="hover:text-white/60 transition-colors">
+          <Link href="/register" className="hover:text-[var(--text-muted)] transition-colors">
             Register
           </Link>
-          <Link href="/dashboard" className="hover:text-white/60 transition-colors">
+          <Link href="/dashboard" className="hover:text-[var(--text-muted)] transition-colors">
             Dashboard
           </Link>
         </div>
       </div>
-      <div className="mt-6 text-center text-xs text-white/15">
+      <div className="mt-6 text-center text-xs text-[var(--text-faint)]">
         &copy; 2026 PalmInsight. Built for Malaysian palm oil estates.
       </div>
     </footer>
@@ -413,10 +561,11 @@ function Footer() {
 /* ─── Main ─── */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0b0d13] text-white antialiased">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] antialiased">
       <Navbar />
       <main id="main-content">
         <Hero />
+        <DashboardPreview />
         <Features />
         <HowItWorks />
         <Stats />

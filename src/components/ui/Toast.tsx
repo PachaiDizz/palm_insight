@@ -31,7 +31,7 @@ export default function Toast({ toast, onDismiss, duration = 3000, position = "t
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.9 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className={`fixed ${position === "top-right" ? "top-6 right-6" : "bottom-6 right-6"} z-[100] flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg`}
+          className={`fixed ${position === "top-right" ? "top-6 right-6" : "bottom-6 right-6"} z-[var(--z-nav)] flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg`}
           style={{
             backgroundColor: "var(--bg-card)",
             borderColor: toast.type === "success" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",

@@ -1,8 +1,8 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, Leaf, User, CheckCircle } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, TreePalm, User, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Mode = "login" | "register";
@@ -17,6 +17,8 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false); // NEW: show "check your email" state
+  const [rememberMe, setRememberMe] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams(); // NEW: read ?confirmed=true from /auth/callback
   const confirmed = searchParams.get("confirmed");
@@ -41,13 +43,13 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
     setLoading(true);
     setError("");
     try {
-      console.log("Attempting login with:", { email });
-      console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-      console.log("Supabase Key exists:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
       const result = await supabase.auth.signInWithPassword({ email, password });
-      console.log("Login result:", JSON.stringify(result, null, 2));
       if (result.error) setError(result.error.message);
-      else router.push("/dashboard");
+      else {
+        if (rememberMe) localStorage.setItem("palminsight_remember_email", email);
+        else localStorage.removeItem("palminsight_remember_email");
+        router.push("/dashboard");
+      }
     } catch (err) {
       console.error("Login catch error:", err);
       setError("Something went wrong. Please try again.");
@@ -87,6 +89,34 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
         });
         setRegistered(true); // show "check your email" message instead of switching to login
       }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Prefill email if the user previously chose "remember me"
+  useEffect(() => {
+    const saved = localStorage.getItem("palminsight_remember_email");
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Enter your email above to reset your password.");
+      return;
+    }
+    setError("");
+    setResetSent(false);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) setError(error.message);
+      else setResetSent(true);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -137,7 +167,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
           <div className="p-8 pb-6">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: "linear-gradient(to bottom right, #f59e0b, #f59e0b)", boxShadow: "0 10px 15px -3px rgba(245, 158, 11, 0.2)" }}>
-                <Leaf className="w-5 h-5 text-theme" />
+                <TreePalm className="w-5 h-5 text-theme" />
               </div>
               <div>
                 <span className="font-bold text-xl text-theme tracking-tight block leading-tight">PalmInsight</span>
@@ -151,9 +181,9 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-5 p-3.5 rounded-xl text-sm flex items-center gap-3"
-                style={{ backgroundColor: "var(--accent-green-light)", border: "1px solid rgba(34,197,94,0.2)", color: "#22c55e" }}
+                style={{ backgroundColor: "var(--status-work-bg)", border: "1px solid var(--status-work-bg)", color: "var(--status-work)" }}
               >
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(34,197,94,0.2)" }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--status-work-bg)" }}>
                   <CheckCircle className="w-3.5 h-3.5" />
                 </div>
                 <span>Email confirmed! You can now sign in.</span>
@@ -255,12 +285,27 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                       </div>
                     </div>
 
+                    {resetSent && (
+                      <div className="mb-4 p-3.5 rounded-xl text-sm flex items-center gap-3" style={{ backgroundColor: "var(--status-work-bg)", border: "1px solid var(--status-work-bg)", color: "var(--status-work)" }}>
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--status-work-bg)" }}>
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        </div>
+                        <span>Password reset link sent to {email}. Check your inbox (and spam).</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-1">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 rounded" style={{ borderColor: "rgba(245,158,11,0.3)", backgroundColor: "var(--bg-input)" }} />
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="w-4 h-4 rounded"
+                          style={{ borderColor: "rgba(245,158,11,0.3)", backgroundColor: "var(--bg-input)" }}
+                        />
                         <span className="text-sm" style={{ color: "var(--text-muted)" }}>Remember me</span>
                       </label>
-                      <button type="button" className="text-sm font-medium transition-colors" style={{ color: "var(--accent-amber)" }}>
+                      <button type="button" onClick={handleForgotPassword} className="text-sm font-medium transition-colors" style={{ color: "var(--accent-amber)" }}>
                         Forgot password?
                       </button>
                     </div>
@@ -302,12 +347,12 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
 
                   <form onSubmit={handleRegister} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Username</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Full Name</label>
                       <div className="relative">
                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
                           type="text"
-                          placeholder="Enter your username"
+                          placeholder="Enter your full name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           className="w-full pl-11 pr-4 py-2.5 rounded-xl text-theme text-sm focus:outline-none focus:ring-2 transition-all"
@@ -419,10 +464,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
         </motion.div>
 
         <p className="text-center text-xs mt-6" style={{ color: "var(--text-muted)" }}>
-          By continuing, you agree to our{" "}
-          <button className="hover:underline underline-offset-4 transition-colors" style={{ color: "var(--text-muted)" }}>Terms</button>
-          {" "}and{" "}
-          <button className="hover:underline underline-offset-4 transition-colors" style={{ color: "var(--text-muted)" }}>Privacy Policy</button>
+          By continuing, you agree to our Terms and Privacy Policy
         </p>
       </div>
     </div>

@@ -586,7 +586,7 @@ function TeamsContent() {
                               <tr key={e.id} style={{ borderBottom: isLast ? "none" : "1px solid rgba(245,158,11,0.08)" }}>
                                 <td className="px-4 py-3 text-sm text-center" style={{ color: "var(--text-muted)" }}>{idx + 1}</td>
                                 <td className="px-4 py-3 text-sm text-theme font-medium whitespace-nowrap">{e.date ? e.date.split("-").reverse().join("/") : "-"}</td>
-                                <td className="px-4 py-3 whitespace-nowrap"><span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)", color: isNoWork ? "#f87171" : "#22c55e" }}>{isNoWork ? "No Work" : "Work"}</span></td>
+                                <td className="px-4 py-3 whitespace-nowrap"><span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "var(--status-no-work-bg)" : "var(--status-work-bg)", color: isNoWork ? "var(--status-no-work)" : "var(--status-work)" }}>{isNoWork ? "No Work" : "Work"}</span></td>
                                 <td className="px-4 py-3 text-sm text-right" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.num_workers ?? "-")}</td>
                                 <td className="px-4 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.lot || "-")}</td>
                                 <td className="px-4 py-3 text-sm text-right" style={{ color: "var(--text-secondary)" }}>{isNoWork ? "-" : (e.bunches ?? "-")}</td>
@@ -611,7 +611,7 @@ function TeamsContent() {
                               <div className="flex items-center justify-between">
                                 <span className="text-sm text-theme font-medium">{e.date ? e.date.split("-").reverse().join("/") : "-"}</span>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)", color: isNoWork ? "#f87171" : "#22c55e" }}>{isNoWork ? "No Work" : "Work"}</span>
+                                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "var(--status-no-work-bg)" : "var(--status-work-bg)", color: isNoWork ? "var(--status-no-work)" : "var(--status-work)" }}>{isNoWork ? "No Work" : "Work"}</span>
                                   <button onClick={() => handleDetailEditEntry(e)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-blue)" }}><Edit2 className="w-3.5 h-3.5" /></button>
                                   <button onClick={() => handleDetailDeleteEntry(e.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-red)" }}><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>

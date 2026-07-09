@@ -135,12 +135,12 @@ export default function PlantationForm() {
                     value={formData.rancangan}
                     onChange={(e) => handleChange("rancangan", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all placeholder:opacity-40"
-                    style={{ ...inputStyle, borderColor: fieldErrors.rancangan ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.rancangan ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.rancangan && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.rancangan}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>Peringkat</label>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Peringkat</label>
                   <input
                     type="number"
                     min="0"
@@ -148,7 +148,7 @@ export default function PlantationForm() {
                     value={formData.peringkat}
                     onChange={(e) => handleChange("peringkat", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all placeholder:opacity-40"
-                    style={{ ...inputStyle, borderColor: fieldErrors.peringkat ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.peringkat ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.peringkat && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.peringkat}</p>}
                 </div>
@@ -161,7 +161,7 @@ export default function PlantationForm() {
                     value={formData.block}
                     onChange={(e) => handleChange("block", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all placeholder:opacity-40"
-                    style={{ ...inputStyle, borderColor: fieldErrors.block ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.block ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.block && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.block}</p>}
                 </div>
@@ -182,7 +182,7 @@ export default function PlantationForm() {
                     value={formData.ketua_block}
                     onChange={(e) => handleChange("ketua_block", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
-                    style={{ ...inputStyle, borderColor: fieldErrors.ketua_block ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.ketua_block ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.ketua_block && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.ketua_block}</p>}
                 </div>
@@ -193,7 +193,7 @@ export default function PlantationForm() {
                     value={formData.biro_ladang}
                     onChange={(e) => handleChange("biro_ladang", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
-                    style={{ ...inputStyle, borderColor: fieldErrors.biro_ladang ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.biro_ladang ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.biro_ladang && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.biro_ladang}</p>}
                 </div>
@@ -204,7 +204,7 @@ export default function PlantationForm() {
                     value={formData.penyelia}
                     onChange={(e) => handleChange("penyelia", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
-                    style={{ ...inputStyle, borderColor: fieldErrors.penyelia ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.penyelia ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.penyelia && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.penyelia}</p>}
                 </div>
@@ -215,7 +215,7 @@ export default function PlantationForm() {
                     value={formData.mandor}
                     onChange={(e) => handleChange("mandor", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
-                    style={{ ...inputStyle, borderColor: fieldErrors.mandor ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.mandor ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.mandor && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.mandor}</p>}
                 </div>
@@ -239,7 +239,7 @@ export default function PlantationForm() {
                     value={formData.area_hectare}
                     onChange={(e) => handleChange("area_hectare", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all placeholder:opacity-40"
-                    style={{ ...inputStyle, borderColor: fieldErrors.area_hectare ? "#f87171" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
+                    style={{ ...inputStyle, borderColor: fieldErrors.area_hectare ? "var(--accent-red)" : undefined, "--tw-ring-color": "rgba(245,158,11,0.3)" } as React.CSSProperties}
                   />
                   {fieldErrors.area_hectare && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.area_hectare}</p>}
                 </div>

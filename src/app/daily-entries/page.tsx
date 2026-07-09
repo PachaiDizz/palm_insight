@@ -221,7 +221,7 @@ export default function DailyEntriesPage() {
                           {plantation ? `Block ${plantation.block}` : "-"}
                         </td>
                         <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full ${e.work_status === "work" ? "bg-[var(--accent-green-light)] text-theme" : "bg-[rgba(239,68,68,0.2)] text-[#f87171]"}`}>
+                          <span className={`text-xs px-2 py-1 rounded-full ${e.work_status === "work" ? "bg-[var(--status-work-bg)] text-[var(--status-work)]" : "bg-[var(--status-no-work-bg)] text-[var(--status-no-work)]"}`}>
                             {e.work_status === "work" ? "Work" : "No Work"}
                           </span>
                         </td>
@@ -244,7 +244,7 @@ export default function DailyEntriesPage() {
                     <div key={e.id} className="p-4 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-theme font-medium">{e.date}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${e.work_status === "work" ? "bg-[var(--accent-green-light)] text-theme" : "bg-[rgba(239,68,68,0.2)] text-[#f87171]"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${e.work_status === "work" ? "bg-[var(--status-work-bg)] text-[var(--status-work)]" : "bg-[var(--status-no-work-bg)] text-[var(--status-no-work)]"}`}>
                           {e.work_status === "work" ? "Work" : "No Work"}
                         </span>
                       </div>

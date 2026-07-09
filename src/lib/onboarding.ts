@@ -27,7 +27,7 @@ export async function getAllUserPlantations(userId: string) {
     .from("plantations")
     .select("*")
     .eq("user_id", userId)
-    .order("created_at", { ascending: true });
+    .order("block", { ascending: true });
 
   return data || [];
 }

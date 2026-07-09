@@ -42,12 +42,12 @@ export default function PwaInstallBanner() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96 animate-slide-up">
-      <div className="bg-[#13161f] border border-amber-600/20 rounded-2xl p-5 shadow-2xl shadow-black/50">
+      <div className="bg-[var(--bg-card)] border border-[var(--accent-primary-border)] rounded-2xl p-5 shadow-2xl shadow-black/50">
         <div className="flex items-start gap-3 mb-4">
           <span className="text-2xl">🌿</span>
           <div>
             <h3 className="text-theme font-bold text-sm">PalmInsight</h3>
-            <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+            <p className="text-[var(--text-muted)] text-xs mt-1 leading-relaxed">
               Install this app on your home screen for quick access in the field.
             </p>
           </div>
@@ -55,7 +55,7 @@ export default function PwaInstallBanner() {
         <div className="flex gap-3 justify-end">
           <button
             onClick={handleDismiss}
-            className="px-4 py-2 text-gray-400 hover:text-theme text-sm font-medium transition-colors"
+            className="px-4 py-2 text-[var(--text-muted)] hover:text-theme text-sm font-medium transition-colors"
           >
             Not Now
           </button>

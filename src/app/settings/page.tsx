@@ -1,13 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle, Bell, BellOff } from "lucide-react";
+import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle, Bell, BellOff, FileSpreadsheet } from "lucide-react";
 import { getNotificationPrefs, saveNotificationPrefs } from "@/components/notifications/notificationHelpers";
 import type { NotificationPrefs } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
+import { getAllUserPlantations } from "@/lib/onboarding";
+import { Plantation } from "@/types";
+import ExportHarvestingModal from "@/components/ExportHarvestingModal";
 
 export default function SettingsPage() {
   const { user, profile, fetchProfile } = useAuth();
@@ -32,6 +35,17 @@ export default function SettingsPage() {
     if ("Notification" in window) return Notification.permission;
     return "denied";
   });
+
+  // Plantations for export modal
+  const [plantations, setPlantations] = useState<Plantation[]>([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Load plantations on mount
+  useEffect(() => {
+    if (user) {
+      getAllUserPlantations(user.id).then(setPlantations);
+    }
+  }, [user]);
 
   const handleSaveName = async () => {
     if (!user || !displayName.trim()) return;
@@ -369,6 +383,23 @@ export default function SettingsPage() {
               </div>
 
               <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                      <FileSpreadsheet className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-theme">Export Harvesting Monthly</div>
+                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>Generate Excel report in harvesting format</div>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowExportModal(true)} className="px-4 py-2 rounded-xl text-sm font-medium text-theme" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
+                    Export
+                  </button>
+                </div>
+              </div>
+
+              <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
                     <Upload className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
@@ -404,6 +435,13 @@ export default function SettingsPage() {
           </section>
 
         </div>
+
+        <ExportHarvestingModal
+          open={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          plantations={plantations}
+          userId={user?.id || ""}
+        />
       </div>
     </DashboardLayout>
   );

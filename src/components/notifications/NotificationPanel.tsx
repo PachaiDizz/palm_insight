@@ -56,14 +56,14 @@ export default function NotificationPanel({
       <>
         {/* Backdrop */}
         <div
-          className="fixed inset-0 z-[9998]"
+          className="fixed inset-0 z-[var(--z-modal)]"
           style={{ background: "rgba(0, 0, 0, 0.6)" }}
           onClick={onClose}
         />
         {/* Bottom sheet */}
         <div
           ref={panelRef}
-          className="fixed bottom-0 left-0 right-0 z-[9999] flex flex-col rounded-t-[20px] border-t shadow-2xl animate-slide-up"
+          className="fixed bottom-0 left-0 right-0 z-[var(--z-modal)] flex flex-col rounded-t-[20px] border-t shadow-2xl animate-slide-up"
           style={{
             backgroundColor: "var(--bg-card)",
             borderColor: "var(--border-default)",
@@ -135,7 +135,7 @@ export default function NotificationPanel({
   return (
     <div
       ref={panelRef}
-      className="absolute rounded-2xl border shadow-2xl shadow-black/40 z-[9999] flex flex-col overflow-hidden"
+      className="absolute rounded-2xl border shadow-2xl shadow-black/40 z-[var(--z-modal)] flex flex-col overflow-hidden"
       style={{
         backgroundColor: "var(--bg-card)",
         borderColor: "var(--border-default)",

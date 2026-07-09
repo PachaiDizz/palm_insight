@@ -9,7 +9,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Calendar, TrendingUp, Download, Filter, ChevronDown, FileText, FileSpreadsheet } from "lucide-react";
 import { Plantation, DailyEntry, TeamLeader } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
+import Badge from "@/components/ui/Badge";
+import StatCard from "@/components/ui/StatCard";
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/ui/Skeleton";
+import ExportHarvestingModal from "@/components/ExportHarvestingModal";
 
 const months = [
   "January", "February", "March", "April",
@@ -27,13 +30,15 @@ export default function ReportsPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showPlantFilter, setShowPlantFilter] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   useEffect(() => {
     if (user) loadData();
-  }, [user]);
+  }, [user, selectedMonth, selectedYear]);
 
   async function loadData() {
     if (!user) return;
+    setLoading(true);
     const hasPlantation = await hasCompletedOnboarding(user.id);
     if (!hasPlantation) {
       router.push("/onboarding/plantation");
@@ -42,10 +47,19 @@ export default function ReportsPage() {
     const allP = await getAllUserPlantations(user.id);
     setPlantations(allP);
 
+    // Scope the query to the selected month/year instead of pulling the
+    // plantation's entire history on every visit.
+    const mm = String(selectedMonth + 1).padStart(2, "0");
+    const start = `${selectedYear}-${mm}-01`;
+    const lastDay = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    const end = `${selectedYear}-${mm}-${String(lastDay).padStart(2, "0")}`;
+
     const { data } = await supabase
       .from("daily_entries")
       .select("*, team_leaders(plantation_id, plantations(rancangan, peringkat, block))")
       .eq("user_id", user.id)
+      .gte("date", start)
+      .lte("date", end)
       .order("date", { ascending: false });
 
     setEntries(data || []);
@@ -87,8 +101,8 @@ export default function ReportsPage() {
 
   // Status pie chart
   const pieData = [
-    { name: "Work Days", value: stats.workDays, color: "var(--accent-primary)" },
-    { name: "No Work", value: stats.noWorkDays, color: "#ef4444" },
+    { name: "Work Days", value: stats.workDays, color: "var(--status-work)" },
+    { name: "No Work", value: stats.noWorkDays, color: "var(--status-no-work)" },
   ];
 
   const selectedP = plantations.find((p: Plantation) => p.id === selectedPlantationId);
@@ -152,12 +166,16 @@ export default function ReportsPage() {
               subtitle={`${months[selectedMonth]} ${selectedYear}`}
               action={
                 <div className="flex items-center gap-3">
-                  <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
+                  <button onClick={() => setShowExportModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-[var(--hover-subtle)]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
+                    <FileSpreadsheet className="w-4 h-4" style={{ color: "var(--accent-amber)" }} />
+                    Export Monthly
+                  </button>
+                  <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-[var(--hover-subtle)]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
                     <FileSpreadsheet className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                     CSV
                   </button>
-                  <button onClick={exportJSON} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
-                    <FileText className="w-4 h-4" style={{ color: "var(--accent-blue)" }} />
+                  <button onClick={exportJSON} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-[var(--hover-subtle)]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
+                    <FileText className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                     JSON
                   </button>
                 </div>
@@ -202,11 +220,11 @@ export default function ReportsPage() {
                   </button>
                   {showPlantFilter && (
                     <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowPlantFilter(false)} />
-                      <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border overflow-hidden z-50 shadow-xl" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
-                        <button onClick={() => { setSelectedPlantationId("all"); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 border-b" style={{ color: selectedPlantationId === "all" ? "#6366f1" : "white", borderColor: "var(--border-subtle)" }}>All Plantations</button>
+                      <div className="fixed inset-0 z-[var(--z-overlay)]" onClick={() => setShowPlantFilter(false)} />
+                      <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border overflow-hidden z-[var(--z-dropdown)] shadow-xl" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}>
+                        <button onClick={() => { setSelectedPlantationId("all"); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-[var(--hover-subtle)] border-b" style={{ color: selectedPlantationId === "all" ? "var(--accent-primary)" : "var(--text-primary)", borderColor: "var(--border-subtle)" }}>All Plantations</button>
                         {plantations.map((p) => (
-                          <button key={p.id} onClick={() => { setSelectedPlantationId(p.id); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 border-b last:border-b-0" style={{ color: selectedPlantationId === p.id ? "#6366f1" : "white", borderColor: "var(--border-subtle)" }}>
+                          <button key={p.id} onClick={() => { setSelectedPlantationId(p.id); setShowPlantFilter(false); }} className="w-full px-4 py-3 text-left text-sm hover:bg-[var(--hover-subtle)] border-b last:border-b-0" style={{ color: selectedPlantationId === p.id ? "var(--accent-primary)" : "var(--text-primary)", borderColor: "var(--border-subtle)" }}>
                             {p.rancangan} · Block {p.block}
                           </button>
                         ))}
@@ -220,20 +238,21 @@ export default function ReportsPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {[
-                { label: "Total Entries", value: stats.totalEntries, icon: Calendar, color: "var(--accent-primary)" },
-                { label: "Total Bunches", value: stats.totalBunches, icon: TrendingUp, color: "var(--accent-purple)" },
-                { label: "Total Tons", value: stats.totalTons.toFixed(2), icon: TrendingUp, color: "var(--accent-primary)" },
-                { label: "Work Days", value: stats.workDays, icon: Calendar, color: "var(--accent-primary)" },
-                { label: "No Work Days", value: stats.noWorkDays, icon: Calendar, color: "#ef4444" },
-                { label: "Total Backlogs", value: stats.totalBacklogs, icon: TrendingUp, color: "var(--accent-amber)" },
+                { label: "Total Entries", value: stats.totalEntries, icon: Calendar, color: "var(--text-secondary)", glow: false },
+                { label: "Total Bunches", value: stats.totalBunches, icon: TrendingUp, color: "var(--chart-bunches)", glow: true },
+                { label: "Total Tons", value: stats.totalTons.toFixed(2), icon: TrendingUp, color: "var(--chart-tons)", glow: false },
+                { label: "Work Days", value: stats.workDays, icon: Calendar, color: "var(--status-work)", glow: false },
+                { label: "No Work Days", value: stats.noWorkDays, icon: Calendar, color: "var(--status-no-work)", glow: false },
+                { label: "Total Backlogs", value: stats.totalBacklogs, icon: TrendingUp, color: "var(--accent-red)", glow: false },
               ].map((s) => (
-                <div key={s.label} className="card-glow rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)" }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{s.label}</span>
-                    <s.icon className="w-4 h-4" style={{ color: s.color }} />
-                  </div>
-                  <div className="text-2xl font-bold text-theme">{s.value}</div>
-                </div>
+                <StatCard
+                  key={s.label}
+                  label={s.label}
+                  value={s.value}
+                  icon={s.icon}
+                  color={s.color}
+                  glow={s.glow}
+                />
               ))}
             </div>
 
@@ -244,12 +263,12 @@ export default function ReportsPage() {
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,158,11,0.12)" />
-                      <XAxis dataKey="date" tick={{ fill: "var(--text-chart-axis)", fontSize: 10 }} />
-                      <YAxis tick={{ fill: "var(--text-chart-axis)", fontSize: 10 }} />
-                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(245,158,11,0.12)", borderRadius: "12px" }} />
-                      <Bar dataKey="bunches" fill="#8b5cf6" name="Bunches" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="tons" fill="#f59e0b" name="Tons" radius={[4, 4, 0, 0]} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                      <XAxis dataKey="date" tick={{ fill: "var(--chart-axis)", fontSize: 10 }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" minTickGap={20} />
+                      <YAxis tick={{ fill: "var(--chart-axis)", fontSize: 10 }} />
+                      <Tooltip contentStyle={{ backgroundColor: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: "12px" }} />
+                      <Bar dataKey="bunches" fill="var(--chart-bunches)" name="Bunches" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="tons" fill="var(--chart-tons)" name="Tons" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -261,16 +280,22 @@ export default function ReportsPage() {
               <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <h3 className="card-title text-sm text-theme mb-4">Work Status</h3>
                 {stats.workDays + stats.noWorkDays > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: "#131f13", border: "1px solid rgba(245,158,11,0.12)", borderRadius: "12px" }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="relative" style={{ height: 300 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: "12px" }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <span className="text-3xl font-bold text-theme">{stats.workDays + stats.noWorkDays}</span>
+                      <span className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Total Days</span>
+                    </div>
+                  </div>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center">
                     <p className="text-sm" style={{ color: "var(--text-muted)" }}>No data</p>
@@ -278,11 +303,11 @@ export default function ReportsPage() {
                 )}
                 <div className="flex justify-center gap-4 mt-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--accent-primary)" }} />
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--status-work)" }} />
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>Work ({stats.workDays})</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#ef4444" }} />
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--status-no-work)" }} />
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>No Work ({stats.noWorkDays})</span>
                   </div>
                 </div>
@@ -326,12 +351,10 @@ export default function ReportsPage() {
                               {leader?.plantations ? `Block ${leader.plantations.block}` : "-"}
                             </td>
                             <td className="px-5 py-3">
-                              <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: e.work_status === "work" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)", color: e.work_status === "work" ? "#22c55e" : "#f87171" }}>
-                                {e.work_status === "work" ? "Work" : "No Work"}
-                              </span>
+                              <Badge status={e.work_status === "work" ? "work" : "no-work"} size="sm" />
                             </td>
                             <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.num_workers}</td>
-                            <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.bunches}</td>
+                            <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{(e.bunches ?? 0).toLocaleString("en-MY")}</td>
                             <td className="px-5 py-3 text-sm font-medium text-theme">{e.tons != null ? Number(e.tons).toFixed(2) : "-"}</td>
                             <td className="px-5 py-3 text-sm" style={{ color: "var(--text-secondary)" }}>{e.backlogs}</td>
                           </tr>
@@ -347,14 +370,12 @@ export default function ReportsPage() {
                         <div key={e.id} className="p-4 space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-theme font-medium">{e.date}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: e.work_status === "work" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)", color: e.work_status === "work" ? "#22c55e" : "#f87171" }}>
-                              {e.work_status === "work" ? "Work" : "No Work"}
-                            </span>
+                            <Badge status={e.work_status === "work" ? "work" : "no-work"} size="sm" />
                           </div>
                           <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{leader?.name || "-"} &middot; {leader?.plantations ? `Block ${leader.plantations.block}` : "-"}</div>
                           <div className="grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
                             <div>Workers: {e.num_workers ?? "-"}</div>
-                            <div>Bunches: {e.bunches ?? "-"}</div>
+                            <div>Bunches: {e.bunches != null ? e.bunches.toLocaleString("en-MY") : "-"}</div>
                             <div>Tons: {e.tons != null ? Number(e.tons).toFixed(2) : "-"}</div>
                             <div>Backlogs: {e.backlogs ?? "-"}</div>
                           </div>
@@ -367,6 +388,13 @@ export default function ReportsPage() {
             </div>
           </>
         )}
+
+        <ExportHarvestingModal
+          open={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          plantations={plantations}
+          userId={user?.id || ""}
+        />
       </div>
     </DashboardLayout>
   );

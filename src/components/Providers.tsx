@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeContext";
+import { MotionConfig } from "framer-motion";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <ErrorBoundary>{children}</ErrorBoundary>
+          <MotionConfig reducedMotion="user">
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </MotionConfig>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

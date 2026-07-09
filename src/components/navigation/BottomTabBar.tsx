@@ -18,7 +18,7 @@ export default function BottomTabBar() {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] flex items-stretch"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-[var(--z-nav)] flex items-stretch"
       style={{
         height: 64,
         background: "var(--bg-nav)",
@@ -48,7 +48,7 @@ export default function BottomTabBar() {
                   width: 24,
                   height: 3,
                   borderRadius: 2,
-                  background: "#6366f1",
+                  background: "var(--accent-primary)",
                 }}
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
@@ -62,7 +62,7 @@ export default function BottomTabBar() {
             >
               <tab.icon
                 className="w-[22px] h-[22px]"
-                style={{ color: isActive ? "#6366f1" : "var(--icon-inactive)" }}
+                style={{ color: isActive ? "var(--accent-primary)" : "var(--icon-inactive)" }}
                 strokeWidth={isActive ? 2.2 : 1.8}
               />
             </motion.div>
@@ -72,7 +72,7 @@ export default function BottomTabBar() {
               className="text-[10px] font-medium uppercase"
               style={{
                 letterSpacing: "0.05em",
-                color: isActive ? "#6366f1" : "var(--icon-inactive)",
+                color: isActive ? "var(--accent-primary)" : "var(--icon-inactive)",
               }}
             >
               {tab.label}

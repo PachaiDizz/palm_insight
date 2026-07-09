@@ -69,7 +69,7 @@ export default function GuidedTour({ onClose }: { onClose: () => void }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4"
         style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
         onClick={onClose}
       >

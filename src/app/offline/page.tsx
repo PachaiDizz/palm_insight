@@ -35,7 +35,7 @@ export default function OfflinePage() {
         </svg>
 
         <h1 className="text-2xl font-bold text-theme mb-2">You&apos;re Offline</h1>
-        <p className="text-gray-400 mb-8 leading-relaxed">
+        <p className="text-[var(--text-muted)] mb-8 leading-relaxed">
           No internet connection detected.
           <br />
           Previously loaded data may still be available.

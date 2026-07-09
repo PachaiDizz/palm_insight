@@ -11,6 +11,8 @@ import { Plantation, TeamLeader, TodayStats } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { FadeIn } from "@/components/ui/Skeleton";
+import StatCard from "@/components/ui/StatCard";
+import Badge from "@/components/ui/Badge";
 import GuidedTour from "@/components/GuidedTour";
 
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -51,10 +53,20 @@ export default function DashboardPage() {
   const [showTour, setShowTour] = useState(false);
   const [hasEntriesToday, setHasEntriesToday] = useState(true);
 
-  // Monthly filter state — default to current month
+  // Monthly filter state — default to current month (timezone-invariant, safe for SSR)
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  // Date-derived display strings are computed only AFTER mount to avoid an
+  // SSR/client hydration mismatch (server runs in UTC, client in local time,
+  // so getHours()/toLocaleDateString() can disagree between the two).
+  const [greeting, setGreeting] = useState("Welcome");
+  const [todayLabel, setTodayLabel] = useState("");
+  useEffect(() => {
+    setGreeting(getGreeting());
+    setTodayLabel(getFormattedDate());
+  }, []);
 
   const prevMonth = useCallback(() => {
     setSelectedMonth((m) => {
@@ -112,13 +124,6 @@ export default function DashboardPage() {
       loadMonthlyTrend(selectedPlantation);
     }
   }, [selectedPlantation, selectedMonth, selectedYear]);
-
-  // Fallback
-  useEffect(() => {
-    if (!checking && !selectedPlantation && user) {
-      console.log("No plantation found, showing empty dashboard");
-    }
-  }, [checking, selectedPlantation, user]);
 
   async function loadMonthlyStats(p: Plantation) {
     if (!user || !p) return;
@@ -261,7 +266,7 @@ export default function DashboardPage() {
             <Link
               href="/onboarding/plantation"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
-              style={{ backgroundColor: "#f59e0b", color: "#050f05" }}
+              style={{ backgroundColor: "var(--accent-primary)", color: "var(--text-on-accent)" }}
             >
               <Plus className="w-4 h-4" />
               Add Your First Plantation
@@ -277,61 +282,61 @@ export default function DashboardPage() {
       {showTour && <GuidedTour onClose={() => { setShowTour(false); localStorage.setItem("palminsight_tour_seen", "true"); }} />}
       <div className="min-h-full overflow-x-hidden" style={{ backgroundColor: "var(--bg-base)" }}>
         {/* Header Banner */}
-        <div className="relative" style={{ background: "var(--bg-header)", zIndex: 50 }}>
-          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20" style={{ backgroundColor: "#818cf8" }} />
-          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15" style={{ backgroundColor: "#a5b4fc" }} />
-          <div className="absolute top-8 right-1/3 w-32 h-32 rounded-full opacity-10" style={{ backgroundColor: "#c7d2fe" }} />
+        <div className="relative z-[var(--z-nav)]" style={{ background: "var(--bg-header)" }}>
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20" style={{ backgroundColor: "#f59e0b" }} />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15" style={{ backgroundColor: "#fbbf24" }} />
+          <div className="absolute top-8 right-1/3 w-32 h-32 rounded-full opacity-10" style={{ backgroundColor: "#fcd34d" }} />
 
           <div className="relative z-10 px-4 py-6 sm:px-6 sm:py-8 max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#d1fae5" }}>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
                     Palm Plantation Manager
                   </span>
                 </div>
                 <div className="flex items-center gap-3 mb-1">
-                  <Tractor className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: "#fbbf24" }} />
+                  <Tractor className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: "var(--accent-primary)" }} />
                   <h1 className="page-title text-xl sm:text-2xl lg:text-3xl tracking-tight" style={{ color: "var(--text-on-gradient)" }}>
-                    {getGreeting()}, {profile?.full_name || (user?.user_metadata as Record<string, string>)?.full_name || user?.email?.split("@")[0] || ""}
+                    {greeting}, {profile?.full_name || (user?.user_metadata as Record<string, string>)?.full_name || user?.email?.split("@")[0] || ""}
                   </h1>
                 </div>
                 <p className="text-xs sm:text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {getFormattedDate()}
+                  {todayLabel}
                 </p>
               </div>
 
               {/* Plantation Selector */}
               {plantations.length > 1 ? (
-                <div className="relative z-[9999]">
+                <div className="relative z-[var(--z-dropdown)]">
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all hover:bg-white/10"
-                    style={{ backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }}
+                    className="flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all hover:bg-[var(--accent-primary-border)]"
+                    style={{ backgroundColor: "var(--accent-primary-light)", borderColor: "var(--accent-primary-border)" }}
                   >
-                    <MapPin className="w-4 h-4 text-amber-300" />
+                    <MapPin className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                     <div className="text-left">
-                      <div className="text-xs text-amber-200/60">Current Plantation</div>
+                      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Current Plantation</div>
                       <div className="text-sm font-semibold" style={{ color: "var(--text-on-gradient)" }}>{selectedPlantation?.rancangan} - Block {selectedPlantation?.block}</div>
                     </div>
                     <ChevronDown className="w-4 h-4 text-theme/50" />
                   </button>
 
                   {showDropdown && (
-                    <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden shadow-2xl bg-[var(--bg-card)] card-glow z-[9999]" style={{ zIndex: 1000 }}>
+                    <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden shadow-2xl bg-[var(--bg-card)] card-glow z-[var(--z-dropdown)]">
                       {plantations.map((p) => (
                         <button
                           key={p.id}
                           onClick={() => { setSelectedPlantation(p); setShowDropdown(false); }}
-                          className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-white/5 border-b last:border-b-0"
+                          className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-[var(--hover-subtle)] border-b last:border-b-0"
                           style={{
-                            backgroundColor: selectedPlantation?.id === p.id ? "rgba(99,102,241,0.1)" : "transparent",
+                            backgroundColor: selectedPlantation?.id === p.id ? "var(--accent-primary-light)" : "transparent",
                             borderColor: "var(--border-subtle)",
                           }}
                         >
-                          <MapPin className="w-4 h-4 shrink-0" style={{ color: selectedPlantation?.id === p.id ? "#f59e0b" : "rgba(255,255,255,0.3)" }} />
+                          <MapPin className="w-4 h-4 shrink-0" style={{ color: selectedPlantation?.id === p.id ? "var(--accent-primary)" : "rgba(255,255,255,0.3)" }} />
                           <div>
-                            <div className="text-sm font-medium" style={{ color: selectedPlantation?.id === p.id ? "#f59e0b" : "var(--text-primary)" }}>
+                            <div className="text-sm font-medium" style={{ color: selectedPlantation?.id === p.id ? "var(--accent-primary)" : "var(--text-primary)" }}>
                               {p.rancangan} - Block {p.block}
                             </div>
                             <div className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -344,10 +349,10 @@ export default function DashboardPage() {
                   )}
                 </div>
               ) : selectedPlantation ? (
-                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-                  <MapPin className="w-4 h-4 text-amber-300" />
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ backgroundColor: "var(--accent-primary-light)" }}>
+                  <MapPin className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                   <div className="text-right">
-                    <div className="text-xs text-amber-200/60">Current Plantation</div>
+                    <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Current Plantation</div>
                     <div className="text-sm font-semibold" style={{ color: "var(--text-on-gradient)" }}>{selectedPlantation.rancangan} - Block {selectedPlantation.block}</div>
                   </div>
                 </div>
@@ -357,59 +362,47 @@ export default function DashboardPage() {
         </div>
 
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
-          {/* Plantation Details Card */}
+          {/* Today Pulse — promoted to a prominent daily signal strip */}
           {selectedPlantation && (
-            <div className="card-glow rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 -mt-4 relative shadow-lg" style={{ backgroundColor: "var(--bg-card)" }}>
-              <div className="flex items-center gap-2 mb-5">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
-                  <Sprout className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-                </div>
-                <h2 className="section-heading text-base" style={{ color: "var(--text-primary)" }}>Plantation Details</h2>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Rancangan</div>
-                  <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{selectedPlantation.rancangan || "-"}</div>
+            <div className="card-glow rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ backgroundColor: "var(--bg-card)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                  <Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                 </div>
                 <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Peringkat</div>
-                  <div className="text-sm font-medium text-theme">{selectedPlantation.peringkat || "-"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Block</div>
-                  <div className="text-sm font-medium text-theme">{selectedPlantation.block || "-"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Ketua Block</div>
-                  <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{selectedPlantation.ketua_block || "-"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Biro Ladang</div>
-                  <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{selectedPlantation.biro_ladang || "-"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Penyelia</div>
-                  <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{selectedPlantation.penyelia || "-"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Mandor</div>
-                  <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{selectedPlantation.mandor || "-"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Area</div>
-                  <div className="text-sm font-medium text-theme">{selectedPlantation.area_hectare ? `${selectedPlantation.area_hectare} ha` : "-"}</div>
+                  <div className="text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Today&apos;s Pulse</div>
+                  <div className="text-sm font-semibold text-theme">Live harvest signal</div>
                 </div>
               </div>
+              <div className="flex items-center gap-5 sm:gap-7">
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-theme">{todayPulse.bunches.toLocaleString("en-MY")}</div>
+                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Bunches</div>
+                </div>
+                <div className="w-px h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-theme">{Number(todayPulse.tons).toFixed(2)}</div>
+                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Tons</div>
+                </div>
+                <div className="w-px h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-theme">{todayPulse.teamsLogged}</div>
+                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Teams Logged</div>
+                </div>
+              </div>
+            </div>
+          )}
 
-              {/* Today Pulse */}
-              <div className="mt-4 pt-4 flex flex-wrap items-center gap-2 text-xs" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                <span className="font-medium text-theme">Today:</span>
-                <span style={{ color: "var(--text-secondary)" }}>{todayPulse.bunches} bunches</span>
-                <span style={{ color: "var(--text-muted)" }}>&middot;</span>
-                <span style={{ color: "var(--text-secondary)" }}>{Number(todayPulse.tons).toFixed(2)} ton</span>
-                <span style={{ color: "var(--text-muted)" }}>&middot;</span>
-                <span style={{ color: "var(--text-secondary)" }}>{todayPulse.teamsLogged} team{todayPulse.teamsLogged !== 1 ? "s" : ""} logged</span>
-              </div>
+          {/* Compact Plantation Summary */}
+          {selectedPlantation && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mb-4 sm:mb-6" style={{ color: "var(--text-secondary)" }}>
+              <span className="font-semibold text-theme">{selectedPlantation.rancangan}</span>
+              <span style={{ color: "var(--text-muted)" }}>·</span>
+              <span>Block {selectedPlantation.block}</span>
+              <span style={{ color: "var(--text-muted)" }}>·</span>
+              <span>{selectedPlantation.area_hectare ? `${selectedPlantation.area_hectare} ha` : "—"}</span>
+              <span style={{ color: "var(--text-muted)" }}>·</span>
+              <span>Peringkat {selectedPlantation.peringkat || "—"}</span>
             </div>
           )}
 
@@ -446,23 +439,19 @@ export default function DashboardPage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {[
-                { label: "Total Bunches", value: monthlyStats.bunches, icon: Sprout, color: "var(--accent-purple)", bg: "rgba(139,92,246,0.12)" },
-                { label: "Transported", value: `${Number(monthlyStats.transported).toFixed(2)} ton`, icon: Truck, color: "var(--accent-primary)", bg: "var(--accent-subtle)" },
-                { label: "Backlogs", value: monthlyStats.backlogs, icon: AlertCircle, color: "var(--accent-amber)", bg: "rgba(245,158,11,0.12)" },
-                { label: "Teams Active", value: `${monthlyStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--accent-blue)", bg: "rgba(59,130,246,0.12)" },
+                { label: "Total Bunches", value: monthlyStats.bunches, icon: Sprout, color: "var(--chart-bunches)", glow: true },
+                { label: "Transported", value: `${Number(monthlyStats.transported).toFixed(2)} ton`, icon: Truck, color: "var(--chart-tons)", glow: false },
+                { label: "Backlogs", value: monthlyStats.backlogs, icon: AlertCircle, color: "var(--accent-red)", glow: false },
+                { label: "Teams Active", value: `${monthlyStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--status-work)", glow: false },
               ].map((s) => (
-                <div key={s.label} className="card-glow relative rounded-2xl p-3 sm:p-4 overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
-                  <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-30 blur-xl" style={{ backgroundColor: s.color }} />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-2 sm:mb-3">
-                      <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{s.label}</span>
-                      <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: s.bg }}>
-                        <s.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: s.color }} />
-                      </div>
-                    </div>
-                    <div className="text-xl sm:text-3xl font-bold text-theme">{s.value}</div>
-                  </div>
-                </div>
+                <StatCard
+                  key={s.label}
+                  label={s.label}
+                  value={s.value}
+                  icon={s.icon}
+                  color={s.color}
+                  glow={s.glow}
+                />
               ))}
             </div>
 
@@ -477,7 +466,7 @@ export default function DashboardPage() {
                 <Link
                   href="/team"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0"
-                  style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#f59e0b" }}
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
                 >
                   Go to Teams
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -496,25 +485,25 @@ export default function DashboardPage() {
               <div className="card-glow rounded-2xl p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#f59e0b" }} />
+                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--chart-bunches)" }} />
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>Bunches</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#3b82f6" }} />
+                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--chart-tons)" }} />
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>Tons</span>
                   </div>
                 </div>
                 <div style={{ height: 220 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={weeklyTrend} barGap={2}>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} />
+                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} interval="preserveStartEnd" minTickGap={12} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} width={35} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 12, fontSize: 12 }}
+                        contentStyle={{ backgroundColor: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: 12, fontSize: 12 }}
                         cursor={{ fill: "rgba(255,255,255,0.03)" }}
                       />
-                      <Bar dataKey="bunches" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={20} />
-                      <Bar dataKey="tons" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                      <Bar dataKey="bunches" fill="var(--chart-bunches)" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                      <Bar dataKey="tons" fill="var(--chart-tons)" radius={[4, 4, 0, 0]} maxBarSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -534,28 +523,28 @@ export default function DashboardPage() {
                 className="group card-glow flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 transition-all hover:scale-[1.01] min-h-[44px]"
                 style={{ backgroundColor: "var(--bg-card)" }}
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
                   <Users className="w-6 h-6 text-theme" />
                 </div>
                 <div className="flex-1">
                   <div className="text-sm font-semibold text-theme mb-0.5">View Teams</div>
                   <div className="text-xs" style={{ color: "var(--text-muted)" }}>{teamLeaders.length} team leader{teamLeaders.length !== 1 ? "s" : ""} assigned</div>
                 </div>
-                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(59,130,246,0.15)", color: "var(--accent-blue)" }}>Open →</div>
+                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>Open →</div>
               </Link>
               <Link
                 href="/reports"
                 className="group card-glow flex items-center gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 transition-all hover:scale-[1.01] min-h-[44px]"
                 style={{ backgroundColor: "var(--bg-card)" }}
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8b5cf6, #a855f7)" }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
                   <BarChart3 className="w-6 h-6 text-theme" />
                 </div>
                 <div className="flex-1">
                   <div className="text-sm font-semibold text-theme mb-0.5">View Reports</div>
                   <div className="text-xs" style={{ color: "var(--text-muted)" }}>Analytics & productivity</div>
                 </div>
-                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(139,92,246,0.15)", color: "var(--accent-purple)" }}>Open →</div>
+                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>Open →</div>
               </Link>
             </div>
           </div>
@@ -579,10 +568,10 @@ export default function DashboardPage() {
                     const plantation = e.plantations as any;
                     const isWork = e.work_status === "work";
                     return (
-                      <div key={e.id} className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-3.5 hover:bg-white/[0.02] transition-colors">
+                      <div key={e.id} className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-3.5 hover:bg-[var(--hover-subtle)] transition-colors">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: isWork ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)" }}>
-                            <Users className="w-4 h-4" style={{ color: isWork ? "#f59e0b" : "#f87171" }} />
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: isWork ? "var(--status-work-bg)" : "var(--status-no-work-bg)" }}>
+                            <Users className="w-4 h-4" style={{ color: isWork ? "var(--status-work)" : "var(--status-no-work)" }} />
                           </div>
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-theme truncate">{leader?.name || "Unknown"}</div>
@@ -591,12 +580,10 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
                           <div className="text-right hidden sm:block">
-                            <div className="text-sm font-medium text-theme">{e.bunches ?? 0} <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>bunches</span></div>
+                            <div className="text-sm font-medium text-theme">{(e.bunches ?? 0).toLocaleString("en-MY")} <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>bunches</span></div>
                             <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{e.tons != null ? Number(e.tons).toFixed(2) : "0.00"} ton</div>
                           </div>
-                          <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: isWork ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", color: isWork ? "#22c55e" : "#f87171" }}>
-                            {isWork ? "Work" : "No Work"}
-                          </span>
+                          <Badge status={isWork ? "work" : "no-work"} size="sm" />
                         </div>
                       </div>
                     );
@@ -609,7 +596,7 @@ export default function DashboardPage() {
 
         {/* Click outside to close dropdown */}
         {showDropdown && (
-          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+          <div className="fixed inset-0 z-[var(--z-overlay)]" onClick={() => setShowDropdown(false)} />
         )}
       </div>
     </DashboardLayout>

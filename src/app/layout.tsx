@@ -1,10 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Cabinet Grotesk self-hosted via next/font/local (no third-party CDN dependency)
+const cabinetGrotesk = localFont({
+  src: [
+    { path: "./fonts/CabinetGrotesk-Medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/CabinetGrotesk-Bold.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/CabinetGrotesk-Extrabold.woff2", weight: "800", style: "normal" },
+  ],
+  variable: "--font-cabinet",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   viewportFit: "cover",
@@ -45,18 +57,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cabinetGrotesk.variable}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="PalmInsight" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body className={`${inter.className} font-body`}>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-4 focus:bg-white focus:text-black">
