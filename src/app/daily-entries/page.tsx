@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Calendar, Filter, Download, ChevronLeft, ChevronRight, Users, TrendingUp, Truck, AlertCircle } from "lucide-react";
+import { Calendar, Download, ChevronLeft, ChevronRight, TrendingUp, Truck, AlertCircle } from "lucide-react";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import { StatCardSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/ui/Skeleton";
@@ -197,7 +197,7 @@ export default function DailyEntriesPage() {
           </div>
           {filteredEntries.length === 0 ? (
             <div className="p-12 text-center">
-              <Calendar className="w-12 h-12 mx-auto mb-3 text-[rgba(255,255,255,0.1)]" />
+              <Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
               <p className="text-sm text-[var(--text-muted)]">No entries for this period.</p>
             </div>
           ) : (

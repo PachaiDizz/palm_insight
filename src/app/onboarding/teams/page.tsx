@@ -75,12 +75,6 @@ export default function TeamSetupPage() {
     router.push("/dashboard");
   };
 
-  const inputStyle = {
-    backgroundColor: "var(--bg-input)",
-    border: "1px solid rgba(245,158,11,0.15)",
-    color: "white",
-  };
-
   return (
     <PageTransition>
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--bg-base)" }}>

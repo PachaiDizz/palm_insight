@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { TreePalm, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { TreePalm, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import NotificationPanel from "@/components/notifications/NotificationPanel";
@@ -14,16 +14,16 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
   { label: "Plantations", href: "/plantations", icon: Sprout },
   { label: "Teams", href: "/team", icon: Users },
+  { label: "Entries", href: "/daily-entries", icon: ClipboardList },
   { label: "Reports", href: "/reports", icon: BarChart3 },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 interface SidebarProps {
-  mobileOpen: boolean;
   onMobileClose: () => void;
 }
 
-export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ onMobileClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, profile } = useAuth();
   const router = useRouter();
@@ -43,40 +43,40 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     >
       {/* Logo */}
       <div className="flex items-center justify-between gap-3 px-5 py-5 border-b overflow-visible" style={{ borderColor: "var(--border-default)" }}>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-[#f59e0b] to-[#d97706]">
-            <TreePalm className="w-5 h-5 text-theme" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-accent-gradient-br">
+            <TreePalm className="w-5 h-5 text-[var(--text-on-accent)]" />
           </div>
-          {!collapsed && <span className="font-bold text-lg text-theme tracking-tight">PalmInsight</span>}
+          {!collapsed && <span className="font-bold text-lg text-theme tracking-tight truncate">PalmInsight</span>}
         </div>
-        {!collapsed && (
-          <div className="relative">
-            <NotificationBell unreadCount={unreadCount} onClick={() => setPanelOpen(!panelOpen)} />
-            {panelOpen && (
-              <NotificationPanel
-                notifications={notifications}
-                unreadCount={unreadCount}
-                onMarkAsRead={markAsRead}
-                onMarkAllAsRead={markAllAsRead}
-                onDismiss={dismiss}
-                onClose={() => setPanelOpen(false)}
-              />
-            )}
-          </div>
-        )}
+        <div className="relative shrink-0">
+          <NotificationBell unreadCount={unreadCount} onClick={() => setPanelOpen(!panelOpen)} />
+          {panelOpen && (
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              onMarkAsRead={markAsRead}
+              onMarkAllAsRead={markAllAsRead}
+              onDismiss={dismiss}
+              onClose={() => setPanelOpen(false)}
+            />
+          )}
+        </div>
       </div>
 
       {/* Nav Items */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[44px] ${isActive ? "bg-[var(--accent-primary-light)]" : ""}`}
+              title={collapsed ? item.label : undefined}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[44px] ${isActive ? "bg-[var(--accent-primary-light)]" : "hover:bg-[var(--hover-subtle)]"}`}
               style={{ color: isActive ? "var(--accent-primary)" : "var(--icon-inactive)" }}
+              onClick={onMobileClose}
             >
               <item.icon className="w-5 h-5 shrink-0" />
               {!collapsed && <span>{item.label}</span>}
@@ -96,7 +96,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         <button
           onClick={handleLogout}
           aria-label="Log out"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all w-full hover:bg-white/5 min-h-[44px]"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all w-full hover:bg-[var(--hover-subtle)] min-h-[44px]"
           style={{ color: "var(--text-muted)" }}
         >
           <LogOut className="w-5 h-5 shrink-0" />
@@ -108,7 +108,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       <button
         onClick={() => setCollapsed(!collapsed)}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="flex absolute top-1/2 -right-3 w-6 h-6 rounded-full items-center justify-center border bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-muted)]"
+        className="flex absolute top-1/2 -right-3 w-6 h-6 rounded-full items-center justify-center border bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-muted)] hover:bg-[var(--hover-subtle)]"
       >
         {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
       </button>

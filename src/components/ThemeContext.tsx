@@ -11,36 +11,52 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function readInitialTheme(): Theme {
+  if (typeof document === "undefined") return "dark";
+  if (document.documentElement.classList.contains("light")) return "light";
+  if (document.documentElement.classList.contains("dark")) return "dark";
+  try {
+    const stored = localStorage.getItem("palm-insight-theme") as Theme | null;
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {
+    /* ignore */
+  }
+  return "dark";
+}
+
+function applyThemeClass(theme: Theme) {
+  const root = document.documentElement;
+  root.classList.remove("light", "dark");
+  root.classList.add(theme);
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem("palm-insight-theme") as Theme | null;
-    if (storedTheme) {
-      setTheme(storedTheme);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setTheme(prefersDark ? "dark" : "light");
-    }
+    const initial = readInitialTheme();
+    setThemeState(initial);
+    applyThemeClass(initial);
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
-    localStorage.setItem("palm-insight-theme", theme);
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    } else {
-      root.classList.add("light");
-      root.classList.remove("dark");
+    try {
+      localStorage.setItem("palm-insight-theme", theme);
+    } catch {
+      /* ignore */
     }
+    applyThemeClass(theme);
   }, [theme, mounted]);
 
+  const setTheme = (next: Theme) => {
+    setThemeState(next);
+  };
+
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    setThemeState((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
   return (

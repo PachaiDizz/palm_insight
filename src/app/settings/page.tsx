@@ -30,7 +30,6 @@ export default function SettingsPage() {
 
   // Notification prefs
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(getNotificationPrefs());
-  const [pushSupported] = useState(() => "Notification" in window);
   const [pushPermission, setPushPermission] = useState(() => {
     if ("Notification" in window) return Notification.permission;
     return "denied";

@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { Home, Sprout, Users, BarChart3, Settings } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Home, Sprout, Users, BarChart3, ClipboardList } from "lucide-react";
 
 const tabs = [
-  { label: "Dashboard", href: "/dashboard", icon: Home },
-  { label: "Plantations", href: "/plantations", icon: Sprout },
+  { label: "Home", href: "/dashboard", icon: Home },
+  { label: "Blocks", href: "/plantations", icon: Sprout },
   { label: "Teams", href: "/team", icon: Users },
+  { label: "Entries", href: "/daily-entries", icon: ClipboardList },
   { label: "Reports", href: "/reports", icon: BarChart3 },
-  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 export default function BottomTabBar() {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
 
   return (
     <nav
@@ -30,7 +31,7 @@ export default function BottomTabBar() {
       aria-label="Mobile navigation"
     >
       {tabs.map((tab) => {
-        const isActive = pathname === tab.href;
+        const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
         return (
           <Link
             key={tab.href}
@@ -39,10 +40,9 @@ export default function BottomTabBar() {
             aria-label={tab.label}
             aria-current={isActive ? "page" : undefined}
           >
-            {/* Active indicator pill */}
             {isActive && (
               <motion.div
-                layoutId="tab-indicator"
+                layoutId={reduceMotion ? undefined : "tab-indicator"}
                 className="absolute top-0 left-1/2 -translate-x-1/2"
                 style={{
                   width: 24,
@@ -50,14 +50,12 @@ export default function BottomTabBar() {
                   borderRadius: 2,
                   background: "var(--accent-primary)",
                 }}
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
 
-            {/* Icon */}
             <motion.div
-              animate={isActive ? { scale: 1 } : { scale: 1 }}
-              whileTap={{ scale: 0.85 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.85 }}
               transition={{ duration: 0.15 }}
             >
               <tab.icon
@@ -67,7 +65,6 @@ export default function BottomTabBar() {
               />
             </motion.div>
 
-            {/* Label */}
             <span
               className="text-[10px] font-medium uppercase"
               style={{

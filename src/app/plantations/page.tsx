@@ -2,11 +2,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
-import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
-import { useRouter } from "next/navigation";
+import { getAllUserPlantations } from "@/lib/onboarding";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Edit, Trash2, Sprout, Users, X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash2, Sprout, Users, X, Loader2 } from "lucide-react";
 import { Plantation } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import Toast, { ToastData } from "@/components/ui/Toast";
@@ -21,7 +20,6 @@ interface LeaderDraft {
 
 export default function PlantationsPage() {
   const { user } = useAuth();
-  const router = useRouter();
   const [plantations, setPlantations] = useState<Plantation[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Plantation | null>(null);

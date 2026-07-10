@@ -51,5 +51,5 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
-// @ts-ignore — injected at build time by @serwist/next
+// @ts-expect-error — injected at build time by @serwist/next
 self.__SW_MANIFEST = [];

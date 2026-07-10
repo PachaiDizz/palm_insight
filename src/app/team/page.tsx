@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Trash2, Users, Phone, MapPin, Edit2, X, Save, CheckCircle, AlertCircle, BarChart3, TrendingUp, Eye, ChevronLeft, Calendar, ChevronDown, Truck } from "lucide-react";
+import { Plus, Trash2, Users, Phone, MapPin, Edit2, AlertCircle, BarChart3, TrendingUp, ChevronLeft, Calendar, ChevronDown, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
 import BlockSelector from "@/components/team/BlockSelector";
@@ -16,7 +16,7 @@ import AddLeaderModal from "@/components/team/AddLeaderModal";
 import EditEntryModal from "@/components/team/EditEntryModal";
 import EmptyLeaderState from "@/components/team/EmptyLeaderState";
 import Toast from "@/components/ui/Toast";
-import { BlockCardSkeleton, LeaderCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
+import { BlockCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
 
 const defaultStats = { totalEntries: 0, workDays: 0, totalBunches: 0, totalTons: 0, totalBacklogs: 0, avgBunches: 0, avgTons: "0", avgWorkers: 0 };
 const defaultDetailStats = { totalEntries: 0, workDays: 0, noWorkDays: 0, totalBunches: 0, totalTons: 0, totalBacklogs: 0, avgBunches: 0, avgTons: "0", avgWorkers: 0 };
@@ -642,7 +642,7 @@ function TeamsContent() {
           onSave={handleDetailSaveEdit} onClose={() => setShowDetailEditModal(false)} />
 
         {/* Add Leader Modal */}
-        <AddLeaderModal show={showModal} selectedBlockId={selectedBlock} selectedPlantation={selectedP || null} plantations={plantations} name={name} phone={phone} saving={saving}
+        <AddLeaderModal show={showModal} selectedBlockId={selectedBlock} selectedPlantation={selectedP || null} name={name} phone={phone} saving={saving}
           onNameChange={setName} onPhoneChange={setPhone} onSubmit={handleSaveLeader} onClose={() => setShowModal(false)} />
 
         {/* Toast */}

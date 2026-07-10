@@ -3,7 +3,6 @@ import { useState, useEffect, useMemo } from "react";
 import { X, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Plantation } from "@/types";
 import { exportHarvestingMonthly } from "@/lib/exportHarvestingMonthly";
-import { supabase } from "@/lib/supabaseClient";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",

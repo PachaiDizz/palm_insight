@@ -7,7 +7,6 @@ interface AddLeaderModalProps {
   show: boolean;
   selectedBlockId: string | null;
   selectedPlantation: Plantation | null;
-  plantations: Plantation[];
   name: string;
   phone: string;
   saving: boolean;
@@ -21,7 +20,6 @@ export default function AddLeaderModal({
   show,
   selectedBlockId,
   selectedPlantation,
-  plantations,
   name,
   phone,
   saving,

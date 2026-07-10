@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabaseClient";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
 

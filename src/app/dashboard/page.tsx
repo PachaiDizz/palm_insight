@@ -1,12 +1,12 @@
 "use client";
 import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+
 import { supabase } from "@/lib/supabaseClient";
 import { hasCompletedOnboarding, getAllUserPlantations, getUserTeamLeaders } from "@/lib/onboarding";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
-import { Users, Calendar, ChevronDown, ChevronLeft, ChevronRight, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
+import { Users, ChevronDown, ChevronLeft, ChevronRight, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Plantation, TeamLeader, TodayStats } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
@@ -40,7 +40,6 @@ function getMonthRange(year: number, month: number) {
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
-  const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [plantations, setPlantations] = useState<Plantation[]>([]);
   const [selectedPlantation, setSelectedPlantation] = useState<Plantation | null>(null);

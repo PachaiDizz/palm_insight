@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
 import PageTransition from "@/components/PageTransition";
@@ -8,19 +8,14 @@ import NotificationPanel from "@/components/notifications/NotificationPanel";
 import { useNotifications } from "@/components/notifications/useNotifications";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
-
-  const handleMobileClose = useCallback(() => {
-    setMobileOpen(false);
-  }, []);
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-base)]">
       {/* Desktop sidebar only */}
       <div className="hidden lg:flex">
-        <Sidebar mobileOpen={false} onMobileClose={handleMobileClose} />
+        <Sidebar onMobileClose={() => {}} />
       </div>
 
       <div className="flex-1 flex flex-col min-w-0">

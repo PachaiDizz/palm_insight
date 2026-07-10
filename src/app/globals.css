@@ -86,11 +86,11 @@
     /* Translucent nav surface when scrolled */
     --bg-nav-scrolled: rgba(11, 13, 19, 0.8);
 
-    /* Z-index scale — one source of truth, no more z-[9999] arms races */
+    /* Z-index scale — one source of truth */
     --z-overlay: 40;
     --z-dropdown: 50;
     --z-nav: 100;
-    --z-modal: 9999;
+    --z-modal: 200;
     --bg-input-field: #090b10;
     --border-input-field: rgba(255, 255, 255, 0.1);
     --bg-nav: #0b0d13;
@@ -100,6 +100,10 @@
     --border-table-row: rgba(245, 158, 11, 0.08);
     --text-chart-axis: rgba(255, 255, 255, 0.5);
     --bg-tooltip: #131f13;
+    /* Brand gradient + soft glow (buttons, logo marks) */
+    --accent-gradient: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-primary) 100%);
+    --accent-gradient-br: linear-gradient(to bottom right, var(--accent-hover), var(--accent-primary));
+    --accent-shadow: rgba(245, 158, 11, 0.2);
   }
 
   .light {
@@ -181,6 +185,9 @@
     --border-table-row: rgba(0, 0, 0, 0.06);
     --text-chart-axis: rgba(0, 0, 0, 0.5);
     --bg-tooltip: #ffffff;
+    --accent-gradient: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-primary) 100%);
+    --accent-gradient-br: linear-gradient(to bottom right, var(--accent-hover), var(--accent-primary));
+    --accent-shadow: rgba(217, 119, 6, 0.18);
   }
 
   .dark {
@@ -299,3 +306,38 @@ select option {
 .text-theme { color: var(--text-primary); }
 .text-theme-muted { color: var(--text-muted); }
 .text-theme-secondary { color: var(--text-secondary); }
+
+/* Brand surfaces */
+.bg-accent-gradient {
+  background-image: var(--accent-gradient);
+}
+.bg-accent-gradient-br {
+  background-image: var(--accent-gradient-br);
+}
+.text-accent {
+  color: var(--accent-primary);
+}
+.hover-subtle {
+  transition: background-color 0.15s ease;
+}
+.hover-subtle:hover {
+  background-color: var(--hover-subtle);
+}
+
+/* Global focus-visible for interactive elements that don't set their own */
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion — CSS animations + respect system preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

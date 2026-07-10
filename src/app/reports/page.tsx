@@ -6,7 +6,7 @@ import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding"
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Calendar, TrendingUp, Download, Filter, ChevronDown, FileText, FileSpreadsheet } from "lucide-react";
+import { Calendar, TrendingUp, Filter, ChevronDown, FileText, FileSpreadsheet } from "lucide-react";
 import { Plantation, DailyEntry, TeamLeader } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
