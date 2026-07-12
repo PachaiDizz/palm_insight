@@ -175,6 +175,7 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
 
     let totWorkers = 0;
     let totBunches = 0;
+    let cumBunches = 0;
     let totHi = 0;
     let cumHi = 0;
 
@@ -191,9 +192,10 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
         if (entry.bunches !== null && entry.bunches !== undefined && entry.bunches !== "") {
           const v = Number(entry.bunches) || 0;
           rows[base + 1][dc] = v;
-          rows[base + 2][dc] = v;
           totBunches += v;
+          cumBunches += v;
         }
+        if (cumBunches > 0) rows[base + 2][dc] = cumBunches;
         if (entry.tons !== null && entry.tons !== undefined && entry.tons !== "") {
           const t = round2(Number(entry.tons));
           rows[base + 3][dc] = t;
@@ -204,7 +206,7 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
       } else if (entry && entry.work_status === "no_work") {
         rows[base][dc] = "-";
         rows[base + 1][dc] = "-";
-        rows[base + 2][dc] = "-";
+        if (cumBunches > 0) rows[base + 2][dc] = cumBunches;
         // Tons still count on no_work days — transport delivers fruit to factory
         if (entry.tons !== null && entry.tons !== undefined && entry.tons !== "") {
           const t = round2(Number(entry.tons));
@@ -218,7 +220,7 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
 
     rows[base][38] = totWorkers;
     rows[base + 1][38] = totBunches;
-    rows[base + 2][38] = totBunches;
+    rows[base + 2][38] = cumBunches;
     rows[base + 3][38] = totHi;
     rows[base + 4][38] = cumHi;
 
@@ -500,7 +502,7 @@ export async function exportHarvestingMonthly(params: {
     .select("*")
     .eq("plantation_id", blockId)
     .eq("user_id", userId)
-    .order("created_at", { ascending: true });
+    .order("name", { ascending: true });
 
   if (leadersErr) console.error("[Export] Leaders query error:", leadersErr);
   if (!leaders || leaders.length === 0) throw new Error("No team leaders found for this block (plantation_id=" + blockId + ")");

@@ -20,11 +20,11 @@ import { FadeIn } from "@/components/ui/Skeleton";
 import StatCard from "@/components/ui/StatCard";
 import Badge from "@/components/ui/Badge";
 import GuidedTour from "@/components/GuidedTour";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, type TranslationKey } from "@/lib/i18n";
 
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function getGreeting(t: (key: string) => string) {
+function getGreeting(t: (key: TranslationKey) => string) {
   const hour = new Date().getHours();
   if (hour < 12) return t("greeting.morning");
   if (hour < 17) return t("greeting.afternoon");
