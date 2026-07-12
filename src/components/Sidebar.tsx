@@ -9,15 +9,7 @@ import { useState } from "react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import NotificationPanel from "@/components/notifications/NotificationPanel";
 import { useNotifications } from "@/components/notifications/useNotifications";
-
-const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: Home },
-  { label: "Plantations", href: "/plantations", icon: Sprout },
-  { label: "Teams", href: "/team", icon: Users },
-  { label: "Entries", href: "/daily-entries", icon: ClipboardList },
-  { label: "Reports", href: "/reports", icon: BarChart3 },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
+import { useI18n } from "@/lib/i18n";
 
 interface SidebarProps {
   onMobileClose: () => void;
@@ -27,9 +19,19 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, profile } = useAuth();
   const router = useRouter();
+  const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
+
+  const navItems = [
+    { label: t("nav.dashboard"), href: "/dashboard", icon: Home },
+    { label: t("nav.plantations"), href: "/plantations", icon: Sprout },
+    { label: t("nav.teams"), href: "/team", icon: Users },
+    { label: t("nav.entries"), href: "/daily-entries", icon: ClipboardList },
+    { label: t("nav.reports"), href: "/reports", icon: BarChart3 },
+    { label: t("nav.settings"), href: "/settings", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -95,12 +97,12 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
         )}
         <button
           onClick={handleLogout}
-          aria-label="Log out"
+          aria-label={t("nav.logout")}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all w-full hover:bg-[var(--hover-subtle)] min-h-[44px]"
           style={{ color: "var(--text-muted)" }}
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>{t("nav.logout")}</span>}
         </button>
       </div>
 

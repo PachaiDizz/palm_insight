@@ -39,6 +39,13 @@ export interface DailyEntry {
   team_leaders?: TeamLeader;
 }
 
+// DailyEntry with its joined relations from dashboard/reports selects.
+// Omit the base `team_leaders` so we can narrow it to just the projected fields.
+export type DailyEntryWithRelations = Omit<DailyEntry, "team_leaders"> & {
+  team_leaders?: { name: string } | null;
+  plantations?: { block: string } | null;
+};
+
 export interface BijiRelai {
   id: string;
   user_id: string;

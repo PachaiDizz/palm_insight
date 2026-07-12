@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Plantations",
-  description: "Manage your palm oil plantations and plantation details",
-};
+  description: "Manage your palm oil plantations — add blocks, view plantation details, and organize your farm structure.",
+  path: "/plantations",
+});

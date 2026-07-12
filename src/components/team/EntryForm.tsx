@@ -1,7 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
-import { Save, X, CheckCircle, Calendar, Users, MapPin, TrendingUp, Truck, AlertCircle, Loader2 } from "lucide-react";
+import { Save, X, CheckCircle, Calendar, Users, MapPin, TrendingUp, Truck, AlertCircle, Loader2, Undo2, Redo2 } from "lucide-react";
 import { TeamLeader, Plantation } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface EntryFormProps {
   leader: TeamLeader;
@@ -16,6 +17,9 @@ interface EntryFormProps {
   notes: string;
   saving: boolean;
   savedId: string | null;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  historyLength?: number;
   onWorkStatusChange: (status: string) => void;
   onDateChange: (date: string) => void;
   onNumWorkersChange: (val: string) => void;
@@ -27,6 +31,8 @@ interface EntryFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onNewEntry: () => void;
   onClose: () => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
 }
 
 export default function EntryForm({
@@ -42,6 +48,9 @@ export default function EntryForm({
   notes,
   saving,
   savedId,
+  canUndo = false,
+  canRedo = false,
+  historyLength = 0,
   onWorkStatusChange,
   onDateChange,
   onNumWorkersChange,
@@ -53,7 +62,10 @@ export default function EntryForm({
   onSubmit,
   onNewEntry,
   onClose,
+  onUndo,
+  onRedo,
 }: EntryFormProps) {
+  const { t } = useI18n();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -75,7 +87,7 @@ export default function EntryForm({
               <Save className="w-5 h-5 text-[var(--accent-primary)]" />
             </div>
             <div>
-              <h2 className="section-heading text-base text-theme">New Entry</h2>
+              <h2 className="section-heading text-base text-theme">{t("team.newEntry")}</h2>
               <p className="text-xs text-[var(--text-muted)]">{leader.name} — Block {plantation?.block}</p>
             </div>
           </div>
@@ -85,13 +97,41 @@ export default function EntryForm({
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--accent-subtle)] text-[var(--accent-primary)]"
             >
-              <CheckCircle className="w-3.5 h-3.5" /> Saved
+              <CheckCircle className="w-3.5 h-3.5" /> {t("team.saved")}
             </motion.span>
           )}
+          <div className="flex items-center gap-1">
+            {onUndo && (
+              <button
+                type="button"
+                onClick={onUndo}
+                disabled={!canUndo}
+                aria-label="Undo"
+                className="p-2 rounded-lg transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{ color: "var(--text-muted)" }}
+                title={`Undo (${historyLength} steps)`}
+              >
+                <Undo2 className="w-4 h-4" />
+              </button>
+            )}
+            {onRedo && (
+              <button
+                type="button"
+                onClick={onRedo}
+                disabled={!canRedo}
+                aria-label="Redo"
+                className="p-2 rounded-lg transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{ color: "var(--text-muted)" }}
+              >
+                <Redo2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           <motion.button
             whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.08)" }}
             whileTap={{ scale: 0.97 }}
             onClick={onClose}
+            aria-label="Close entry form"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all text-[var(--text-muted)] border"
           >
             <X className="w-3.5 h-3.5" /> Close
@@ -105,7 +145,7 @@ export default function EntryForm({
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
       >
         {/* Work Status Toggle */}
-        <div className="relative flex rounded-2xl p-1 bg-[var(--bg-base)]">
+        <div role="radiogroup" aria-label="Work status" className="relative flex rounded-2xl p-1 bg-[var(--bg-base)]">
           <motion.div
             animate={{
               left: workStatus === "work" ? "4px" : "calc(50% + 0px)",
@@ -119,18 +159,22 @@ export default function EntryForm({
           />
           <button
             type="button"
+            role="radio"
+            aria-checked={workStatus === "work"}
             onClick={() => onWorkStatusChange("work")}
             className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10 min-h-[44px]"
             style={{ color: workStatus === "work" ? "#f59e0b" : "var(--text-muted)" }}
           >
-            Work Day
+            {t("entry.workDay")}
           </button>
           <button
             type="button"
+            role="radio"
+            aria-checked={workStatus === "no_work"}
             onClick={() => onWorkStatusChange("no_work")}
             className="relative flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors z-10 min-h-[44px]"
           >
-            No Work
+            {t("entry.noWork")}
           </button>
         </div>
 
@@ -138,7 +182,7 @@ export default function EntryForm({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
             <Calendar className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
-            Date
+            {t("entry.date")}
           </label>
           <input
             type="date"
@@ -154,7 +198,7 @@ export default function EntryForm({
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
                   <Users className="w-3.5 h-3.5 text-[var(--accent-purple)]" />
-                  Workers
+                  {t("entry.workers")}
                 </label>
                 <input
                   type="number"
@@ -167,7 +211,7 @@ export default function EntryForm({
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
                   <MapPin className="w-3.5 h-3.5 text-[var(--accent-amber)]" />
-                  Lot
+                  {t("entry.lot")}
                 </label>
                 <input
                   className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
@@ -182,7 +226,7 @@ export default function EntryForm({
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
                   <TrendingUp className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
-                  Bunches
+                  {t("entry.bunches")}
                 </label>
                 <input
                   type="number"
@@ -195,7 +239,7 @@ export default function EntryForm({
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
                   <Truck className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-                  Tons
+                  {t("entry.tons")}
                 </label>
                 <input
                   type="text"
@@ -209,7 +253,7 @@ export default function EntryForm({
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
                   <AlertCircle className="w-3.5 h-3.5 text-[var(--accent-red)]" />
-                  Backlogs
+                  {t("entry.backlogs")}
                 </label>
                 <input
                   type="number"
@@ -227,7 +271,7 @@ export default function EntryForm({
           <div>
             <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
               <Truck className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-              Tons (Transport)
+              {t("entry.tons")} (Transport)
             </label>
             <input
               type="text"
@@ -244,13 +288,13 @@ export default function EntryForm({
         {/* Notes */}
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--text-muted)]">
-            Notes
+            {t("entry.notes")}
           </label>
           <textarea
             className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50 min-h-15"
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
-            placeholder={workStatus === "work" ? "Any additional notes..." : "Reason for no work..."}
+            placeholder={workStatus === "work" ? t("entry.notesPlaceholder") : t("entry.noWorkPlaceholder")}
           />
         </div>
 
@@ -264,7 +308,7 @@ export default function EntryForm({
               onClick={onNewEntry}
             className="px-4 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-white/5 text-[var(--text-muted)] min-h-[44px]"
           >
-            New Entry
+            {t("team.newEntry")}
             </motion.button>
           )}
           <motion.button
@@ -276,7 +320,7 @@ export default function EntryForm({
             style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? "Saving..." : "Save Entry"}
+            {saving ? t("team.saving") : t("entry.saveEntry")}
           </motion.button>
         </div>
       </motion.form>

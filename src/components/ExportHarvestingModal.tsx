@@ -111,8 +111,8 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
   };
 
   return (
-    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Export Harvesting Monthly">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div
         className="relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
         style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-default)" }}
@@ -128,7 +128,7 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>Generate Excel report</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "var(--text-muted)" }}>
+          <button onClick={onClose} aria-label="Close" className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "var(--text-muted)" }}>
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -138,8 +138,9 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
           {/* Plantation (only shown when parent structure exists) */}
           {hasParentStructure && (
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Plantation</label>
+              <label htmlFor="export-plantation" className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Plantation</label>
               <select
+                id="export-plantation"
                 value={plantationId}
                 onChange={(e) => {
                   setPlantationId(e.target.value);
@@ -157,8 +158,9 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
 
           {/* Block */}
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Block</label>
+            <label htmlFor="export-block" className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Block</label>
             <select
+              id="export-block"
               value={blockId}
               onChange={(e) => setBlockId(e.target.value)}
               className="w-full px-3 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
@@ -180,8 +182,9 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
           {/* Month + Year */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Month</label>
+              <label htmlFor="export-month" className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Month</label>
               <select
+                id="export-month"
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
                 className="w-full px-3 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
@@ -193,8 +196,9 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Year</label>
+              <label htmlFor="export-year" className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Year</label>
               <select
+                id="export-year"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
                 className="w-full px-3 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
@@ -219,6 +223,7 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: "var(--border-default)" }}>
           <button
             onClick={onClose}
+            aria-label="Cancel export"
             className="px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-white/5"
             style={{ color: "var(--text-secondary)" }}
           >
@@ -227,6 +232,7 @@ export default function ExportHarvestingModal({ open, onClose, plantations, user
           <button
             onClick={handleExport}
             disabled={exporting || !canExport}
+            aria-label="Export harvesting data"
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium text-theme disabled:opacity-50 transition-all"
             style={{ background: "linear-gradient(to right, #d97706, #f59e0b)" }}
           >

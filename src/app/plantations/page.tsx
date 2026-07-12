@@ -11,6 +11,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Toast, { ToastData } from "@/components/ui/Toast";
 import { plantationSchema } from "@/lib/schemas";
 import { PlantationCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
+import { useI18n } from "@/lib/i18n";
 
 interface LeaderDraft {
   id: string;
@@ -20,6 +21,7 @@ interface LeaderDraft {
 
 export default function PlantationsPage() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [plantations, setPlantations] = useState<Plantation[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Plantation | null>(null);
@@ -176,7 +178,7 @@ export default function PlantationsPage() {
         {loading && (
           <FadeIn>
             <div className="mb-4">
-              <PageHeader title="Plantations" subtitle="Loading..." action={null} />
+              <PageHeader title={t("plantations.title")} subtitle="Loading..." action={null} />
             </div>
             <div className="space-y-3">
               {[1,2,3].map(i => <PlantationCardSkeleton key={i} />)}
@@ -187,8 +189,8 @@ export default function PlantationsPage() {
         {!loading && (
           <>
             <PageHeader
-              title="Plantations"
-              subtitle={`${plantations.length} plantation${plantations.length !== 1 ? "s" : ""}`}
+              title={t("plantations.title")}
+              subtitle={`${plantations.length} ${plantations.length !== 1 ? t("team.leaders") : t("team.leader")}`}
               action={
                 <button
                   onClick={() => { resetForm(); setEditing(null); setShowModal(true); }}
@@ -203,7 +205,7 @@ export default function PlantationsPage() {
             {plantations.length === 0 ? (
               <div className="card-glow rounded-2xl p-12 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
                 <Sprout className="w-12 h-12 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.15)" }} />
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>No plantations yet.</p>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("plantations.noPlantations")}</p>
               </div>
             ) : (
               <div className="space-y-3">

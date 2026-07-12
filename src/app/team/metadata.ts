@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Team Management",
-  description: "Manage team leaders, view org charts, and log daily entries",
-};
+  description: "Manage team leaders, view org charts, log daily harvest entries, and track worker productivity per block.",
+  path: "/team",
+});

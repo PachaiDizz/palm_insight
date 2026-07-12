@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabaseClient";
-import { Plantation, TeamLeader, DailyEntry } from "@/types";
+import { getUserTeamLeaders } from "./onboarding";
+import { getMonthRange, toLocalDateKey } from "./date";
+import { Plantation, TeamLeader, DailyEntry, DailyEntryWithRelations } from "@/types";
 
 export async function fetchPlantations(userId: string): Promise<Plantation[]> {
   const { data } = await supabase
@@ -134,4 +136,116 @@ export function useInvalidateEntries() {
     queryClient.invalidateQueries({ queryKey: ["leaderEntries"] });
     queryClient.invalidateQueries({ queryKey: ["allEntries"] });
   };
+}
+
+// ─── Dashboard data hooks ────────────────────────────────────────────────
+// These replace the raw supabase calls that used to live in dashboard/page.tsx
+// useEffect handlers, so caching / dedup / stale-while-revalidate actually apply.
+
+export function usePlantationTeamLeaders(
+  userId: string | undefined,
+  plantationId: string | undefined
+) {
+  return useQuery({
+    queryKey: ["plantationTeamLeaders", userId, plantationId],
+    queryFn: () => getUserTeamLeaders(userId!, plantationId!),
+    enabled: !!userId && !!plantationId,
+    staleTime: 60_000,
+  });
+}
+
+export function useDashboardMonthEntries(
+  userId: string | undefined,
+  plantationId: string | undefined,
+  year: number,
+  month: number
+) {
+  const { startDate, endDate } = getMonthRange(year, month);
+  return useQuery({
+    queryKey: ["dashboardMonthEntries", userId, plantationId, year, month],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("daily_entries")
+        .select("date, bunches, tons, backlogs, team_leader_id, work_status")
+        .eq("user_id", userId)
+        .eq("plantation_id", plantationId)
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: true });
+      return (data || []) as DailyEntry[];
+    },
+    enabled: !!userId && !!plantationId,
+    staleTime: 30_000,
+  });
+}
+
+export function useDashboardRecentEntries(
+  userId: string | undefined,
+  plantationId: string | undefined,
+  year: number,
+  month: number
+) {
+  const { startDate, endDate } = getMonthRange(year, month);
+  return useQuery({
+    queryKey: ["dashboardRecentEntries", userId, plantationId, year, month],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("daily_entries")
+        .select("*, team_leaders(name), plantations(block)")
+        .eq("user_id", userId)
+        .eq("plantation_id", plantationId)
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: false })
+        .limit(10);
+      return (data || []) as DailyEntryWithRelations[];
+    },
+    enabled: !!userId && !!plantationId,
+    staleTime: 30_000,
+  });
+}
+
+export function useTodayPulse(
+  userId: string | undefined,
+  plantationId: string | undefined
+) {
+  // `today` in the key means a new day triggers a fresh fetch automatically.
+  const today = toLocalDateKey(new Date());
+  return useQuery({
+    queryKey: ["todayPulse", userId, plantationId, today],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("daily_entries")
+        .select("bunches, tons, team_leader_id, work_status")
+        .eq("user_id", userId)
+        .eq("plantation_id", plantationId)
+        .eq("date", today);
+      return (data || []) as DailyEntry[];
+    },
+    enabled: !!userId && !!plantationId,
+    staleTime: 30_000,
+  });
+}
+
+export function useReportEntries(
+  userId: string | undefined,
+  year: number,
+  month: number
+) {
+  const { startDate, endDate } = getMonthRange(year, month);
+  return useQuery({
+    queryKey: ["reportEntries", userId, year, month],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("daily_entries")
+        .select("*, team_leaders(plantation_id, plantations(rancangan, peringkat, block))")
+        .eq("user_id", userId)
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: false });
+      return (data || []) as DailyEntry[];
+    },
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
 }

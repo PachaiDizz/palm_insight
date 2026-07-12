@@ -63,6 +63,9 @@ export default function NotificationPanel({
         {/* Bottom sheet */}
         <div
           ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Notifications"
           className="fixed bottom-0 left-0 right-0 z-[var(--z-modal)] flex flex-col rounded-t-[20px] border-t shadow-2xl animate-slide-up"
           style={{
             backgroundColor: "var(--bg-card)",
@@ -90,6 +93,7 @@ export default function NotificationPanel({
               {unreadCount > 0 && (
                 <button
                   onClick={onMarkAllAsRead}
+                  aria-label="Mark all notifications as read"
                   className="flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-lg transition-colors hover:bg-white/5"
                   style={{ color: "var(--accent-primary)" }}
                 >
@@ -99,6 +103,7 @@ export default function NotificationPanel({
               )}
               <button
                 onClick={onClose}
+                aria-label="Close notifications"
                 className="p-1 rounded-lg transition-colors hover:bg-white/5"
                 style={{ color: "var(--text-muted)" }}
               >
@@ -135,6 +140,9 @@ export default function NotificationPanel({
   return (
     <div
       ref={panelRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Notifications"
       className="absolute rounded-2xl border shadow-2xl shadow-black/40 z-[var(--z-modal)] flex flex-col overflow-hidden"
       style={{
         backgroundColor: "var(--bg-card)",
@@ -160,6 +168,7 @@ export default function NotificationPanel({
         {unreadCount > 0 && (
           <button
             onClick={onMarkAllAsRead}
+            aria-label="Mark all notifications as read"
             className="flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-lg transition-colors hover:bg-white/5"
             style={{ color: "var(--accent-primary)" }}
           >

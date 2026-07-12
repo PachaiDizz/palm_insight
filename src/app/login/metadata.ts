@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Login",
-  description: "Sign in to your PalmInsight account",
-};
+  description: "Sign in to your PalmInsight account to manage your palm oil plantations.",
+  path: "/login",
+});

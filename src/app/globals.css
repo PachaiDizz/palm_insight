@@ -137,33 +137,33 @@
     --text-primary: #0f172a;
     --text-secondary: rgba(15, 23, 42, 0.6);
     --text-muted: rgba(15, 23, 42, 0.4);
-    --accent-primary: #d97706;                        /* amber, darker for contrast on white */
-    --accent-hover: #b45309;
-    --accent-subtle: rgba(217, 119, 6, 0.08);
-    --accent-primary-light: rgba(217, 119, 6, 0.14);  /* nav-active / selection bg */
-    --accent-primary-border: rgba(217, 119, 6, 0.25);
-    --accent-green: #16a34a;
-    --accent-green-light: rgba(22, 163, 74, 0.08);
-    --accent-green-border: rgba(22, 163, 74, 0.2);
-    --accent-purple: #7c3aed;
-    --accent-purple-light: rgba(124, 58, 237, 0.08);
-    --accent-blue: #4f46e5;
-    --accent-blue-light: rgba(79, 70, 229, 0.08);
-    --accent-amber: #d97706;
-    --accent-amber-light: rgba(217, 119, 6, 0.08);
-    --accent-red: #dc2626;
-    --accent-red-light: rgba(220, 38, 38, 0.08);
-    --accent-red-border: rgba(220, 38, 38, 0.2);
+    --accent-primary: #b45309;                        /* amber-700: 4.8:1 on white, passes AA */
+    --accent-hover: #92400e;
+    --accent-subtle: rgba(180, 83, 9, 0.08);
+    --accent-primary-light: rgba(180, 83, 9, 0.14);  /* nav-active / selection bg */
+    --accent-primary-border: rgba(180, 83, 9, 0.25);
+    --accent-green: #15803d;
+    --accent-green-light: rgba(21, 128, 61, 0.08);
+    --accent-green-border: rgba(21, 128, 61, 0.2);
+    --accent-purple: #6d28d9;
+    --accent-purple-light: rgba(109, 40, 217, 0.08);
+    --accent-blue: #4338ca;
+    --accent-blue-light: rgba(67, 56, 202, 0.08);
+    --accent-amber: #b45309;
+    --accent-amber-light: rgba(180, 83, 9, 0.08);
+    --accent-red: #b91c1c;
+    --accent-red-light: rgba(185, 28, 28, 0.08);
+    --accent-red-border: rgba(185, 28, 28, 0.2);
 
     /* Semantic status (work / no-work) — light theme */
-    --status-work: #16a34a;
-    --status-work-bg: rgba(22, 163, 74, 0.14);
-    --status-no-work: #dc2626;
-    --status-no-work-bg: rgba(220, 38, 38, 0.12);
+    --status-work: #15803d;
+    --status-work-bg: rgba(21, 128, 61, 0.14);
+    --status-no-work: #b91c1c;
+    --status-no-work-bg: rgba(185, 28, 28, 0.12);
 
     /* Unified chart palette — light theme */
-    --chart-bunches: #d97706;
-    --chart-tons: #2563eb;
+    --chart-bunches: #b45309;
+    --chart-tons: #4338ca;
     --chart-grid: rgba(15, 23, 42, 0.08);
     --chart-axis: rgba(15, 23, 42, 0.5);
     --chart-tooltip-bg: #ffffff;
@@ -173,7 +173,7 @@
     /* Amber-tinted header (harvest tones) instead of the old indigo banner */
     --bg-header: linear-gradient(135deg, #fde9c4 0%, #f1f5f9 55%, #f8fafc 100%);
 
-    --text-on-accent: #050f05;
+    --text-on-accent: #ffffff;
     --text-faint: rgba(15, 23, 42, 0.4);
     --bg-nav-scrolled: rgba(255, 255, 255, 0.8);
     --bg-input-field: #f1f3f5;
@@ -187,7 +187,7 @@
     --bg-tooltip: #ffffff;
     --accent-gradient: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-primary) 100%);
     --accent-gradient-br: linear-gradient(to bottom right, var(--accent-hover), var(--accent-primary));
-    --accent-shadow: rgba(217, 119, 6, 0.18);
+    --accent-shadow: rgba(180, 83, 9, 0.18);
   }
 
   .dark {
@@ -255,6 +255,39 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.35s ease-out;
+}
+
+/* ─── Landing page animations (replace framer-motion) ─── */
+.bg-gradient-header {
+  background: var(--bg-header);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s cubic-bezier(0.25, 0.1, 0.25, 1),
+    transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: opacity, transform;
+}
+.reveal--in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+.mount-reveal {
+  animation: riseIn 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+@keyframes menuDrop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-menu {
+  animation: menuDrop 0.2s ease-out both;
 }
 
 /* Card glow system */
@@ -339,5 +372,10 @@ select option {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* Scroll-reveal elements must be visible immediately when motion is reduced */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

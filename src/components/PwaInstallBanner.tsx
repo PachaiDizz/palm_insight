@@ -41,10 +41,10 @@ export default function PwaInstallBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96 animate-slide-up">
+    <div role="status" aria-label="Install PalmInsight app" className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96 animate-slide-up">
       <div className="bg-[var(--bg-card)] border border-[var(--accent-primary-border)] rounded-2xl p-5 shadow-2xl shadow-black/50">
         <div className="flex items-start gap-3 mb-4">
-          <span className="text-2xl">🌿</span>
+          <span className="text-2xl" aria-hidden="true">🌿</span>
           <div>
             <h3 className="text-theme font-bold text-sm">PalmInsight</h3>
             <p className="text-[var(--text-muted)] text-xs mt-1 leading-relaxed">
@@ -55,12 +55,14 @@ export default function PwaInstallBanner() {
         <div className="flex gap-3 justify-end">
           <button
             onClick={handleDismiss}
+            aria-label="Dismiss install prompt"
             className="px-4 py-2 text-[var(--text-muted)] hover:text-theme text-sm font-medium transition-colors"
           >
             Not Now
           </button>
           <button
             onClick={handleInstall}
+            aria-label="Install PalmInsight app"
             className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-[#1a1200] text-sm font-medium rounded-lg transition-colors"
           >
             Install App

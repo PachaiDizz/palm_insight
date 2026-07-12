@@ -3,7 +3,8 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import PwaInstallBanner from "@/components/PwaInstallBanner";
+import AppShell from "@/components/AppShell";
+import { SITE_URL, SITE_NAME, OG_IMAGE } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
   keywords: ["palm oil", "plantation", "productivity", "tracker", "harvest", "agriculture"],
   authors: [{ name: "PalmInsight" }],
   manifest: "/manifest.json",
+  metadataBase: new URL(SITE_URL),
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -75,8 +77,9 @@ export default function RootLayout({
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-4 focus:bg-white focus:text-black">
           Skip to content
         </a>
-        <Providers>{children}</Providers>
-        <PwaInstallBanner />
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
       </body>
     </html>
   );

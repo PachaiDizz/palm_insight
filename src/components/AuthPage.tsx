@@ -4,10 +4,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, TreePalm, User, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 type Mode = "login" | "register";
 
 function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,7 +67,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("auth.passwordMismatch") || "Passwords do not match");
       setLoading(false);
       return;
     }
@@ -186,7 +188,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--status-work-bg)" }}>
                   <CheckCircle className="w-3.5 h-3.5" />
                 </div>
-                <span>Email confirmed! You can now sign in.</span>
+                <span>{t("auth.confirmed")}</span>
               </motion.div>
             )}
 
@@ -203,7 +205,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "linear-gradient(to bottom right, #f59e0b, #f59e0b)", boxShadow: "0 10px 15px -3px rgba(245,158,11,0.2)" }}>
                     <Mail className="w-8 h-8 text-theme" />
                   </div>
-                  <h2 className="section-heading text-xl text-theme mb-2">Check your email</h2>
+                  <h2 className="section-heading text-xl text-theme mb-2">{t("auth.registerSuccess")}</h2>
                   <p className="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>
                     We sent a confirmation link to:
                   </p>
@@ -246,7 +248,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
 
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Email</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("auth.email")}</label>
                       <div className="relative">
                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -262,7 +264,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Password</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("auth.password")}</label>
                       <div className="relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -290,7 +292,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--status-work-bg)" }}>
                           <CheckCircle className="w-3.5 h-3.5" />
                         </div>
-                        <span>Password reset link sent to {email}. Check your inbox (and spam).</span>
+                        <span>{t("auth.resetSent")}</span>
                       </div>
                     )}
 
@@ -303,10 +305,10 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                           className="w-4 h-4 rounded"
                           style={{ borderColor: "rgba(245,158,11,0.3)", backgroundColor: "var(--bg-input)" }}
                         />
-                        <span className="text-sm" style={{ color: "var(--text-muted)" }}>Remember me</span>
+                        <span className="text-sm" style={{ color: "var(--text-muted)" }}>{t("auth.rememberMe")}</span>
                       </label>
                       <button type="button" onClick={handleForgotPassword} className="text-sm font-medium transition-colors" style={{ color: "var(--accent-amber)" }}>
-                        Forgot password?
+                        {t("auth.forgotPassword")}
                       </button>
                     </div>
 
@@ -363,7 +365,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Email</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("auth.email")}</label>
                       <div className="relative">
                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -379,7 +381,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Password</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("auth.password")}</label>
                       <div className="relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -403,7 +405,7 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Confirm Password</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("auth.confirmPassword")}</label>
                       <div className="relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} />
                         <input
@@ -445,16 +447,16 @@ function AuthPageInner({ initialMode = "login" }: { initialMode?: Mode }) {
               <p className="text-center text-sm" style={{ color: "var(--text-muted)" }}>
                 {mode === "login" ? (
                   <>
-                    Don&apos;t have an account?{" "}
+                    {t("auth.noAccount")}{" "}
                     <button onClick={() => switchMode("register")} className="font-semibold hover:underline underline-offset-4 transition-colors" style={{ color: "var(--accent-amber)" }}>
-                      Sign up
+                      {t("auth.register")}
                     </button>
                   </>
                 ) : (
                   <>
-                    Already have an account?{" "}
+                    {t("auth.hasAccount")}{" "}
                     <button onClick={() => switchMode("login")} className="font-semibold hover:underline underline-offset-4 transition-colors" style={{ color: "var(--accent-amber)" }}>
-                      Sign in
+                      {t("auth.login")}
                     </button>
                   </>
                 )}

@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
-import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
 import { useRouter } from "next/navigation";
+import { usePlantations, useReportEntries } from "@/lib/queries";
 import DashboardLayout from "@/components/DashboardLayout";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Calendar, TrendingUp, Filter, ChevronDown, FileText, FileSpreadsheet } from "lucide-react";
@@ -13,6 +12,7 @@ import Badge from "@/components/ui/Badge";
 import StatCard from "@/components/ui/StatCard";
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/ui/Skeleton";
 import ExportHarvestingModal from "@/components/ExportHarvestingModal";
+import { useI18n } from "@/lib/i18n";
 
 const months = [
   "January", "February", "March", "April",
@@ -23,48 +23,22 @@ const months = [
 export default function ReportsPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [entries, setEntries] = useState<DailyEntry[]>([]);
-  const [plantations, setPlantations] = useState<Plantation[]>([]);
+  const { t } = useI18n();
   const [selectedPlantationId, setSelectedPlantationId] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showPlantFilter, setShowPlantFilter] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  const { data: plantations = [], isLoading: plantationsLoading } = usePlantations(user?.id);
+  const { data: entries = [], isLoading } = useReportEntries(user?.id, selectedYear, selectedMonth);
+
+  // Redirect to onboarding if the user has no plantation yet.
   useEffect(() => {
-    if (user) loadData();
-  }, [user, selectedMonth, selectedYear]);
-
-  async function loadData() {
-    if (!user) return;
-    setLoading(true);
-    const hasPlantation = await hasCompletedOnboarding(user.id);
-    if (!hasPlantation) {
+    if (user && !plantationsLoading && plantations.length === 0) {
       router.push("/onboarding/plantation");
-      return;
     }
-    const allP = await getAllUserPlantations(user.id);
-    setPlantations(allP);
-
-    // Scope the query to the selected month/year instead of pulling the
-    // plantation's entire history on every visit.
-    const mm = String(selectedMonth + 1).padStart(2, "0");
-    const start = `${selectedYear}-${mm}-01`;
-    const lastDay = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-    const end = `${selectedYear}-${mm}-${String(lastDay).padStart(2, "0")}`;
-
-    const { data } = await supabase
-      .from("daily_entries")
-      .select("*, team_leaders(plantation_id, plantations(rancangan, peringkat, block))")
-      .eq("user_id", user.id)
-      .gte("date", start)
-      .lte("date", end)
-      .order("date", { ascending: false });
-
-    setEntries(data || []);
-    setLoading(false);
-  }
+  }, [user, plantationsLoading, plantations, router]);
 
   // Filter by month/year/plantation
   const filteredEntries = entries.filter((e: DailyEntry) => {
@@ -141,9 +115,9 @@ export default function ReportsPage() {
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6 max-w-6xl mx-auto">
-        {loading && (
+        {isLoading && (
           <FadeIn>
-            <PageHeader title="Monthly Report" subtitle="Loading..." action={null} />
+            <PageHeader title={t("reports.title")} subtitle="Loading..." action={null} />
             <div className="flex items-center gap-4 mb-6">
               <Skeleton className="w-32 h-10 rounded-xl" />
               <Skeleton className="w-32 h-10 rounded-xl" />
@@ -159,10 +133,10 @@ export default function ReportsPage() {
           </FadeIn>
         )}
 
-        {!loading && (
+        {!isLoading && (
           <>
             <PageHeader
-              title="Monthly Report"
+              title={t("reports.title")}
               subtitle={`${months[selectedMonth]} ${selectedYear}`}
               action={
                 <div className="flex items-center gap-3">

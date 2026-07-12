@@ -1,27 +1,34 @@
 "use client";
 import { useAuth } from "@/components/AuthProvider";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
-import { supabase } from "@/lib/supabaseClient";
-import { hasCompletedOnboarding, getAllUserPlantations, getUserTeamLeaders } from "@/lib/onboarding";
+import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
+import {
+  usePlantationTeamLeaders,
+  useDashboardMonthEntries,
+  useDashboardRecentEntries,
+  useTodayPulse,
+} from "@/lib/queries";
+import { toLocalDateKey } from "@/lib/date";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
 import { Users, ChevronDown, ChevronLeft, ChevronRight, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
-import { Plantation, TeamLeader, TodayStats } from "@/types";
+import { Plantation, TodayStats } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { FadeIn } from "@/components/ui/Skeleton";
 import StatCard from "@/components/ui/StatCard";
 import Badge from "@/components/ui/Badge";
 import GuidedTour from "@/components/GuidedTour";
+import { useI18n } from "@/lib/i18n";
 
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function getGreeting() {
+function getGreeting(t: (key: string) => string) {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  return "Good Evening";
+  if (hour < 12) return t("greeting.morning");
+  if (hour < 17) return t("greeting.afternoon");
+  return t("greeting.evening");
 }
 
 function getFormattedDate() {
@@ -30,27 +37,14 @@ function getFormattedDate() {
   return now.toLocaleDateString("en-MY", options);
 }
 
-function getMonthRange(year: number, month: number) {
-  const mm = String(month + 1).padStart(2, "0");
-  const startDate = `${year}-${mm}-01`;
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const endDate = `${year}-${mm}-${String(lastDay).padStart(2, "0")}`;
-  return { startDate, endDate };
-}
-
 export default function DashboardPage() {
   const { user, profile } = useAuth();
+  const { t } = useI18n();
   const [checking, setChecking] = useState(true);
   const [plantations, setPlantations] = useState<Plantation[]>([]);
   const [selectedPlantation, setSelectedPlantation] = useState<Plantation | null>(null);
-  const [teamLeaders, setTeamLeaders] = useState<TeamLeader[]>([]);
-  const [monthlyStats, setMonthlyStats] = useState<TodayStats>({ bunches: 0, transported: 0, backlogs: 0, teamsActive: 0 });
-  const [todayPulse, setTodayPulse] = useState({ bunches: 0, tons: 0, teamsLogged: 0 });
   const [showDropdown, setShowDropdown] = useState(false);
-  const [recentEntries, setRecentEntries] = useState<any[]>([]);
-  const [weeklyTrend, setWeeklyTrend] = useState<{ date: string; day: string; bunches: number; tons: number }[]>([]);
   const [showTour, setShowTour] = useState(false);
-  const [hasEntriesToday, setHasEntriesToday] = useState(true);
 
   // Monthly filter state — default to current month (timezone-invariant, safe for SSR)
   const now = new Date();
@@ -63,7 +57,7 @@ export default function DashboardPage() {
   const [greeting, setGreeting] = useState("Welcome");
   const [todayLabel, setTodayLabel] = useState("");
   useEffect(() => {
-    setGreeting(getGreeting());
+    setGreeting(getGreeting(t));
     setTodayLabel(getFormattedDate());
   }, []);
 
@@ -80,6 +74,63 @@ export default function DashboardPage() {
       return m + 1;
     });
   }, []);
+
+  // ── Data fetching via React Query (caching + dedup + stale-while-revalidate) ──
+  const { data: monthEntries = [] } = useDashboardMonthEntries(
+    user?.id, selectedPlantation?.id, selectedYear, selectedMonth
+  );
+  const { data: teamLeaders = [] } = usePlantationTeamLeaders(user?.id, selectedPlantation?.id);
+  const { data: recentEntries = [] } = useDashboardRecentEntries(
+    user?.id, selectedPlantation?.id, selectedYear, selectedMonth
+  );
+  const { data: todayEntries = [] } = useTodayPulse(user?.id, selectedPlantation?.id);
+
+  const monthlyStats = useMemo<TodayStats>(() => {
+    const allEntries = monthEntries;
+    const workEntries = allEntries.filter((e) => e.work_status === "work");
+    const activeLeaders = new Set(workEntries.map((e) => e.team_leader_id));
+    return {
+      bunches: workEntries.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
+      transported: allEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
+      backlogs: workEntries.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0),
+      teamsActive: activeLeaders.size,
+    };
+  }, [monthEntries]);
+
+  const weeklyTrend = useMemo(() => {
+    const dayMap: Record<string, { date: string; day: string; bunches: number; tons: number }> = {};
+    const start = new Date(selectedYear, selectedMonth, 1);
+    const end = new Date(selectedYear, selectedMonth + 1, 0);
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = toLocalDateKey(d);
+      const dayNum = d.getDate();
+      dayMap[key] = { date: String(dayNum), day: String(dayNum), bunches: 0, tons: 0 };
+    }
+    monthEntries.forEach((e) => {
+      const key = e.date;
+      if (!dayMap[key]) return;
+      // Tons from all entries (work + no_work) — transport delivers regardless
+      dayMap[key].tons += Number(e.tons) || 0;
+      // Bunches only from work days
+      if (e.work_status === "work") {
+        dayMap[key].bunches += Number(e.bunches) || 0;
+      }
+    });
+    return Object.values(dayMap);
+  }, [monthEntries, selectedYear, selectedMonth]);
+
+  const todayPulse = useMemo(() => {
+    const allToday = todayEntries;
+    const workToday = allToday.filter((e) => e.work_status === "work");
+    const teamsLogged = new Set(workToday.map((e) => e.team_leader_id));
+    return {
+      bunches: workToday.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
+      tons: allToday.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
+      teamsLogged: teamsLogged.size,
+    };
+  }, [todayEntries]);
+
+  const hasEntriesToday = monthEntries.length > 0;
 
   useEffect(() => {
     if (!user) return;
@@ -112,118 +163,6 @@ export default function DashboardPage() {
       console.error("Onboarding check failed:", error);
       setChecking(false);
     }
-  }
-
-  // Reload data when plantation or month changes
-  useEffect(() => {
-    if (selectedPlantation && user) {
-      loadMonthlyStats(selectedPlantation);
-      loadTodayPulse(selectedPlantation);
-      loadRecentEntries(selectedPlantation);
-      loadMonthlyTrend(selectedPlantation);
-    }
-  }, [selectedPlantation, selectedMonth, selectedYear]);
-
-  async function loadMonthlyStats(p: Plantation) {
-    if (!user || !p) return;
-    const { startDate, endDate } = getMonthRange(selectedYear, selectedMonth);
-    const leaders = await getUserTeamLeaders(user.id, p.id);
-    setTeamLeaders(leaders);
-
-    const { data: entries } = await supabase
-      .from("daily_entries")
-      .select("bunches, tons, backlogs, team_leader_id, work_status")
-      .eq("user_id", user.id)
-      .eq("plantation_id", p.id)
-      .gte("date", startDate)
-      .lte("date", endDate);
-
-    const allEntries = entries || [];
-    const workEntries = allEntries.filter((e) => e.work_status === "work");
-    const activeLeaders = new Set(workEntries.map((e) => e.team_leader_id));
-
-    setHasEntriesToday(allEntries.length > 0);
-    setMonthlyStats({
-      bunches: workEntries.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
-      transported: allEntries.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
-      backlogs: workEntries.reduce((sum, e) => sum + (Number(e.backlogs) || 0), 0),
-      teamsActive: activeLeaders.size,
-    });
-  }
-
-  async function loadTodayPulse(p: Plantation) {
-    if (!user || !p) return;
-    const today = new Date().toISOString().split("T")[0];
-
-    const { data: todayEntries } = await supabase
-      .from("daily_entries")
-      .select("bunches, tons, team_leader_id, work_status")
-      .eq("user_id", user.id)
-      .eq("plantation_id", p.id)
-      .eq("date", today);
-
-    const allToday = todayEntries || [];
-    const workToday = allToday.filter((e) => e.work_status === "work");
-    const teamsLogged = new Set(workToday.map((e) => e.team_leader_id));
-
-    setTodayPulse({
-      bunches: workToday.reduce((sum, e) => sum + (Number(e.bunches) || 0), 0),
-      tons: allToday.reduce((sum, e) => sum + (Number(e.tons) || 0), 0),
-      teamsLogged: teamsLogged.size,
-    });
-  }
-
-  async function loadRecentEntries(p: Plantation) {
-    if (!user || !p) return;
-    const { startDate, endDate } = getMonthRange(selectedYear, selectedMonth);
-
-    const { data } = await supabase
-      .from("daily_entries")
-      .select("*, team_leaders(name), plantations(block)")
-      .eq("user_id", user.id)
-      .eq("plantation_id", p.id)
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: false })
-      .limit(10);
-    setRecentEntries(data || []);
-  }
-
-  async function loadMonthlyTrend(p: Plantation) {
-    if (!user || !p) return;
-    const { startDate, endDate } = getMonthRange(selectedYear, selectedMonth);
-
-    const { data } = await supabase
-      .from("daily_entries")
-      .select("date, bunches, tons, work_status")
-      .eq("user_id", user.id)
-      .eq("plantation_id", p.id)
-      .gte("date", startDate)
-      .lte("date", endDate)
-      .order("date", { ascending: true });
-
-    // Build a map for every day in the month
-    const dayMap: Record<string, { date: string; day: string; bunches: number; tons: number }> = {};
-    const start = new Date(selectedYear, selectedMonth, 1);
-    const end = new Date(selectedYear, selectedMonth + 1, 0);
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const key = d.toISOString().split("T")[0];
-      const dayNum = d.getDate();
-      dayMap[key] = { date: String(dayNum), day: String(dayNum), bunches: 0, tons: 0 };
-    }
-
-    (data || []).forEach((e: any) => {
-      const key = e.date;
-      if (!dayMap[key]) return;
-      // Tons from all entries (work + no_work) — transport delivers regardless
-      dayMap[key].tons += Number(e.tons) || 0;
-      // Bunches only from work days
-      if (e.work_status === "work") {
-        dayMap[key].bunches += Number(e.bunches) || 0;
-      }
-    });
-
-    setWeeklyTrend(Object.values(dayMap));
   }
 
   if (checking) {
@@ -281,7 +220,7 @@ export default function DashboardPage() {
       {showTour && <GuidedTour onClose={() => { setShowTour(false); localStorage.setItem("palminsight_tour_seen", "true"); }} />}
       <div className="min-h-full overflow-x-hidden" style={{ backgroundColor: "var(--bg-base)" }}>
         {/* Header Banner */}
-        <div className="relative z-[var(--z-nav)]" style={{ background: "var(--bg-header)" }}>
+        <div className="relative z-[var(--z-nav)] bg-gradient-header">
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20" style={{ backgroundColor: "#f59e0b" }} />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15" style={{ backgroundColor: "#fbbf24" }} />
           <div className="absolute top-8 right-1/3 w-32 h-32 rounded-full opacity-10" style={{ backgroundColor: "#fcd34d" }} />
@@ -369,24 +308,24 @@ export default function DashboardPage() {
                   <Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                 </div>
                 <div>
-                  <div className="text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Today&apos;s Pulse</div>
+                  <div className="text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("dashboard.todaysPulse")}</div>
                   <div className="text-sm font-semibold text-theme">Live harvest signal</div>
                 </div>
               </div>
               <div className="flex items-center gap-5 sm:gap-7">
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-theme">{todayPulse.bunches.toLocaleString("en-MY")}</div>
-                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Bunches</div>
+                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("entry.bunches")}</div>
                 </div>
                 <div className="w-px h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-theme">{Number(todayPulse.tons).toFixed(2)}</div>
-                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Tons</div>
+                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("entry.tons")}</div>
                 </div>
                 <div className="w-px h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-theme">{todayPulse.teamsLogged}</div>
-                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Teams Logged</div>
+                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("dashboard.activeTeams")}</div>
                 </div>
               </div>
             </div>
@@ -434,7 +373,7 @@ export default function DashboardPage() {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="section-heading text-lg text-theme">Monthly Overview</h2>
+              <h2 className="section-heading text-lg text-theme">{t("dashboard.monthlyOverview")}</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {[
@@ -552,19 +491,19 @@ export default function DashboardPage() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <ClipboardList className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="section-heading text-base sm:text-lg text-theme">Recent Entries — {MONTH_NAMES[selectedMonth]} {selectedYear}</h2>
+              <h2 className="section-heading text-base sm:text-lg text-theme">{t("dashboard.recentEntries")} — {MONTH_NAMES[selectedMonth]} {selectedYear}</h2>
             </div>
-            <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
+            <div className="card-glow rounded-2xl overflow-hidden bg-[var(--bg-card)]">
               {recentEntries.length === 0 ? (
                 <div className="p-6 sm:p-8 text-center">
                   <ClipboardList className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries for {MONTH_NAMES[selectedMonth]} {selectedYear} — go to Teams to add one.</p>
                 </div>
               ) : (
-                <div className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="divide-y border-[var(--border-subtle)]">
                   {recentEntries.map((e) => {
-                    const leader = e.team_leaders as any;
-                    const plantation = e.plantations as any;
+                    const leader = e.team_leaders;
+                    const plantation = e.plantations;
                     const isWork = e.work_status === "work";
                     return (
                       <div key={e.id} className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-3.5 hover:bg-[var(--hover-subtle)] transition-colors">

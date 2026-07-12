@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Phone, Trash2, Save, Eye, ChevronLeft, Sprout } from "lucide-react";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface LeaderOrgChartProps {
   selectedPlantation: Plantation;
@@ -48,6 +49,7 @@ export default function LeaderOrgChart({
   onBijiRelai,
   focusedLeaderId,
 }: LeaderOrgChartProps) {
+  const { t } = useI18n();
   const sortedLeaders = focusedLeaderId
     ? [...leaders].filter((l) => l.id === focusedLeaderId).sort((a, b) => a.name.localeCompare(b.name))
     : [...leaders].sort((a, b) => a.name.localeCompare(b.name));
@@ -64,10 +66,11 @@ export default function LeaderOrgChart({
           whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.08)" }}
           whileTap={{ scale: 0.97 }}
           onClick={onBack}
+          aria-label="Back to all blocks"
           className="flex items-center gap-2 mb-4 px-4 py-2 rounded-xl text-sm font-medium transition-all text-[var(--text-muted)] border"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to all blocks
+          {t("team.backToBlocks")}
         </motion.button>
           <div
             className="card-glow rounded-2xl p-8 text-center w-full max-w-[400px] bg-[rgba(245,158,11,0.08)]"
@@ -82,17 +85,18 @@ export default function LeaderOrgChart({
               Block {selectedPlantation.block}
             </div>
             <div className="text-sm mt-3 text-[var(--text-muted)]">
-              {sortedLeaders.length} Team Leader{sortedLeaders.length !== 1 ? "s" : ""}
+              {sortedLeaders.length} {sortedLeaders.length !== 1 ? t("team.leaders") : t("team.leader")}
             </div>
             <motion.button
               whileHover={{ scale: 1.04, backgroundColor: "rgba(34,197,94,0.18)" }}
               whileTap={{ scale: 0.96 }}
               onClick={(e) => { e.stopPropagation(); onBijiRelai(); }}
+              aria-label={t("team.bijiRelai")}
               className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border"
               style={{ borderColor: "rgba(34,197,94,0.3)", color: "#22c55e", backgroundColor: "rgba(34,197,94,0.08)" }}
             >
               <Sprout className="w-4 h-4" />
-              Biji Relai
+              {t("team.bijiRelai")}
             </motion.button>
         </div>
       </motion.div>
@@ -179,6 +183,7 @@ export default function LeaderOrgChart({
                           </div>
                         <button
                           onClick={() => onDeleteLeader(leader.id)}
+                          aria-label={`Remove ${leader.name}`}
                           className="p-2 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-muted)]"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -187,19 +192,19 @@ export default function LeaderOrgChart({
 
                       <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
                         <div className="p-3 sm:p-4 rounded-xl bg-[rgba(245,158,11,0.08)]">
-                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Total Workers</div>
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">{t("team.totalWorkers")}</div>
                           <div className="text-base sm:text-lg font-bold text-theme">{totalWorkers}</div>
                         </div>
                         <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-purple-light)]">
-                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Additional</div>
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">{t("team.additional")}</div>
                           <div className="text-base sm:text-lg font-bold text-theme">0</div>
                         </div>
                         <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-amber-light)]">
-                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Total Lots</div>
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">{t("team.totalLots")}</div>
                           <div className="text-base sm:text-lg font-bold text-theme uppercase">{totalLots}</div>
                         </div>
                         <div className="p-3 sm:p-4 rounded-xl bg-[var(--accent-blue-light)]">
-                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">Loose Fruit</div>
+                          <div className="text-xs sm:text-sm mb-1 text-[var(--text-muted)]">{t("team.looseFruit")}</div>
                           <div className="text-base sm:text-lg font-bold text-theme">0</div>
                         </div>
                       </div>
@@ -209,19 +214,21 @@ export default function LeaderOrgChart({
                           whileHover={{ scale: 1.03, backgroundColor: "rgba(245,158,11,0.18)" }}
                           whileTap={{ scale: 0.97 }}
                           onClick={() => onSelectLeader(leader)}
+                          aria-label={`${t("team.addEntry")} ${leader.name}`}
                           className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium transition-all bg-[var(--accent-subtle)] text-[var(--accent-primary)] min-h-[44px]"
                         >
                           <Save className="w-3.5 h-3.5" />
-                          Add Entry
+                          {t("team.addEntry")}
                         </motion.button>
                         <motion.button
                           onClick={() => onViewDetails(leader)}
                           whileHover={{ scale: 1.03, backgroundColor: "rgba(59,130,246,0.18)" }}
                           whileTap={{ scale: 0.97 }}
+                          aria-label={`${t("team.viewDetails")} ${leader.name}`}
                           className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-medium transition-all bg-[var(--accent-blue-light)] text-[var(--accent-blue)] min-h-[44px]"
                         >
                           <Eye className="w-4 h-4" />
-                          View Details
+                          {t("team.viewDetails")}
                         </motion.button>
                       </div>
                     </div>

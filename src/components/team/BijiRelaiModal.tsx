@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Save, X, CheckCircle, Calendar, Truck, Loader2, Edit2, Trash2 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Plantation, BijiRelai } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface BijiRelaiModalProps {
   open: boolean;
@@ -38,6 +39,7 @@ export default function BijiRelaiModal({
   onEdit,
   onDelete,
 }: BijiRelaiModalProps) {
+  const { t } = useI18n();
   const [editingEntry, setEditingEntry] = useState<BijiRelai | null>(null);
   const [editDate, setEditDate] = useState("");
   const [editTons, setEditTons] = useState("");
@@ -76,11 +78,11 @@ export default function BijiRelaiModal({
             <Truck className="w-5 h-5" style={{ color: "#22c55e" }} />
           </div>
           <div>
-            <h2 className="section-heading text-base text-theme">Biji Relai</h2>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Block {plantation.block} — Seed Tonnage</p>
+            <h2 className="section-heading text-base text-theme">{t("bijiRelai.title")}</h2>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Block {plantation.block} — {t("bijiRelai.seedTonnage")}</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 rounded-xl transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
+        <button onClick={onClose} aria-label="Close" className="p-2 rounded-xl transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -91,7 +93,7 @@ export default function BijiRelaiModal({
           <div>
             <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>
               <Calendar className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
-              Date
+              {t("entry.date")}
             </label>
             <input
               type="date"
@@ -104,7 +106,7 @@ export default function BijiRelaiModal({
           <div>
             <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>
               <Truck className="w-3.5 h-3.5" style={{ color: "#22c55e" }} />
-              Tons (Biji Relai)
+              {t("entry.tons")} (Biji Relai)
             </label>
             <input
               type="text"
@@ -115,7 +117,7 @@ export default function BijiRelaiModal({
               onChange={(e) => onTonsChange(e.target.value)}
               placeholder="0.00"
             />
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Palm seed tonnage collected per block</p>
+            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{t("bijiRelai.description")}</p>
           </div>
         </div>
         <div className="flex justify-end gap-3">
@@ -128,7 +130,7 @@ export default function BijiRelaiModal({
               className="px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-white/5"
               style={{ color: "var(--text-muted)" }}
             >
-              New Entry
+              {t("team.newEntry")}
             </motion.button>
           )}
           <motion.button
@@ -140,7 +142,7 @@ export default function BijiRelaiModal({
             style={{ background: "linear-gradient(135deg, #22c55e, #16a34a)" }}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? "Saving..." : "Save Entry"}
+            {saving ? t("team.saving") : t("entry.saveEntry")}
           </motion.button>
         </div>
       </form>
@@ -151,11 +153,11 @@ export default function BijiRelaiModal({
           <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-default)" }}>
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4" style={{ color: "#22c55e" }} />
-              <h3 className="text-sm font-semibold text-theme">Biji Relai History</h3>
+              <h3 className="text-sm font-semibold text-theme">{t("bijiRelai.history")}</h3>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>{sorted.length} entries</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{totalTons.toFixed(2)} ton</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{totalTons.toFixed(2)} {t("entry.tons")}</span>
             </div>
           </div>
 
@@ -167,7 +169,7 @@ export default function BijiRelaiModal({
                   <th className="text-center px-3 py-2.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>#</th>
                   <th className="text-left px-3 py-2.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Date</th>
                   <th className="text-right px-3 py-2.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Tons</th>
-                  <th className="text-right px-3 py-2.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Cumulative</th>
+                  <th className="text-right px-3 py-2.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("bijiRelai.cumulative")}</th>
                   <th className="text-center px-3 py-2.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Actions</th>
                 </tr>
               </thead>
@@ -204,22 +206,22 @@ export default function BijiRelaiModal({
                             {isEditing ? (
                               <>
                                 <button onClick={handleSaveEdit} disabled={editSaving}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "#22c55e" }} title="Save">
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "#22c55e" }} title="Save" aria-label="Save changes">
                                   {editSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                                 </button>
                                 <button onClick={handleCancelEdit}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }} title="Cancel">
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }} title="Cancel" aria-label="Cancel edit">
                                   <X className="w-3.5 h-3.5" />
                                 </button>
                               </>
                             ) : (
                               <>
                                 <button onClick={() => handleStartEdit(e)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--accent-blue)" }} title="Edit">
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--accent-blue)" }} title="Edit" aria-label="Edit entry">
                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button onClick={() => onDelete(e.id)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--accent-red)" }} title="Delete">
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--accent-red)" }} title="Delete" aria-label="Delete entry">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </>
@@ -266,19 +268,19 @@ export default function BijiRelaiModal({
                         <div className="flex items-center gap-1">
                           {isEditing ? (
                             <>
-                              <button onClick={handleSaveEdit} disabled={editSaving} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "#22c55e" }}>
+                              <button onClick={handleSaveEdit} disabled={editSaving} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "#22c55e" }} aria-label="Save changes">
                                 {editSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                               </button>
-                              <button onClick={handleCancelEdit} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
+                              <button onClick={handleCancelEdit} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--text-muted)" }} aria-label="Cancel edit">
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </>
                           ) : (
                             <>
-                              <button onClick={() => handleStartEdit(e)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-blue)" }}>
+                              <button onClick={() => handleStartEdit(e)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-blue)" }} aria-label="Edit entry">
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
-                              <button onClick={() => onDelete(e.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-red)" }}>
+                              <button onClick={() => onDelete(e.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-red)" }} aria-label="Delete entry">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </>

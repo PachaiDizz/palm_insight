@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, useInView } from "framer-motion";
 import {
   TreePalm,
   Users,
@@ -18,6 +17,27 @@ import {
   Settings,
 } from "lucide-react";
 
+function useReveal(options?: IntersectionObserverInit) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+          obs.disconnect();
+        }
+      },
+      options ?? { rootMargin: "0px 0px -60px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [options]);
+  return { ref, shown };
+}
+
 function FadeIn({
   children,
   delay = 0,
@@ -27,19 +47,15 @@ function FadeIn({
   delay?: number;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
-
+  const { ref, shown } = useReveal();
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: 28 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.55, delay, ease: [0.25, 0.1, 0.25, 1] }}
-      className={className}
+      className={`reveal ${shown ? "reveal--in" : ""} ${className ?? ""}`}
+      style={{ transitionDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -168,11 +184,7 @@ function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="sm:hidden bg-[var(--bg-nav-scrolled)] backdrop-blur-xl border-b border-[var(--border-subtle)] px-5 pb-4"
-        >
+        <div className="sm:hidden animate-menu bg-[var(--bg-nav-scrolled)] backdrop-blur-xl border-b border-[var(--border-subtle)] px-5 pb-4">
           <Link
             href="/login"
             className="block py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -187,7 +199,7 @@ function Navbar() {
           >
             Get Started
           </Link>
-        </motion.div>
+        </div>
       )}
     </nav>
   );
@@ -204,46 +216,36 @@ function Hero() {
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-5 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        >
+        <div className="mount-reveal">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--accent-primary-border)] bg-[var(--accent-primary-light)] text-[var(--accent-primary)] text-xs font-medium mb-8">
             <LeafIcon className="w-3.5 h-3.5" />
             Built for Malaysian Palm Oil Estates
           </div>
-        </motion.div>
+        </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-          className="hero-headline text-4xl sm:text-5xl md:text-6xl text-[var(--text-primary)]"
+        <h1
+          className="hero-headline text-4xl sm:text-5xl md:text-6xl text-[var(--text-primary)] mount-reveal"
+          style={{ animationDelay: "0.1s" }}
         >
           Track Your Harvest.
           <br />
           Manage Your Teams.
           <br />
           <span className="text-[var(--accent-primary)]">Grow Smarter.</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-6 text-base sm:text-lg text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed"
+        <p
+          className="mt-6 text-base sm:text-lg text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed mount-reveal"
+          style={{ animationDelay: "0.22s" }}
         >
           PalmInsight is a productivity tracker built for palm oil plantation supervisors
           and estate managers in Malaysia. Log daily harvests, monitor team performance,
           and generate reports — all in one place.
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.36, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3"
+        <div
+          className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 mount-reveal"
+          style={{ animationDelay: "0.36s" }}
         >
           <Link
             href="/register"
@@ -258,16 +260,14 @@ function Hero() {
           >
             Login to Dashboard
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-5 text-xs text-[var(--text-faint)]"
+        <p
+          className="mt-5 text-xs text-[var(--text-faint)] mount-reveal"
+          style={{ animationDelay: "0.5s" }}
         >
           No credit card required. Free forever.
-        </motion.p>
+        </p>
       </div>
     </section>
   );
@@ -291,11 +291,9 @@ function DashboardPreview() {
   return (
     <section className="relative -mt-10 sm:-mt-16 z-20 px-5 pb-8">
       <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-          className="relative"
+        <div
+          className="relative mount-reveal"
+          style={{ animationDelay: "0.1s" }}
         >
           {/* Soft glow behind the window */}
           <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-[var(--accent-primary-light)] blur-3xl opacity-40" />
@@ -412,7 +410,7 @@ function DashboardPreview() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

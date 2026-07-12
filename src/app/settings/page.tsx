@@ -4,17 +4,19 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle, Bell, BellOff, FileSpreadsheet } from "lucide-react";
+import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle, Bell, BellOff, FileSpreadsheet, Globe } from "lucide-react";
 import { getNotificationPrefs, saveNotificationPrefs } from "@/components/notifications/notificationHelpers";
 import type { NotificationPrefs } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import { getAllUserPlantations } from "@/lib/onboarding";
 import { Plantation } from "@/types";
 import ExportHarvestingModal from "@/components/ExportHarvestingModal";
+import { useI18n } from "@/lib/i18n";
 
 export default function SettingsPage() {
   const { user, profile, fetchProfile } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { locale, setLocale, t } = useI18n();
   const [importing, setImporting] = useState(false);
 
   // Account state
@@ -163,7 +165,7 @@ export default function SettingsPage() {
 
           {/* ===== Account Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Account</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>{t("settings.account")}</h2>
             <div className="card-glow rounded-2xl p-5 space-y-4" style={{ backgroundColor: "var(--bg-card)" }}>
 
               {/* Display Name */}
@@ -261,7 +263,7 @@ export default function SettingsPage() {
 
           {/* ===== Notifications Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Notifications</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>{t("settings.notifications")}</h2>
             <div className="card-glow rounded-2xl p-5 space-y-0" style={{ backgroundColor: "var(--bg-card)" }}>
               {([
                 { key: "dailyReminder" as const, label: "Daily Harvest Reminder", desc: "Remind me when no entries are logged by 10AM" },
@@ -333,7 +335,7 @@ export default function SettingsPage() {
 
           {/* ===== Appearance Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Appearance</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>{t("settings.appearance")}</h2>
             <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -341,8 +343,8 @@ export default function SettingsPage() {
                     {theme === "dark" ? <Sun className="w-5 h-5" style={{ color: "var(--accent-purple)" }} /> : <Moon className="w-5 h-5" style={{ color: "var(--accent-purple)" }} />}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-theme">Theme</div>
-                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{theme === "dark" ? "Dark mode" : "Light mode"}</div>
+                    <div className="text-sm font-medium text-theme">{t("settings.theme")}</div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{theme === "dark" ? t("settings.darkMode") : t("settings.lightMode")}</div>
                   </div>
                 </div>
                 <button
@@ -360,9 +362,49 @@ export default function SettingsPage() {
             </div>
           </section>
 
+          {/* ===== Language Section ===== */}
+          <section>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>{t("settings.language")}</h2>
+            <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(59,130,246,0.15)" }}>
+                    <Globe className="w-5 h-5" style={{ color: "var(--accent-blue)" }} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-theme">{t("settings.language")}</div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{locale === "en" ? "English" : "Bahasa Melayu"}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-base)" }}>
+                  <button
+                    onClick={() => setLocale("en")}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    style={{
+                      backgroundColor: locale === "en" ? "var(--accent-primary)" : "transparent",
+                      color: locale === "en" ? "var(--text-on-accent)" : "var(--text-muted)",
+                    }}
+                  >
+                    EN
+                  </button>
+                  <button
+                    onClick={() => setLocale("ms")}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    style={{
+                      backgroundColor: locale === "ms" ? "var(--accent-primary)" : "transparent",
+                      color: locale === "ms" ? "var(--text-on-accent)" : "var(--text-muted)",
+                    }}
+                  >
+                    MS
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* ===== Data Management Section ===== */}
           <section>
-            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>Data Management</h2>
+            <h2 className="card-title text-sm uppercase tracking-wider mb-3" style={{ color: "var(--accent-primary)" }}>{t("settings.dataManagement")}</h2>
             <div className="space-y-3">
               <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
                 <div className="flex items-center justify-between">

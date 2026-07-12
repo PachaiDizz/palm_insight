@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Settings",
-  description: "Manage your account, appearance, and data settings",
-};
+  description: "Manage your account, appearance theme, notification preferences, and data settings.",
+  path: "/settings",
+});
