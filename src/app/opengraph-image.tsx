@@ -1,6 +1,4 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { SITE_NAME } from "@/lib/site";
 
 export const runtime = "nodejs";
@@ -9,10 +7,6 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function Image() {
-  const fontData = await readFile(
-    join(process.cwd(), "src/app/fonts/CabinetGrotesk-Bold.woff2")
-  );
-
   return new ImageResponse(
     (
       <div
@@ -27,7 +21,6 @@ export default async function Image() {
           backgroundImage:
             "linear-gradient(135deg, #1a1d2b 0%, #0f172a 55%, #241a08 100%)",
           color: "white",
-          fontFamily: "CabinetGrotesk",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -70,9 +63,6 @@ export default async function Image() {
         </div>
       </div>
     ),
-    {
-      ...size,
-      fonts: [{ name: "CabinetGrotesk", data: fontData, weight: 700, style: "normal" }],
-    }
+    { ...size }
   );
 }
