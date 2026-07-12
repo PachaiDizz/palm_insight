@@ -39,6 +39,15 @@ export interface DailyEntry {
   team_leaders?: TeamLeader;
 }
 
+export interface BijiRelai {
+  id: string;
+  user_id: string;
+  plantation_id: string;
+  date: string;
+  tons: number | null;
+  created_at: string;
+}
+
 export interface UserProfile {
   id?: string;
   full_name: string;

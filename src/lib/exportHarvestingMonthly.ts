@@ -10,44 +10,468 @@ function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-const thin = { style: "thin" as const, color: { rgb: "000000" } };
-const thinBorder = { top: thin, bottom: thin, left: thin, right: thin };
-
-function styleCell(
-  ws: XLSX.WorkSheet,
-  r: number,
-  c: number,
-  opts?: {
-    bold?: boolean;
-    fontSize?: number;
-    align?: "center" | "left" | "right";
-    numFmt?: string;
-  }
-) {
-  const addr = XLSX.utils.encode_cell({ r, c });
-  if (!ws[addr]) ws[addr] = { t: "s", v: "" };
-  const s: Record<string, any> = { border: thinBorder };
-  if (opts?.bold || opts?.fontSize) {
-    s.font = { bold: opts.bold, sz: opts.fontSize };
-  }
-  if (opts?.align) {
-    s.alignment = { horizontal: opts.align };
-  }
-  if (opts?.numFmt) {
-    s.numFmt = opts.numFmt;
-  }
-  ws[addr].s = s;
+// Extract the calendar day (1-31) from a date string that may be either
+// "YYYY-MM-DD" (DATE column) or "YYYY-MM-DDTHH:MM:SS.sssZ" (TIMESTAMP column).
+function dayOf(entryDate: string | null | undefined): number {
+  if (!entryDate) return NaN;
+  const m = String(entryDate).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return parseInt(m[3], 10);
+  const d = new Date(entryDate);
+  return isNaN(d.getTime()) ? NaN : d.getDate();
 }
 
-function putInRow(row: any[], col: number, value: any) {
-  while (row.length <= col) row.push("");
-  row[col] = value;
-}
+// ----- Thin border (every data cell gets this on all 4 sides) -----
+const thin = { style: "thin" as const, color: { argb: "FF000000" } };
+const allBorders = { top: thin, bottom: thin, left: thin, right: thin };
+
+// ----- Number formats -----
+const FMT_INT = "0";   // workers / bunches
+const FMT_TON = "0.00"; // tons
+
+// ----- Column indices (0-based) -----
+// A=0 B=1 C=2 D=3 E=4 ... AI=34 AJ=35 AK=36 AL=37 AM=38 AN=39
+const dayCol = (d: number) => 4 + (d - 1);
+
+// ----- Fixed row indices (0-based) -----
+const R_TITLE = 3;
+const R_SUB = 4;
+const R_BULAN = 7;
+const R_INFO1 = 9;
+const R_INFO2 = 10;
+const R_INFO3 = 11;
+const R_HASILHDR = 13;
+const R_HEADER = 14;
+const R_LEADER_START = 15;
+const ROWS_PER_LEADER = 6;
 
 function round2(n: number) {
-  return Math.round(n * 100) / 100;
+  return Math.round((n + Number.EPSILON) * 100) / 100;
 }
 
+function merge(r1: number, c1: number, r2: number, c2: number): XLSX.Range {
+  return { s: { r: r1, c: c1 }, e: { r: r2, c: c2 } };
+}
+
+function leaderFirstRow(i: number) {
+  return R_LEADER_START + i * ROWS_PER_LEADER;
+}
+
+function leaderLastRow(i: number) {
+  return R_LEADER_START + i * ROWS_PER_LEADER + (ROWS_PER_LEADER - 1);
+}
+
+export interface HarvestingData {
+  rancanganName: string;
+  blockName: string;
+  blockPlantation: any;
+  leaders: any[];
+  entriesByLeader: Record<string, Record<number, any>>;
+  bijiRelaiData: any[];
+  days: number;
+  monthName: string;
+  year: number;
+  month: number;
+}
+
+export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.WorkSheet {
+  const { rancanganName, blockName, blockPlantation, leaders, entriesByLeader, bijiRelaiData, days } = data;
+
+  // =====================================================================
+  // Phase 1: Build the 2D data array (rows × cols) with values
+  // xlsx-js-style requires aoa_to_sheet — manual ws[addr] = {t,v} is ignored
+  // =====================================================================
+  const NUM_COLS = 40; // A through AN
+  const N = leaders.length;
+
+  // We'll extend rows as needed; start with placeholder rows
+  // The actual row count depends on leaders count
+  const lastSigRow = R_LEADER_START + N * ROWS_PER_LEADER + 7; // last signature row
+  const totalRows = lastSigRow + 1;
+
+  // Initialize empty 2D array
+  const rows: (string | number | null)[][] = [];
+  for (let r = 0; r < totalRows; r++) {
+    rows.push(new Array(NUM_COLS).fill(null));
+  }
+
+  // -- Title (Row 4, col V = 21)
+  rows[R_TITLE][21] = "HARVESTING MONTHLY";
+
+  // -- Subtitle (Row 5, col V = 21)
+  rows[R_SUB][21] = rancanganName + " — BLOCK " + blockName;
+
+  // -- BULAN (Row 8)
+  rows[R_BULAN][21] = "BULAN";
+  rows[R_BULAN][23] = data.monthName + " " + data.year;
+
+  // -- Info lines (Rows 10-12)
+  const infoLines = [
+    {
+      r: R_INFO1,
+      label: "Rancangan/Peringkat",
+      value: (blockPlantation?.rancangan || "-") + (blockPlantation?.peringkat ? " / " + blockPlantation.peringkat : ""),
+      mid: "Kontraktor Checkroll (Nama)",
+      right: "Mekanisasi",
+      suffix: ": TIADA",
+    },
+    {
+      r: R_INFO2,
+      label: "Penyelia",
+      value: blockPlantation?.penyelia || "-",
+      mid: "Kumpulan Menuai",
+      right: "Bil. Mekanisasi",
+      suffix: ": TIADA",
+    },
+    {
+      r: R_INFO3,
+      label: "Mandor",
+      value: blockPlantation?.mandor || "-",
+      mid: "Lori",
+      right: "Bil Pekerja",
+      suffix: ":",
+    },
+  ];
+  for (const ln of infoLines) {
+    rows[ln.r][1] = ln.label;   // B
+    rows[ln.r][3] = ":";        // D
+    rows[ln.r][14] = ln.mid;    // O
+    rows[ln.r][17] = ":";       // R
+    rows[ln.r][26] = ln.right;  // AA
+    rows[ln.r][28] = ln.suffix; // AC
+  }
+
+  // -- Hasil (M/t) header (Row 14)
+  rows[R_HASILHDR][35] = "Hasil (M /t)";   // AJ
+  rows[R_HASILHDR][39] = "Jum.Pusingan";    // AN
+
+  // -- Main header (Row 15)
+  rows[R_HEADER][0] = "BIL";
+  rows[R_HEADER][1] = "Peringkat / Blok";
+  rows[R_HEADER][2] = "Zon";
+  rows[R_HEADER][3] = "Luas (Hek)";
+  for (let d = 1; d <= 31; d++) rows[R_HEADER][dayCol(d)] = d;
+  rows[R_HEADER][35] = "Pus 1";
+  rows[R_HEADER][36] = "Pus 2";
+  rows[R_HEADER][37] = "Pus 3";
+  rows[R_HEADER][38] = "Jumlah";
+
+  // -- Team leaders (6 rows each, starting Row 16)
+  const leaderTotals: { workers: number; bunches: number; hi: number; hhi: number }[] = [];
+
+  leaders.forEach((leader, i) => {
+    const base = leaderFirstRow(i);
+    const zon = "ZON " + String.fromCharCode(65 + i);
+    const dayEntries = entriesByLeader[leader.id] || {};
+
+    rows[base][0] = i + 1;             // BIL
+    rows[base][1] = leader.name || "";  // Name
+    rows[base + 4][2] = "(" + zon + ")"; // ZON
+
+    rows[base][3] = "Bil. Pekerja";
+    rows[base + 1][3] = "Tandan";
+    rows[base + 2][3] = "Bil. Tandan";
+    rows[base + 3][3] = "Hasil(Tan) HI";
+    rows[base + 4][3] = "Hasil(Tan) HHI";
+
+    let totWorkers = 0;
+    let totBunches = 0;
+    let totHi = 0;
+    let cumHi = 0;
+
+    for (let d = 1; d <= days; d++) {
+      const entry = dayEntries[d];
+      const dc = dayCol(d);
+
+      if (entry && entry.work_status === "work") {
+        if (entry.num_workers !== null && entry.num_workers !== undefined && entry.num_workers !== "") {
+          const v = Number(entry.num_workers) || 0;
+          rows[base][dc] = v;
+          totWorkers += v;
+        }
+        if (entry.bunches !== null && entry.bunches !== undefined && entry.bunches !== "") {
+          const v = Number(entry.bunches) || 0;
+          rows[base + 1][dc] = v;
+          rows[base + 2][dc] = v;
+          totBunches += v;
+        }
+        if (entry.tons !== null && entry.tons !== undefined && entry.tons !== "") {
+          const t = round2(Number(entry.tons));
+          rows[base + 3][dc] = t;
+          totHi = round2(totHi + t);
+          cumHi = round2(cumHi + t);
+          rows[base + 4][dc] = cumHi;
+        }
+      } else if (entry && entry.work_status === "no_work") {
+        rows[base][dc] = "-";
+        rows[base + 1][dc] = "-";
+        rows[base + 2][dc] = "-";
+        // Tons still count on no_work days — transport delivers fruit to factory
+        if (entry.tons !== null && entry.tons !== undefined && entry.tons !== "") {
+          const t = round2(Number(entry.tons));
+          rows[base + 3][dc] = t;
+          totHi = round2(totHi + t);
+          cumHi = round2(cumHi + t);
+        }
+        rows[base + 4][dc] = cumHi;
+      }
+    }
+
+    rows[base][38] = totWorkers;
+    rows[base + 1][38] = totBunches;
+    rows[base + 2][38] = totBunches;
+    rows[base + 3][38] = totHi;
+    rows[base + 4][38] = cumHi;
+
+    leaderTotals.push({ workers: totWorkers, bunches: totBunches, hi: totHi, hhi: cumHi });
+  });
+
+  // -- Summary rows
+  const lastLeaderRow = leaderLastRow(N - 1);
+  const R_BIJI = lastLeaderRow + 1;
+  const R_BIJI_CUM = R_BIJI + 1;
+  const R_SUMMARY = R_BIJI_CUM + 1;
+  const R_SUMMARY_CUM = R_SUMMARY + 1;
+
+  rows[R_BIJI][0] = "Biji Relai (M/t)";
+  rows[R_BIJI][3] = "Hari ini";
+  rows[R_BIJI_CUM][3] = "Hingga Hari Ini";
+
+  // Populate Biji Relai data from biji_relai table
+  const bijiByDay: Record<number, number> = {};
+  for (const br of bijiRelaiData || []) {
+    const day = dayOf(br.date);
+    if (br.tons !== null && br.tons !== undefined) {
+      bijiByDay[day] = round2(Number(br.tons));
+    }
+  }
+  let bijiCum = 0;
+  let totalBiji = 0;
+  for (let d = 1; d <= days; d++) {
+    const dc = dayCol(d);
+    if (bijiByDay[d] !== undefined) {
+      rows[R_BIJI][dc] = bijiByDay[d];
+      bijiCum = round2(bijiCum + bijiByDay[d]);
+      totalBiji = round2(totalBiji + bijiByDay[d]);
+    }
+    if (bijiCum > 0) {
+      rows[R_BIJI_CUM][dc] = bijiCum;
+    }
+  }
+  rows[R_BIJI][38] = totalBiji;
+  rows[R_BIJI_CUM][38] = bijiCum;
+
+  rows[R_SUMMARY][0] = "Jumlah Hasil (M/t)";
+  rows[R_SUMMARY][3] = "Hari ini";
+  rows[R_SUMMARY_CUM][3] = "Hingga Hari Ini";
+
+  // Compute summary per day
+  let grandHi = 0;
+  let grandCum = 0;
+  for (let d = 1; d <= days; d++) {
+    const dc = dayCol(d);
+    let dayHi = 0;
+    for (const leader of leaders) {
+      const entry = (entriesByLeader[leader.id] || {})[d];
+      if (entry && entry.tons !== null && entry.tons !== undefined && entry.tons !== "") {
+        dayHi = round2(dayHi + Number(entry.tons));
+        grandCum = round2(grandCum + Number(entry.tons));
+      }
+    }
+    if (dayHi > 0) rows[R_SUMMARY][dc] = dayHi;
+    if (grandCum > 0) rows[R_SUMMARY_CUM][dc] = grandCum;
+  }
+  for (const lt of leaderTotals) grandHi = round2(grandHi + lt.hi);
+  rows[R_SUMMARY][38] = grandHi;
+  rows[R_SUMMARY_CUM][38] = grandCum;
+
+  // -- Signatures
+  const R_SIG1 = R_SUMMARY_CUM + 1;
+  rows[R_SIG1][0] = "T . T Penyelia";
+  rows[R_SIG1 + 1][0] = "T . T Field Controller (FC)";
+  rows[R_SIG1 + 2][0] = "T .T Pengurus";
+  const R_LAST = R_SIG1 + 2;
+
+  // =====================================================================
+  // Phase 2: Create worksheet from 2D array
+  // =====================================================================
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // =====================================================================
+  // Phase 3: Apply merges, styling, borders, column widths, row heights
+  // =====================================================================
+  const merges: XLSX.Range[] = [];
+
+  // -- Title
+  merges.push(merge(R_TITLE, 21, R_TITLE, 23));
+  // -- Subtitle
+  merges.push(merge(R_SUB, 21, R_SUB, 23));
+  // -- Info lines: B:C merge
+  for (const ln of infoLines) merges.push(merge(ln.r, 1, ln.r, 2));
+  // -- Hasil header: AJ14:AM14
+  merges.push(merge(R_HASILHDR, 35, R_HASILHDR, 38));
+  // -- Jum.Pusingan: AN14:AN15
+  merges.push(merge(R_HASILHDR, 39, R_HASILHDR + 1, 39));
+  // -- Leader merges: A, B, C(ZON)
+  leaders.forEach((_, i) => {
+    const base = leaderFirstRow(i);
+    merges.push(merge(base, 0, base + 5, 0));     // A col
+    merges.push(merge(base, 1, base + 5, 1));     // B col
+    merges.push(merge(base + 4, 2, base + 5, 2)); // C col (ZON)
+  });
+  // -- Biji Relai: A:C across 2 rows
+  merges.push(merge(R_BIJI, 0, R_BIJI_CUM, 2));
+  // -- Jumlah Hasil: A:C across 2 rows
+  merges.push(merge(R_SUMMARY, 0, R_SUMMARY_CUM, 2));
+  // -- Signatures: A:D each
+  merges.push(merge(R_SIG1, 0, R_SIG1, 3));
+  merges.push(merge(R_SIG1 + 1, 0, R_SIG1 + 1, 3));
+  merges.push(merge(R_SIG1 + 2, 0, R_SIG1 + 2, 3));
+
+  ws["!merges"] = merges;
+
+  // -- Apply styling to every cell
+  function setS(r: number, c: number, opts: {
+    bold?: boolean; size?: number; align?: "left" | "center" | "right";
+    valign?: "top" | "center" | "bottom"; wrap?: boolean; numFmt?: string;
+  }) {
+    const cell = XLSX.utils.encode_cell({ r, c });
+    if (!ws[cell]) ws[cell] = { t: "s", v: "" };
+    const s: any = ws[cell].s ? { ...ws[cell].s } : {};
+    if (opts.bold || opts.size) {
+      s.font = { ...(s.font || {}), ...(opts.bold ? { bold: true } : {}), ...(opts.size ? { sz: opts.size } : {}) };
+    }
+    if (opts.align || opts.wrap || opts.valign) {
+      s.alignment = {
+        ...(s.alignment || {}),
+        ...(opts.align ? { horizontal: opts.align } : {}),
+        ...(opts.valign ? { vertical: opts.valign } : { vertical: "center" }),
+        ...(opts.wrap ? { wrapText: true } : {}),
+      };
+    }
+    if (opts.numFmt) s.numFmt = opts.numFmt;
+    ws[cell].s = s;
+  }
+
+  // -- Title styling
+  setS(R_TITLE, 21, { bold: true, size: 11, align: "center" });
+  setS(R_SUB, 21, { bold: true, size: 14, align: "center", wrap: true });
+
+  // -- BULAN
+  setS(R_BULAN, 21, { bold: true, align: "center" });
+  setS(R_BULAN, 23, { align: "center" });
+
+  // -- Info lines
+  for (const ln of infoLines) {
+    setS(ln.r, 1, { bold: true, align: "left", valign: "top" });
+    setS(ln.r, 3, { align: "left", valign: "top" });
+    setS(ln.r, 14, { bold: true, align: "left" });
+    setS(ln.r, 17, { align: "center" });
+    setS(ln.r, 26, { bold: true, align: "left" });
+    setS(ln.r, 28, { align: "center" });
+  }
+
+  // -- Hasil header
+  setS(R_HASILHDR, 35, { bold: true, align: "center", wrap: true });
+  setS(R_HASILHDR, 39, { bold: true, align: "center", wrap: true });
+
+  // -- Main header
+  for (let c = 0; c <= 38; c++) setS(R_HEADER, c, { bold: true, align: "center" });
+
+  // -- Leader cell styling
+  leaders.forEach((_, i) => {
+    const base = leaderFirstRow(i);
+    setS(base, 0, { bold: true, align: "center", wrap: true });
+    setS(base, 1, { align: "left", wrap: true });
+    setS(base + 4, 2, { align: "center" });
+    for (let k = 0; k <= 4; k++) setS(base + k, 3, { align: "center", wrap: true });
+    for (let d = 1; d <= days; d++) {
+      const dc = dayCol(d);
+      setS(base, dc, { align: "center", numFmt: FMT_INT });
+      setS(base + 1, dc, { align: "center", numFmt: FMT_INT });
+      setS(base + 2, dc, { align: "center", numFmt: FMT_INT });
+      setS(base + 3, dc, { align: "center", numFmt: FMT_TON });
+      setS(base + 4, dc, { align: "center", numFmt: FMT_TON });
+    }
+    setS(base, 38, { align: "center", numFmt: FMT_INT });
+    setS(base + 1, 38, { align: "center", numFmt: FMT_INT });
+    setS(base + 2, 38, { align: "center", numFmt: FMT_INT });
+    setS(base + 3, 38, { align: "center", numFmt: FMT_TON });
+    setS(base + 4, 38, { align: "center", numFmt: FMT_TON });
+  });
+
+  // -- Summary styling
+  setS(R_BIJI, 0, { bold: true, align: "center", wrap: true, valign: "center" });
+  setS(R_BIJI, 3, { bold: true, align: "center" });
+  setS(R_BIJI_CUM, 3, { bold: true, align: "center" });
+  setS(R_BIJI, 38, { align: "center", numFmt: FMT_TON });
+  setS(R_BIJI_CUM, 38, { align: "center", numFmt: FMT_TON });
+
+  setS(R_SUMMARY, 0, { bold: true, align: "center", wrap: true, valign: "center" });
+  setS(R_SUMMARY, 3, { bold: true, align: "center" });
+  setS(R_SUMMARY_CUM, 3, { bold: true, align: "center" });
+
+  for (let d = 1; d <= days; d++) {
+    const dc = dayCol(d);
+    setS(R_SUMMARY, dc, { align: "center", numFmt: FMT_TON });
+    setS(R_SUMMARY_CUM, dc, { align: "center", numFmt: FMT_TON });
+  }
+  setS(R_SUMMARY, 38, { align: "center", numFmt: FMT_TON });
+  setS(R_SUMMARY_CUM, 38, { align: "center", numFmt: FMT_TON });
+
+  // -- Biji Relai data cell styling
+  for (let d = 1; d <= days; d++) {
+    const dc = dayCol(d);
+    setS(R_BIJI, dc, { align: "center", numFmt: FMT_TON });
+    setS(R_BIJI_CUM, dc, { align: "center", numFmt: FMT_TON });
+  }
+  setS(R_BIJI, 38, { align: "center", numFmt: FMT_TON });
+  setS(R_BIJI_CUM, 38, { align: "center", numFmt: FMT_TON });
+
+  // -- Signature styling
+  setS(R_SIG1, 0, { bold: true, align: "center", wrap: true });
+  setS(R_SIG1 + 1, 0, { bold: true, align: "center", wrap: true });
+  setS(R_SIG1 + 2, 0, { bold: true, align: "center", wrap: true });
+
+  // -- Borders on full data grid (row 13 through R_LAST, cols A-AM)
+  for (let r = R_HASILHDR; r <= R_LAST; r++) {
+    for (let c = 0; c <= 38; c++) {
+      const cell = XLSX.utils.encode_cell({ r, c });
+      if (!ws[cell]) ws[cell] = { t: "s", v: "" };
+      ws[cell].s = {
+        ...(ws[cell].s || {}),
+        border: allBorders,
+        alignment: { ...(ws[cell].s?.alignment || {}), horizontal: ws[cell].s?.alignment?.horizontal || "center", vertical: "center" },
+      };
+    }
+  }
+
+  // -- Column widths
+  const colWidths: ({ wch: number } | undefined)[] = [];
+  colWidths[0] = { wch: 5 };       // A
+  colWidths[1] = { wch: 16 };      // B
+  colWidths[2] = { wch: 11.71 };   // C
+  colWidths[3] = { wch: 16.29 };   // D
+  for (let d = 1; d <= 31; d++) colWidths[dayCol(d)] = { wch: 4.5 };
+  colWidths[35] = { wch: 8 };      // AJ
+  colWidths[36] = { wch: 8 };      // AK
+  colWidths[37] = { wch: 8 };      // AL
+  colWidths[38] = { wch: 8 };      // AM
+  colWidths[39] = { wch: 15.0 };   // AN
+  ws["!cols"] = colWidths as any;
+
+  // -- Row heights
+  const rowHeights: ({ hpt: number } | undefined)[] = [];
+  rowHeights[R_SUB] = { hpt: 18.75 };
+  for (let r = R_HEADER; r <= R_LAST; r++) rowHeights[r] = { hpt: 30 };
+  ws["!rows"] = rowHeights as any;
+
+  return ws;
+}
+
+// ------------------------------------------------------------------
+// Top-level export: runs the Supabase queries, then builds and
+// downloads the workbook.
+// ------------------------------------------------------------------
 export async function exportHarvestingMonthly(params: {
   userId: string;
   plantationId: string;
@@ -58,23 +482,19 @@ export async function exportHarvestingMonthly(params: {
   const { userId, plantationId, blockId, month, year } = params;
   const days = daysInMonth(year, month);
   const monthName = MONTH_NAMES[month];
-  const mm = String(month + 1).padStart(2, "0");
-  const startDate = `${year}-${mm}-01`;
-  const endDate = `${year}-${mm}-${String(days).padStart(2, "0")}`;
 
-  // Fetch block plantation
   const { data: blockPlantation, error: blockErr } = await supabase
     .from("plantations")
     .select("*")
     .eq("id", blockId)
     .single();
 
-  if (!blockPlantation) throw new Error("Block not found");
+  if (blockErr) console.error("[Export] Block query error:", blockErr);
+  if (!blockPlantation) throw new Error("Block not found. Queried id=" + blockId);
 
   const rancanganName = blockPlantation.rancangan || "FELDA SAHABAT 05";
   const blockName = blockPlantation.block || "Block 01";
 
-  // Fetch team leaders for this block
   const { data: leaders, error: leadersErr } = await supabase
     .from("team_leaders")
     .select("*")
@@ -82,9 +502,13 @@ export async function exportHarvestingMonthly(params: {
     .eq("user_id", userId)
     .order("created_at", { ascending: true });
 
-  if (!leaders || leaders.length === 0) throw new Error("No team leaders found for this block");
+  if (leadersErr) console.error("[Export] Leaders query error:", leadersErr);
+  if (!leaders || leaders.length === 0) throw new Error("No team leaders found for this block (plantation_id=" + blockId + ")");
 
-  // Fetch daily entries for the month
+  const mm = String(month + 1).padStart(2, "0");
+  const startDate = year + "-" + mm + "-01";
+  const endDate = year + "-" + mm + "-" + String(days).padStart(2, "0");
+
   const { data: entries, error: entriesErr } = await supabase
     .from("daily_entries")
     .select("*")
@@ -94,414 +518,60 @@ export async function exportHarvestingMonthly(params: {
     .lte("date", endDate)
     .order("date", { ascending: true });
 
-  // Group entries by team leader and day
+  if (entriesErr) console.error("[Export] Entries query error:", entriesErr);
+
+  // Query Biji Relai (palm seed tonnage) for this block and month
+  const { data: bijiRelaiData } = await supabase
+    .from("biji_relai")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("plantation_id", blockId)
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date", { ascending: true });
+
   const entriesByLeader: Record<string, Record<number, any>> = {};
-  for (const leader of leaders) {
-    entriesByLeader[leader.id] = {};
-  }
+  for (const leader of leaders) entriesByLeader[leader.id] = {};
   for (const entry of entries || []) {
-    const day = new Date(entry.date + "T00:00:00").getDate();
-    if (!entriesByLeader[entry.team_leader_id]) {
-      entriesByLeader[entry.team_leader_id] = {};
-    }
+    const day = dayOf(entry.date);
+    if (!entriesByLeader[entry.team_leader_id]) entriesByLeader[entry.team_leader_id] = {};
     entriesByLeader[entry.team_leader_id][day] = entry;
   }
 
-  // ============================================================
-  // BUILD AOA (Array of Arrays)
-  // Column layout: A=0, B=1, C=2, D=3, E=4..34 (days 1-31), AJ=35, AK=36, AL=37, AM=38
-  // ============================================================
-  const dayCol = (d: number) => 3 + d; // day 1 = col 4
-  const totalCols = 38; // col AM = index 38
+  const totalEntriesMapped = Object.values(entriesByLeader).reduce((sum, dayMap) => sum + Object.keys(dayMap).length, 0);
 
-  const rows: any[][] = [];
-
-  function ensureRow(idx: number) {
-    while (rows.length <= idx) {
-      const empty: any[] = [];
-      for (let i = 0; i <= totalCols; i++) empty.push("");
-      rows.push(empty);
-    }
-    return rows[idx];
+  if (totalEntriesMapped === 0) {
+    throw new Error(`No entries found for ${monthName} ${year}. Make sure daily entries exist for this block.`);
   }
 
-  // ---------- ROW 0 (Excel 1): Title ----------
-  const r0 = ensureRow(0);
-  putInRow(r0, 0, "HARVESTING MONTHLY");
-
-  // ---------- ROW 1 (Excel 2): Subtitle ----------
-  const r1 = ensureRow(1);
-  putInRow(r1, 0, `${rancanganName} — BLOCK ${blockName}`);
-
-  // ---------- ROW 2 (Excel 3): BULAN ----------
-  const r2 = ensureRow(2);
-  putInRow(r2, 0, `BULAN ${monthName} ${year}`);
-
-  // ---------- ROW 3 (Excel 4): Info line 1 ----------
-  const r3 = ensureRow(3);
-  putInRow(r3, 0, "Rancangan/Peringkat");  // A
-  putInRow(r3, 2, ":");                      // C
-  putInRow(r3, 3, `${blockPlantation.rancangan || "-"} - ${blockPlantation.peringkat || "-"}`); // D
-  putInRow(r3, 7, "Kontraktor Checkroll");   // H
-  putInRow(r3, 9, ":");                       // J
-  putInRow(r3, 10, "-");                      // K
-  putInRow(r3, 13, "Mekanisasi");             // N
-  putInRow(r3, 15, ":");                      // P
-  putInRow(r3, 16, "TIADA");                 // Q
-
-  // ---------- ROW 4 (Excel 5): Info line 2 ----------
-  const r4 = ensureRow(4);
-  putInRow(r4, 0, "Penyelia");               // A
-  putInRow(r4, 2, ":");                       // C
-  putInRow(r4, 3, blockPlantation.penyelia || "-"); // D
-  putInRow(r4, 7, "Kumpulan Menuai");        // H
-  putInRow(r4, 9, ":");                       // J
-  putInRow(r4, 10, "-");                      // K
-  putInRow(r4, 13, "Bil. Mekanisasi");       // N
-  putInRow(r4, 15, ":");                      // P
-  putInRow(r4, 16, "TIADA");                 // Q
-
-  // ---------- ROW 5 (Excel 6): Info line 3 ----------
-  const r5 = ensureRow(5);
-  putInRow(r5, 0, "Mandor");                 // A
-  putInRow(r5, 2, ":");                       // C
-  putInRow(r5, 3, blockPlantation.mandor || "-"); // D
-  putInRow(r5, 7, "Lori");                   // H
-  putInRow(r5, 9, ":");                       // J
-  putInRow(r5, 10, "-");                      // K
-  putInRow(r5, 13, "Bil Pekerja");           // N
-  putInRow(r5, 15, ":");                      // P
-  putInRow(r5, 16, String(leaders.length));   // Q
-
-  // ---------- ROW 7 (Excel 8): Column header ----------
-  const headerRowIdx = 7;
-  const hdr = ensureRow(headerRowIdx);
-  putInRow(hdr, 0, "BIL");                    // A
-  putInRow(hdr, 1, "Peringkat / Blok");       // B
-  putInRow(hdr, 2, "Zon");                    // C
-  putInRow(hdr, 3, "Luas (Hek)");             // D
-  for (let d = 1; d <= 31; d++) {
-    putInRow(hdr, dayCol(d), String(d));
-  }
-  putInRow(hdr, 35, "Pus 1");                 // AJ
-  putInRow(hdr, 36, "Pus 2");                 // AK
-  putInRow(hdr, 37, "Pus 3");                 // AL
-  putInRow(hdr, 38, "Jumlah");                // AM
-
-  // ---------- TEAM LEADER DATA (5 sub-rows per leader, NO blank rows between) ----------
-  const today = new Date().getDate();
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  const isCurrentMonth = month === currentMonth && year === currentYear;
-
-  let grandTotalTons = 0;
-  let todayTotalTons = 0;
-
-  const leaderStartRow = headerRowIdx + 1; // row 8
-
-  leaders.forEach((leader, idx) => {
-    const baseRow = leaderStartRow + idx * 5;
-    const dayEntries = entriesByLeader[leader.id] || {};
-    const zonLabel = `ZON ${String.fromCharCode(65 + idx)}`;
-
-    // --- Sub-row 1: BIL + Name + Bil. Pekerja + workers/day ---
-    const rw1 = ensureRow(baseRow);
-    putInRow(rw1, 0, idx + 1);       // A: BIL
-    putInRow(rw1, 1, leader.name);   // B: Name
-    putInRow(rw1, 3, "Bil. Pekerja"); // D
-
-    let leaderTotalWorkers = 0;
-    for (let d = 1; d <= days; d++) {
-      const entry = dayEntries[d];
-      const val = entry?.num_workers;
-      if (val !== null && val !== undefined && val !== "") {
-        putInRow(rw1, dayCol(d), Number(val));
-        leaderTotalWorkers += Number(val) || 0;
-      }
-    }
-    putInRow(rw1, 38, leaderTotalWorkers);
-
-    // --- Sub-row 2: Tandan (bunches/day) ---
-    const rw2 = ensureRow(baseRow + 1);
-    putInRow(rw2, 3, "Tandan");
-
-    let leaderTotalBunches = 0;
-    for (let d = 1; d <= days; d++) {
-      const entry = dayEntries[d];
-      const val = entry?.bunches;
-      if (val !== null && val !== undefined && val !== "") {
-        putInRow(rw2, dayCol(d), Number(val));
-        leaderTotalBunches += Number(val) || 0;
-      }
-    }
-    putInRow(rw2, 38, leaderTotalBunches);
-
-    // --- Sub-row 3: Bil. Tandan (same as tandan) ---
-    const rw3 = ensureRow(baseRow + 2);
-    putInRow(rw3, 3, "Bil. Tandan");
-
-    for (let d = 1; d <= days; d++) {
-      const entry = dayEntries[d];
-      const val = entry?.bunches;
-      if (val !== null && val !== undefined && val !== "") {
-        putInRow(rw3, dayCol(d), Number(val));
-      }
-    }
-    putInRow(rw3, 38, leaderTotalBunches);
-
-    // --- Sub-row 4: ZON + Hasil(Tan) HI (tons/day, rounded) ---
-    const rw4 = ensureRow(baseRow + 3);
-    putInRow(rw4, 2, `(${zonLabel})`);
-    putInRow(rw4, 3, "Hasil(Tan) HI");
-
-    let leaderTotalTons = 0;
-    for (let d = 1; d <= days; d++) {
-      const entry = dayEntries[d];
-      const val = entry?.tons;
-      if (entry && entry.work_status === "work" && val !== null && val !== undefined && val !== "") {
-        const t = round2(Number(val));
-        putInRow(rw4, dayCol(d), t);
-        leaderTotalTons = round2(leaderTotalTons + t);
-        grandTotalTons = round2(grandTotalTons + t);
-        if (isCurrentMonth && d === today) todayTotalTons = round2(todayTotalTons + t);
-      }
-    }
-    putInRow(rw4, 38, round2(leaderTotalTons));
-
-    // --- Sub-row 5: Hasil(Tan) HHI (cumulative tons, rounded) ---
-    const rw5 = ensureRow(baseRow + 4);
-    putInRow(rw5, 3, "Hasil(Tan) HHI");
-
-    let cumulativeTons = 0;
-    for (let d = 1; d <= days; d++) {
-      const entry = dayEntries[d];
-      // Only accumulate on work days with tons
-      if (entry && entry.work_status === "work" && entry.tons) {
-        cumulativeTons = round2(cumulativeTons + Number(entry.tons));
-      }
-      // Always carry forward — write cumulative for every day once > 0
-      if (cumulativeTons > 0) {
-        putInRow(rw5, dayCol(d), round2(cumulativeTons));
-      }
-    }
-    putInRow(rw5, 38, round2(cumulativeTons));
+  const ws = buildHarvestingMonthlyWorksheet({
+    rancanganName,
+    blockName,
+    blockPlantation,
+    leaders,
+    entriesByLeader,
+    bijiRelaiData: bijiRelaiData || [],
+    days,
+    monthName,
+    year,
+    month,
   });
 
-  // ---------- SUMMARY ROWS (no blank row before them) ----------
-  const summaryBase = leaderStartRow + leaders.length * 5;
-
-  // Biji Relai (M/t) — Hari ini
-  const sr1 = ensureRow(summaryBase);
-  putInRow(sr1, 0, "Biji Relai (M/t)");
-  putInRow(sr1, 3, "Hari ini");
-  putInRow(sr1, 38, 0);
-
-  // Biji Relai — Hingga Hari Ini
-  const sr2 = ensureRow(summaryBase + 1);
-  putInRow(sr2, 3, "Hingga Hari Ini");
-  putInRow(sr2, 38, 0);
-
-  // Jumlah Hasil (M/t) — Hari ini
-  const sr3 = ensureRow(summaryBase + 2);
-  putInRow(sr3, 0, "Jumlah Hasil (M/t)");
-  putInRow(sr3, 3, "Hari ini");
-  if (isCurrentMonth) {
-    putInRow(sr3, dayCol(today), round2(todayTotalTons));
-  }
-  putInRow(sr3, 38, isCurrentMonth ? round2(todayTotalTons) : 0);
-
-  // Jumlah Hasil — Hingga Hari Ini (progressive cumulative across all leaders)
-  const sr4 = ensureRow(summaryBase + 3);
-  putInRow(sr4, 3, "Hingga Hari Ini");
-  let runningCumSum = 0;
-  for (let d = 1; d <= days; d++) {
-    for (const leader of leaders) {
-      const entry = (entriesByLeader[leader.id] || {})[d];
-      if (entry && entry.work_status === "work" && entry.tons) {
-        runningCumSum = round2(runningCumSum + Number(entry.tons));
-      }
-    }
-    if (runningCumSum > 0) {
-      putInRow(sr4, dayCol(d), round2(runningCumSum));
-    }
-  }
-  putInRow(sr4, 38, round2(grandTotalTons));
-
-  // ---------- SIGNATURE ROWS ----------
-  const sigBase = summaryBase + 5;
-  putInRow(ensureRow(sigBase), 0, "T . T Penyelia");
-  putInRow(ensureRow(sigBase + 2), 0, "T . T Field Controller (FC)");
-  putInRow(ensureRow(sigBase + 4), 0, "T .T Pengurus");
-
-  // ============================================================
-  // CREATE WORKSHEET FROM AOA
-  // ============================================================
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // ============================================================
-  // COLUMN WIDTHS
-  // ============================================================
-  const colWidths: { wch: number }[] = [];
-  colWidths.push({ wch: 5 });   // A: BIL
-  colWidths.push({ wch: 16 });  // B: Peringkat / Blok
-  colWidths.push({ wch: 8 });   // C: Zon
-  colWidths.push({ wch: 16 });  // D: Labels
-  for (let d = 1; d <= 31; d++) {
-    colWidths.push({ wch: 4.5 }); // Day columns
-  }
-  colWidths.push({ wch: 7 });   // AJ: Pus 1
-  colWidths.push({ wch: 7 });   // AK: Pus 2
-  colWidths.push({ wch: 7 });   // AL: Pus 3
-  colWidths.push({ wch: 10 });  // AM: Jumlah
-  ws["!cols"] = colWidths;
-
-  // ============================================================
-  // MERGES
-  // ============================================================
-  const lastDataRowIdx = summaryBase + 3; // last summary row
-  const lastRowIdx = sigBase + 4; // last signature row
-
-  const merges: XLSX.Range[] = [
-    // Title rows: merged A to AM
-    { s: { r: 0, c: 0 }, e: { r: 0, c: totalCols } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: totalCols } },
-    { s: { r: 2, c: 0 }, e: { r: 2, c: totalCols } },
-    // Summary row A: Biji Relai merged A-C
-    { s: { r: summaryBase, c: 0 }, e: { r: summaryBase, c: 2 } },
-    // Summary row C: Jumlah Hasil merged A-C
-    { s: { r: summaryBase + 2, c: 0 }, e: { r: summaryBase + 2, c: 2 } },
-  ];
-  ws["!merges"] = merges;
-
-  // ============================================================
-  // APPLY STYLES
-  // ============================================================
-
-  // Style title rows (0, 1, 2): merged, bold, centered
-  for (let c = 0; c <= totalCols; c++) {
-    const a0 = XLSX.utils.encode_cell({ r: 0, c });
-    if (ws[a0]) ws[a0].s = { border: thinBorder, font: { bold: true, sz: 14 }, alignment: { horizontal: "center" } };
-
-    const a1 = XLSX.utils.encode_cell({ r: 1, c });
-    if (ws[a1]) ws[a1].s = { border: thinBorder, font: { bold: true, sz: 12 }, alignment: { horizontal: "center" } };
-
-    const a2 = XLSX.utils.encode_cell({ r: 2, c });
-    if (ws[a2]) ws[a2].s = { border: thinBorder, font: { bold: true }, alignment: { horizontal: "center" } };
-  }
-
-  // Style info rows (3, 4, 5)
-  for (let r = 3; r <= 5; r++) {
-    for (const c of [0, 7, 13]) { // A, H, N — label columns
-      styleCell(ws, r, c, { bold: true, align: "left" });
-    }
-    for (const c of [2, 9, 15]) { // C, J, P — colon columns
-      styleCell(ws, r, c, { align: "center" });
-    }
-    for (const c of [3, 10, 16]) { // D, K, Q — value columns
-      styleCell(ws, r, c, { align: "left" });
-    }
-  }
-
-  // Style header row (7): bold, green fill, centered, borders
-  for (let c = 0; c <= totalCols; c++) {
-    const addr = XLSX.utils.encode_cell({ r: headerRowIdx, c });
-    if (!ws[addr]) ws[addr] = { t: "s", v: "" };
-    ws[addr].s = {
-      border: thinBorder,
-      font: { bold: true },
-      fill: { fgColor: { rgb: "C6EFCE" } },
-      alignment: { horizontal: "center" },
-    };
-  }
-
-  // Style data rows + borders on ALL cells
-  const lastDataIdx = leaderStartRow + leaders.length * 5 - 1;
-  for (let r = leaderStartRow; r <= lastDataIdx; r++) {
-    // BIL: center
-    styleCell(ws, r, 0, { align: "center" });
-    // Name: left
-    styleCell(ws, r, 1, { align: "left" });
-    // Zon: center
-    styleCell(ws, r, 2, { align: "center" });
-    // Label: left
-    styleCell(ws, r, 3, { align: "left" });
-
-    // Day columns
-    for (let d = 1; d <= 31; d++) {
-      const c = dayCol(d);
-      const addr = XLSX.utils.encode_cell({ r, c });
-      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
-
-      const subRow = (r - leaderStartRow) % 5;
-      if (typeof ws[addr].v === "number") {
-        if (subRow === 3 || subRow === 4) {
-          // Hasil(Tan) HI or HHI — decimal
-          ws[addr].s = { border: thinBorder, numFmt: "0.00", alignment: { horizontal: "center" } };
-        } else {
-          // Workers, bunches — integer
-          ws[addr].s = { border: thinBorder, numFmt: "0", alignment: { horizontal: "center" } };
-        }
-      } else {
-        ws[addr].s = { border: thinBorder, alignment: { horizontal: "center" } };
-      }
-    }
-
-    // Pus + Jumlah columns: center, border
-    for (let c = 35; c <= 38; c++) {
-      const addr = XLSX.utils.encode_cell({ r, c });
-      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
-      ws[addr].s = { border: thinBorder, alignment: { horizontal: "center" } };
-      if (typeof ws[addr].v === "number") {
-        const subRow = (r - leaderStartRow) % 5;
-        ws[addr].s.numFmt = (subRow === 3 || subRow === 4) ? "0.00" : "0";
-      }
-    }
-  }
-
-  // Apply borders + styles to summary rows
-  for (let r = summaryBase; r <= summaryBase + 3; r++) {
-    for (let c = 0; c <= totalCols; c++) {
-      const addr = XLSX.utils.encode_cell({ r, c });
-      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
-      ws[addr].s = { border: thinBorder, alignment: { horizontal: "center" } };
-    }
-    // Labels bold left
-    styleCell(ws, r, 0, { bold: true, align: "left" });
-    styleCell(ws, r, 3, { bold: true, align: "left" });
-    // Number format for tons
-    for (let d = 1; d <= 31; d++) {
-      const c = dayCol(d);
-      const addr = XLSX.utils.encode_cell({ r, c });
-      if (ws[addr] && typeof ws[addr].v === "number") {
-        ws[addr].s = { border: thinBorder, numFmt: "0.00", alignment: { horizontal: "center" } };
-      }
-    }
-    // AM column
-    const amAddr = XLSX.utils.encode_cell({ r, c: 38 });
-    if (ws[amAddr] && typeof ws[amAddr].v === "number") {
-      ws[amAddr].s = { border: thinBorder, numFmt: "0.00", alignment: { horizontal: "center" } };
-    }
-  }
-
-  // Apply borders to signature rows
-  for (const sigRow of [sigBase, sigBase + 2, sigBase + 4]) {
-    for (let c = 0; c <= totalCols; c++) {
-      const addr = XLSX.utils.encode_cell({ r: sigRow, c });
-      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
-      ws[addr].s = { border: thinBorder };
-    }
-    styleCell(ws, sigRow, 0, { bold: true, align: "left" });
-  }
-
-  // ============================================================
-  // WORKBOOK + DOWNLOAD
-  // ============================================================
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Harvesting Monthly");
 
   const cleanRancangan = (rancanganName || "Plantation").replace(/[^a-zA-Z0-9]/g, "");
   const cleanBlock = (blockName || "Block01").replace(/[^a-zA-Z0-9]/g, "");
-  const filename = `PalmInsight_Harvesting_${cleanRancangan}_${cleanBlock}_${monthName}_${year}.xlsx`;
+  const filename = "PalmInsight_Harvesting_" + cleanRancangan + "_" + cleanBlock + "_" + monthName + "_" + year + ".xlsx";
 
-  XLSX.writeFile(wb, filename);
+  const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

@@ -7,13 +7,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Plus, Trash2, Users, Phone, MapPin, Edit2, AlertCircle, BarChart3, TrendingUp, ChevronLeft, Calendar, ChevronDown, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plantation, TeamLeader, DailyEntry } from "@/types";
+import { Plantation, TeamLeader, DailyEntry, BijiRelai } from "@/types";
 import BlockSelector from "@/components/team/BlockSelector";
 import LeaderOrgChart from "@/components/team/LeaderOrgChart";
 import EntryForm from "@/components/team/EntryForm";
 import FilterPanel from "@/components/team/FilterPanel";
 import AddLeaderModal from "@/components/team/AddLeaderModal";
 import EditEntryModal from "@/components/team/EditEntryModal";
+import BijiRelaiModal from "@/components/team/BijiRelaiModal";
 import EmptyLeaderState from "@/components/team/EmptyLeaderState";
 import Toast from "@/components/ui/Toast";
 import { BlockCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
@@ -97,6 +98,13 @@ function TeamsContent() {
   const [blockLastEntries, setBlockLastEntries] = useState<Record<string, string | null>>({});
   const [blockWorkersToday, setBlockWorkersToday] = useState<Record<string, number>>({});
 
+  const [bijiRelaiEntries, setBijiRelaiEntries] = useState<BijiRelai[]>([]);
+  const [bijiRelaiDate, setBijiRelaiDate] = useState(new Date().toISOString().split("T")[0]);
+  const [bijiRelaiTons, setBijiRelaiTons] = useState("");
+  const [bijiRelaiSaving, setBijiRelaiSaving] = useState(false);
+  const [bijiRelaiSavedId, setBijiRelaiSavedId] = useState<string | null>(null);
+  const [showBijiRelaiModal, setShowBijiRelaiModal] = useState(false);
+
   // --- Browser back-button: track previous block for popstate logic ---
   const prevBlockRef = useRef<string | null>(selectedBlock);
 
@@ -171,6 +179,17 @@ function TeamsContent() {
     setLeaderLatestEntries(latestMap);
   }
 
+  async function loadBijiRelai(blockId: string) {
+    if (!user) return;
+    const { data } = await supabase
+      .from("biji_relai")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("plantation_id", blockId)
+      .order("date", { ascending: false });
+    setBijiRelaiEntries((data || []) as BijiRelai[]);
+  }
+
   const getFilteredEntries = useCallback(() => {
     if (!selectedLeader) return [];
     let filtered: DailyEntry[] = leaderEntries;
@@ -224,6 +243,53 @@ function TeamsContent() {
     await loadOrgChartData(selectedLeader.plantation_id);
     setToast({ type: "success", message: existingEntry ? "Entry updated!" : "Entry saved successfully!" });
     setSaving(false);
+  };
+
+  const handleSubmitBijiRelai = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !selectedBlock) return;
+    setBijiRelaiSaving(true);
+    const entryData = {
+      user_id: user.id,
+      plantation_id: selectedBlock,
+      date: bijiRelaiDate,
+      tons: bijiRelaiTons ? parseFloat(bijiRelaiTons) : null,
+    };
+    const existing = bijiRelaiEntries.find((e) => e.date === bijiRelaiDate && e.plantation_id === selectedBlock);
+    if (existing) {
+      const { error } = await supabase.from("biji_relai").update(entryData).eq("id", existing.id);
+      if (error) { setBijiRelaiSaving(false); setToast({ type: "error", message: error.message || "Failed to update." }); return; }
+    } else {
+      const { error } = await supabase.from("biji_relai").insert(entryData);
+      if (error) { setBijiRelaiSaving(false); setToast({ type: "error", message: error.message || "Failed to save." }); return; }
+    }
+    setBijiRelaiSaving(false);
+    setBijiRelaiSavedId("saved");
+    loadBijiRelai(selectedBlock);
+    setToast({ type: "success", message: existing ? "Biji Relai updated!" : "Biji Relai saved!" });
+  };
+
+  const handleEditBijiRelai = async (entry: BijiRelai) => {
+    if (!user) return;
+    const { error } = await supabase.from("biji_relai").update({ date: entry.date, tons: entry.tons }).eq("id", entry.id);
+    if (error) { setToast({ type: "error", message: error.message || "Failed to update." }); return; }
+    loadBijiRelai(selectedBlock!);
+    setToast({ type: "success", message: "Biji Relai updated." });
+  };
+
+  const handleDeleteBijiRelai = async (id: string) => {
+    if (!confirm("Delete this Biji Relai entry?")) return;
+    await supabase.from("biji_relai").delete().eq("id", id);
+    if (selectedBlock) loadBijiRelai(selectedBlock);
+    setToast({ type: "success", message: "Biji Relai entry deleted." });
+  };
+
+  const handleOpenBijiRelai = () => {
+    if (selectedBlock) loadBijiRelai(selectedBlock);
+    setBijiRelaiDate(new Date().toISOString().split("T")[0]);
+    setBijiRelaiTons("");
+    setBijiRelaiSavedId(null);
+    setShowBijiRelaiModal(true);
   };
 
   const handleEditEntry = (entry: DailyEntry) => {
@@ -287,7 +353,15 @@ function TeamsContent() {
   const handleClearFilter = () => { setFilterDate(""); setFilterFrom(""); setFilterTo(""); setShowFilterPanel(false); };
 
   useEffect(() => { if (toast) { const timer = setTimeout(() => setToast(null), 3000); return () => clearTimeout(timer); } }, [toast]);
-  useEffect(() => { if (selectedBlock) loadOrgChartData(selectedBlock); }, [selectedBlock]);
+  useEffect(() => {
+    if (selectedBlock) {
+      loadOrgChartData(selectedBlock);
+      loadBijiRelai(selectedBlock);
+      setBijiRelaiDate(new Date().toISOString().split("T")[0]);
+      setBijiRelaiTons("");
+      setBijiRelaiSavedId(null);
+    }
+  }, [selectedBlock]);
 
   // --- Browser back-button handler ---
   useEffect(() => {
@@ -465,11 +539,32 @@ function TeamsContent() {
             <motion.div key="org" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
               <LeaderOrgChart selectedPlantation={selectedP!} leaders={blockLeaders} latestEntries={leaderLatestEntries}
                 onSelectLeader={handleSelectLeader} onViewDetails={handleViewDetails} onDeleteLeader={handleDeleteLeader} onBack={handleBackToBlocks}
+                onBijiRelai={handleOpenBijiRelai}
                 focusedLeaderId={selectedLeader?.id || viewingLeader?.id} />
               {sortedLeaders.length === 0 && <EmptyLeaderState onAdd={() => setShowModal(true)} />}
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Biji Relai Modal */}
+        {selectedP && (
+          <BijiRelaiModal
+            open={showBijiRelaiModal}
+            onClose={() => setShowBijiRelaiModal(false)}
+            plantation={selectedP}
+            entries={bijiRelaiEntries}
+            date={bijiRelaiDate}
+            tons={bijiRelaiTons}
+            saving={bijiRelaiSaving}
+            savedId={bijiRelaiSavedId}
+            onDateChange={setBijiRelaiDate}
+            onTonsChange={setBijiRelaiTons}
+            onSubmit={handleSubmitBijiRelai}
+            onNewEntry={() => { setBijiRelaiSavedId(null); setBijiRelaiDate(new Date().toISOString().split("T")[0]); setBijiRelaiTons(""); }}
+            onEdit={handleEditBijiRelai}
+            onDelete={handleDeleteBijiRelai}
+          />
+        )}
 
         {/* Data Entry Form */}
         <AnimatePresence>

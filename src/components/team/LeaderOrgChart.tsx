@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Trash2, Save, Eye, ChevronLeft } from "lucide-react";
+import { MapPin, Phone, Trash2, Save, Eye, ChevronLeft, Sprout } from "lucide-react";
 import { Plantation, TeamLeader, DailyEntry } from "@/types";
 
 interface LeaderOrgChartProps {
@@ -11,6 +11,7 @@ interface LeaderOrgChartProps {
   onViewDetails: (leader: TeamLeader) => void;
   onDeleteLeader: (id: string) => void;
   onBack: () => void;
+  onBijiRelai: () => void;
   focusedLeaderId?: string | null;
 }
 
@@ -44,6 +45,7 @@ export default function LeaderOrgChart({
   onViewDetails,
   onDeleteLeader,
   onBack,
+  onBijiRelai,
   focusedLeaderId,
 }: LeaderOrgChartProps) {
   const sortedLeaders = focusedLeaderId
@@ -81,7 +83,17 @@ export default function LeaderOrgChart({
             </div>
             <div className="text-sm mt-3 text-[var(--text-muted)]">
               {sortedLeaders.length} Team Leader{sortedLeaders.length !== 1 ? "s" : ""}
-          </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.04, backgroundColor: "rgba(34,197,94,0.18)" }}
+              whileTap={{ scale: 0.96 }}
+              onClick={(e) => { e.stopPropagation(); onBijiRelai(); }}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border"
+              style={{ borderColor: "rgba(34,197,94,0.3)", color: "#22c55e", backgroundColor: "rgba(34,197,94,0.08)" }}
+            >
+              <Sprout className="w-4 h-4" />
+              Biji Relai
+            </motion.button>
         </div>
       </motion.div>
 
