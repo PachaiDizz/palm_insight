@@ -524,7 +524,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey, params?: Record<string, string | number>): string => {
-      let text = translations[locale]?.[key] ?? translations.en[key] ?? key;
+      let text: string = translations[locale]?.[key] ?? translations.en[key] ?? key;
       if (params) {
         Object.entries(params).forEach(([k, v]) => {
           text = text.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
