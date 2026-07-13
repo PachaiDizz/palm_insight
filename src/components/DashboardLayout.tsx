@@ -20,7 +20,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile header with notification bell */}
-        <div className="lg:hidden flex items-center justify-end px-4 py-2">
+        <div className="lg:hidden flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-accent-gradient-br">
+              <svg className="w-4 h-4 text-[var(--text-on-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span className="text-sm font-bold text-theme">PalmInsight</span>
+          </div>
           <div className="relative">
             <NotificationBell unreadCount={unreadCount} onClick={() => setPanelOpen(!panelOpen)} />
             {panelOpen && (

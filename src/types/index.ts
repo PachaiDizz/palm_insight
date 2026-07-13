@@ -35,6 +35,9 @@ export interface DailyEntry {
   tons: number | null;
   backlogs: number | null;
   notes: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  lot_label: string | null;
   created_at: string;
   team_leaders?: TeamLeader;
 }

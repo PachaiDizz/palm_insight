@@ -139,17 +139,18 @@ export default function ReportsPage() {
               title={t("reports.title")}
               subtitle={`${months[selectedMonth]} ${selectedYear}`}
               action={
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setShowExportModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-[var(--hover-subtle)]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
-                    <FileSpreadsheet className="w-4 h-4" style={{ color: "var(--accent-amber)" }} />
-                    Export Monthly
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <button onClick={() => setShowExportModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all hover:bg-[var(--hover-subtle)] min-h-[40px]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
+                    <FileSpreadsheet className="w-4 h-4 shrink-0" style={{ color: "var(--accent-amber)" }} />
+                    <span className="hidden sm:inline">Export Monthly</span>
+                    <span className="sm:hidden">Export</span>
                   </button>
-                  <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-[var(--hover-subtle)]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
-                    <FileSpreadsheet className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                  <button onClick={exportCSV} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all hover:bg-[var(--hover-subtle)] min-h-[40px]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
+                    <FileSpreadsheet className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
                     CSV
                   </button>
-                  <button onClick={exportJSON} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-[var(--hover-subtle)]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
-                    <FileText className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                  <button onClick={exportJSON} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all hover:bg-[var(--hover-subtle)] min-h-[40px]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
+                    <FileText className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
                     JSON
                   </button>
                 </div>
@@ -157,12 +158,12 @@ export default function ReportsPage() {
             />
 
             {/* Filters */}
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
               {/* Month Selector */}
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
+                className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none min-h-[40px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 {months.map((m, i) => (
@@ -173,7 +174,7 @@ export default function ReportsPage() {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none"
+                className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none min-h-[40px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
                 {[2024, 2025, 2026, 2027].map((y) => (
@@ -346,12 +347,12 @@ export default function ReportsPage() {
                             <span className="text-sm text-theme font-medium">{e.date}</span>
                             <Badge status={e.work_status === "work" ? "work" : "no-work"} size="sm" />
                           </div>
-                          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{leader?.name || "-"} &middot; {leader?.plantations ? `Block ${leader.plantations.block}` : "-"}</div>
-                          <div className="grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                            <div>Workers: {e.num_workers ?? "-"}</div>
-                            <div>Bunches: {e.bunches != null ? e.bunches.toLocaleString("en-MY") : "-"}</div>
-                            <div>Tons: {e.tons != null ? Number(e.tons).toFixed(2) : "-"}</div>
-                            <div>Backlogs: {e.backlogs ?? "-"}</div>
+                          <div className="text-sm truncate" style={{ color: "var(--text-secondary)" }}>{leader?.name || "-"} &middot; {leader?.plantations ? `Block ${leader.plantations.block}` : "-"}</div>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                            <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>Workers</span><span className="font-medium text-theme">{e.num_workers ?? "-"}</span></div>
+                            <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>Bunches</span><span className="font-medium text-theme">{e.bunches != null ? e.bunches.toLocaleString("en-MY") : "-"}</span></div>
+                            <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>Tons</span><span className="font-medium text-theme">{e.tons != null ? Number(e.tons).toFixed(2) : "-"}</span></div>
+                            <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>Backlogs</span><span className="font-medium text-theme">{e.backlogs ?? "-"}</span></div>
                           </div>
                         </div>
                       );

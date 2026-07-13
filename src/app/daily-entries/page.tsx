@@ -181,22 +181,23 @@ export default function DailyEntriesPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
         <PageHeader
           title={t("entries.title")}
           subtitle="View and export all harvest entries"
           action={
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setShowImport(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5 bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-secondary)]"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all hover:bg-white/5 bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-secondary)] min-h-[40px]"
               >
                 <Upload className="w-4 h-4 text-[var(--accent-primary)]" />
-                {t("action.import")}
+                <span className="hidden sm:inline">{t("action.import")}</span>
+                <span className="sm:hidden">{t("action.import")}</span>
               </button>
               <button
                 onClick={handleBulkExport}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-white/5 bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-secondary)]"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all hover:bg-white/5 bg-[var(--bg-card)] border-[var(--border-default)] text-[var(--text-secondary)] min-h-[40px]"
               >
                 <Download className="w-4 h-4 text-[var(--accent-primary)]" />
                 {selectedIds.size > 0 ? t("bulk.exportSelected") : t("entries.exportCSV")}
@@ -206,7 +207,7 @@ export default function DailyEntriesPage() {
         />
 
         {/* Filters */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
             <button onClick={prevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10 bg-[var(--accent-subtle)] text-[var(--accent-primary)] border" style={{ borderColor: "var(--accent-subtle)" }}>
               <ChevronLeft className="w-4 h-4" />
@@ -221,7 +222,7 @@ export default function DailyEntriesPage() {
             <select
               value={selectedPlantationId}
               onChange={(e) => { setSelectedPlantationId(e.target.value); setSelectedIds(new Set()); }}
-              className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none bg-[var(--bg-card)] border-[var(--border-default)]"
+              className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none bg-[var(--bg-card)] border-[var(--border-default)] min-h-[40px]"
             >
               <option value="all">All Plantations</option>
               {plantations.map((p) => (
@@ -252,11 +253,11 @@ export default function DailyEntriesPage() {
 
         {/* Bulk Actions Bar */}
         {filteredEntries.length > 0 && (
-          <div className="flex items-center justify-between mb-4 px-4 py-2.5 rounded-xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-default)" }}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-4 px-3 sm:px-4 py-2.5 rounded-xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-default)" }}>
             <div className="flex items-center gap-3">
               <button
                 onClick={toggleSelectAll}
-                className="flex items-center gap-2 text-sm transition-colors"
+                className="flex items-center gap-2 text-sm transition-colors min-h-[36px]"
                 style={{ color: allSelected ? "var(--accent-primary)" : "var(--text-muted)" }}
                 aria-label={allSelected ? t("bulk.deselectAll") : t("bulk.selectAll")}
               >
@@ -273,7 +274,7 @@ export default function DailyEntriesPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleBulkDelete}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
                   style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)" }}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -281,7 +282,7 @@ export default function DailyEntriesPage() {
                 </button>
                 <button
                   onClick={handleBulkExport}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
                   style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -363,29 +364,30 @@ export default function DailyEntriesPage() {
                   const plantation = leader?.plantations as Plantation | undefined;
                   const isSelected = selectedIds.has(e.id);
                   return (
-                    <div key={e.id} className="p-4 space-y-2" style={{ backgroundColor: isSelected ? "rgba(245,158,11,0.04)" : undefined }}>
+                    <div key={e.id} className="p-4 space-y-2.5" style={{ backgroundColor: isSelected ? "rgba(245,158,11,0.04)" : undefined }}>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
                           <button
                             onClick={() => toggleSelect(e.id)}
                             aria-label={isSelected ? "Deselect" : "Select"}
                             style={{ color: isSelected ? "var(--accent-primary)" : "var(--text-muted)" }}
+                            className="shrink-0"
                           >
                             {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                           </button>
-                          <span className="text-sm text-theme font-medium">{e.date}</span>
+                          <span className="text-sm text-theme font-medium truncate">{e.date}</span>
                         </div>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${e.work_status === "work" ? "bg-[var(--status-work-bg)] text-[var(--status-work)]" : "bg-[var(--status-no-work-bg)] text-[var(--status-no-work)]"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${e.work_status === "work" ? "bg-[var(--status-work-bg)] text-[var(--status-work)]" : "bg-[var(--status-no-work-bg)] text-[var(--status-no-work)]"}`}>
                           {e.work_status === "work" ? t("status.work") : t("status.noWork")}
                         </span>
                       </div>
-                      <div className="text-sm" style={{ color: "var(--text-secondary)" }}>{leader?.name || "-"} &middot; {plantation ? `Block ${plantation.block}` : "-"}</div>
-                      <div className="grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                        <div>{t("entry.workers")}: {e.num_workers ?? "-"}</div>
-                        <div>{t("entry.bunches")}: {e.bunches ?? "-"}</div>
-                        <div>{t("entry.tons")}: {e.tons != null ? Number(e.tons).toFixed(2) : "-"}</div>
-                        <div>{t("entry.backlogs")}: {e.backlogs ?? "-"}</div>
-                        {e.notes && <div className="col-span-2 truncate" style={{ color: "var(--text-muted)" }}>{t("entry.notes")}: {e.notes}</div>}
+                      <div className="text-sm truncate" style={{ color: "var(--text-secondary)" }}>{leader?.name || "-"} &middot; {plantation ? `Block ${plantation.block}` : "-"}</div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                        <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.workers")}</span><span className="font-medium text-theme">{e.num_workers ?? "-"}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.bunches")}</span><span className="font-medium text-theme">{e.bunches ?? "-"}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.tons")}</span><span className="font-medium text-theme">{e.tons != null ? Number(e.tons).toFixed(2) : "-"}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.backlogs")}</span><span className="font-medium text-theme">{e.backlogs ?? "-"}</span></div>
+                        {e.notes && <div className="col-span-2 truncate mt-1" style={{ color: "var(--text-muted)" }}>{e.notes}</div>}
                       </div>
                     </div>
                   );

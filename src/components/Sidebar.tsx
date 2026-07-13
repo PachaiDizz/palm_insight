@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { TreePalm, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList } from "lucide-react";
+import { TreePalm, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Map } from "lucide-react";
 import { useState } from "react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import NotificationPanel from "@/components/notifications/NotificationPanel";
@@ -28,6 +28,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
     { label: t("nav.dashboard"), href: "/dashboard", icon: Home },
     { label: t("nav.plantations"), href: "/plantations", icon: Sprout },
     { label: t("nav.teams"), href: "/team", icon: Users },
+    { label: t("nav.map"), href: "/map", icon: Map },
     { label: t("nav.entries"), href: "/daily-entries", icon: ClipboardList },
     { label: t("nav.reports"), href: "/reports", icon: BarChart3 },
     { label: t("nav.settings"), href: "/settings", icon: Settings },

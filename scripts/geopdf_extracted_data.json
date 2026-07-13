@@ -1,0 +1,15 @@
+{
+  "file": "C:\\Users\\PachaiDizzer\\palm-insight\\scripts\\..\\SAHABAT 5.pdf",
+  "pages": [],
+  "metadata": {
+    "/Producer": "Global Mapper (www.globalmapper.com)",
+    "/Creator": "Foxit Quick PDF Library 13.12 (www.debenu.com)",
+    "/CreationDate": "D:20220520154403+08'00'",
+    "/ModDate": "D:20220520154427+08'00'"
+  },
+  "text_content": [],
+  "geospatial_hints": [],
+  "page_count": 1,
+  "pypdf_error": "'RectangleObject' object has no attribute 'x'",
+  "pdfplumber_error": "list index out of range"
+}

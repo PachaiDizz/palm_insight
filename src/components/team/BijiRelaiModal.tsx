@@ -72,17 +72,17 @@ export default function BijiRelaiModal({
   return (
     <Modal open={open} onClose={onClose} size="lg">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(34,197,94,0.12)" }}>
-            <Truck className="w-5 h-5" style={{ color: "#22c55e" }} />
+      <div className="flex items-center justify-between mb-4 sm:mb-5">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(34,197,94,0.12)" }}>
+            <Truck className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: "#22c55e" }} />
           </div>
-          <div>
-            <h2 className="section-heading text-base text-theme">{t("bijiRelai.title")}</h2>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Block {plantation.block} — {t("bijiRelai.seedTonnage")}</p>
+          <div className="min-w-0">
+            <h2 className="section-heading text-sm sm:text-base text-theme">{t("bijiRelai.title")}</h2>
+            <p className="text-[10px] sm:text-xs truncate" style={{ color: "var(--text-muted)" }}>Block {plantation.block} — {t("bijiRelai.seedTonnage")}</p>
           </div>
         </div>
-        <button onClick={onClose} aria-label="Close" className="p-2 rounded-xl transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
+        <button onClick={onClose} aria-label="Close" className="p-2 rounded-xl transition-colors hover:bg-white/10 shrink-0" style={{ color: "var(--text-muted)" }}>
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -97,7 +97,7 @@ export default function BijiRelaiModal({
             </label>
             <input
               type="date"
-              className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border transition-colors"
+              className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border transition-colors"
               style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
               value={date}
               onChange={(e) => onDateChange(e.target.value)}
@@ -111,7 +111,7 @@ export default function BijiRelaiModal({
             <input
               type="text"
               inputMode="decimal"
-              className="w-full px-4 py-2.5 rounded-xl text-sm text-theme outline-none border transition-colors"
+              className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border transition-colors"
               style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }}
               value={tons}
               onChange={(e) => onTonsChange(e.target.value)}
@@ -120,7 +120,7 @@ export default function BijiRelaiModal({
             <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{t("bijiRelai.description")}</p>
           </div>
         </div>
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
           {savedId && (
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -150,14 +150,14 @@ export default function BijiRelaiModal({
       {/* History */}
       {sorted.length > 0 && (
         <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "var(--border-default)" }}>
-          <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-default)" }}>
+          <div className="px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-default)" }}>
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4" style={{ color: "#22c55e" }} />
-              <h3 className="text-sm font-semibold text-theme">{t("bijiRelai.history")}</h3>
+              <h3 className="text-xs sm:text-sm font-semibold text-theme">{t("bijiRelai.history")}</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>{sorted.length} entries</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{totalTons.toFixed(2)} {t("entry.tons")}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>{sorted.length} entries</span>
+              <span className="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{totalTons.toFixed(2)} {t("entry.tons")}</span>
             </div>
           </div>
 
@@ -244,9 +244,9 @@ export default function BijiRelaiModal({
                   cum += Number(e.tons) || 0;
                   const isEditing = editingEntry?.id === e.id;
                   return (
-                    <div key={e.id} className="px-4 py-3">
+                    <div key={e.id} className="px-3 sm:px-4 py-2.5 sm:py-3">
                       <div className="flex items-center justify-between mb-1">
-                        <div className="text-sm font-medium text-theme">
+                        <div className="text-xs sm:text-sm font-medium text-theme">
                           {isEditing ? (
                             <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)}
                               className="px-2 py-1 rounded-lg text-xs outline-none border" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} />

@@ -35,8 +35,8 @@ function normalizeDate(dateStr: string): string {
   return dateStr;
 }
 
-interface EntryFormState { workStatus: string; date: string; numWorkers: string; lot: string; bunches: string; tons: string; backlogs: string; notes: string; }
-const emptyEntryForm: EntryFormState = { workStatus: "work", date: toLocalDateKey(new Date()), numWorkers: "", lot: "", bunches: "", tons: "", backlogs: "", notes: "" };
+interface EntryFormState { workStatus: string; date: string; numWorkers: string; lot: string; bunches: string; tons: string; backlogs: string; notes: string; latitude: string; longitude: string; lotLabel: string; }
+const emptyEntryForm: EntryFormState = { workStatus: "work", date: toLocalDateKey(new Date()), numWorkers: "", lot: "", bunches: "", tons: "", backlogs: "", notes: "", latitude: "", longitude: "", lotLabel: "" };
 type EntryFormAction =
   | { type: "SET"; field: keyof EntryFormState; value: string }
   | { type: "RESET" }
@@ -56,6 +56,9 @@ function entryFormReducer(state: EntryFormState, action: EntryFormAction): Entry
         tons: e.tons != null ? String(e.tons) : "",
         backlogs: e.work_status === "work" ? String(e.backlogs ?? "") : "",
         notes: e.notes || "",
+        latitude: e.latitude != null ? String(e.latitude) : "",
+        longitude: e.longitude != null ? String(e.longitude) : "",
+        lotLabel: e.lot_label || "",
       };
     }
   }
@@ -71,8 +74,8 @@ function filterReducer(state: FilterState, action: FilterAction): FilterState {
   }
 }
 
-interface DetailEditState { workStatus: string; date: string; numWorkers: string; lot: string; bunches: string; tons: string; backlogs: string; notes: string; }
-const emptyDetailEdit: DetailEditState = { workStatus: "work", date: "", numWorkers: "", lot: "", bunches: "", tons: "", backlogs: "", notes: "" };
+interface DetailEditState { workStatus: string; date: string; numWorkers: string; lot: string; bunches: string; tons: string; backlogs: string; notes: string; latitude: string; longitude: string; lotLabel: string; }
+const emptyDetailEdit: DetailEditState = { workStatus: "work", date: "", numWorkers: "", lot: "", bunches: "", tons: "", backlogs: "", notes: "", latitude: "", longitude: "", lotLabel: "" };
 type DetailEditAction = { type: "SET"; field: keyof DetailEditState; value: string } | { type: "RESET" } | { type: "LOAD"; entry: DailyEntry };
 function detailEditReducer(state: DetailEditState, action: DetailEditAction): DetailEditState {
   switch (action.type) {
@@ -89,6 +92,9 @@ function detailEditReducer(state: DetailEditState, action: DetailEditAction): De
         tons: e.tons != null ? String(e.tons) : "",
         backlogs: e.work_status === "work" ? String(e.backlogs ?? "") : "",
         notes: e.notes || "",
+        latitude: e.latitude != null ? String(e.latitude) : "",
+        longitude: e.longitude != null ? String(e.longitude) : "",
+        lotLabel: e.lot_label || "",
       };
     }
   }
@@ -319,6 +325,9 @@ function TeamsContent() {
       tons: parseFloat(entryForm.tons) || 0,
       backlogs: entryForm.workStatus === "work" ? parseInt(entryForm.backlogs) || 0 : null,
       notes: entryForm.notes || null,
+      latitude: entryForm.latitude ? parseFloat(entryForm.latitude) : null,
+      longitude: entryForm.longitude ? parseFloat(entryForm.longitude) : null,
+      lot_label: entryForm.lotLabel || null,
     };
     if (existingEntry) {
       const { error } = await supabase.from("daily_entries").update(entryData).eq("id", existingEntry.id);
@@ -532,6 +541,9 @@ function TeamsContent() {
       tons: parseFloat(detailEdit.tons) || 0,
       backlogs: detailEdit.workStatus === "work" ? parseInt(detailEdit.backlogs) || 0 : null,
       notes: detailEdit.notes || null,
+      latitude: detailEdit.latitude ? parseFloat(detailEdit.latitude) : null,
+      longitude: detailEdit.longitude ? parseFloat(detailEdit.longitude) : null,
+      lot_label: detailEdit.lotLabel || null,
     }).eq("id", detailView.editEntry.id);
     if (!error) {
       await loadDetailData(viewingLeader); setToast({ type: "success", message: t("msg.entryUpdated") });
@@ -564,7 +576,7 @@ function TeamsContent() {
           {!selectedBlock && (
             <motion.button whileHover={{ scale: 1.05, boxShadow: "0 4px 20px rgba(245,158,11,0.3)" }} whileTap={{ scale: 0.95 }} onClick={() => leaderFormDispatch({ type: "OPEN" })}
               aria-label="Add team leader"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-theme transition-all" style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}>
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-theme transition-all w-full sm:w-auto min-h-[44px]" style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}>
               <Plus className="w-4 h-4" /> {t("team.addLeader")}
             </motion.button>
           )}
@@ -573,12 +585,14 @@ function TeamsContent() {
         {/* Date Filter Bar */}
         <AnimatePresence>
           {selectedLeader && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3, ease: "easeOut" }} className="mb-6">
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, ease: "easeOut", delay: 0.05 }} className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-amber-400" />
-                <input type="date" className="px-3 py-2 rounded border border-[var(--border-default)] bg-[var(--bg-elevated)] text-sm text-theme outline-none min-w-[140px]" value={entryForm.date} onChange={(e) => { setEntryField("date", e.target.value); filterDispatch({ type: "SET", field: "showFilterPanel", value: false }); }} />
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3, ease: "easeOut" }} className="mb-4 sm:mb-6">
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, ease: "easeOut", delay: 0.05 }} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-amber-400 shrink-0" />
+                  <input type="date" className="flex-1 sm:flex-none px-3 py-2 rounded border border-[var(--border-default)] bg-[var(--bg-elevated)] text-sm text-theme outline-none min-w-0 sm:min-w-[140px]" value={entryForm.date} onChange={(e) => { setEntryField("date", e.target.value); filterDispatch({ type: "SET", field: "showFilterPanel", value: false }); }} />
+                </div>
                 <motion.button whileHover={{ scale: 1.03, backgroundColor: "var(--accent-subtle)" }} whileTap={{ scale: 0.97 }} onClick={() => filterDispatch({ type: "SET", field: "showFilterPanel", value: !filters.showFilterPanel })}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all min-h-[40px]" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
                   <Calendar className="w-4 h-4" /> {t("entry.filterByDate")}
                 </motion.button>
               </motion.div>
@@ -638,9 +652,20 @@ function TeamsContent() {
         <AnimatePresence>
           {selectedLeader && (
             <motion.div key="entry-form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.3, ease: "easeOut" }}>
-              <EntryForm leader={selectedLeader} plantation={selectedP || null} workStatus={entryForm.workStatus} date={entryForm.date} numWorkers={entryForm.numWorkers} lot={entryForm.lot} bunches={entryForm.bunches} tons={entryForm.tons} backlogs={entryForm.backlogs} notes={entryForm.notes} saving={saving} savedId={savedId}
+              <EntryForm leader={selectedLeader} plantation={selectedP || null} workStatus={entryForm.workStatus} date={entryForm.date} numWorkers={entryForm.numWorkers} lot={entryForm.lot} bunches={entryForm.bunches} tons={entryForm.tons} backlogs={entryForm.backlogs} notes={entryForm.notes} latitude={entryForm.latitude} longitude={entryForm.longitude} lotLabel={entryForm.lotLabel} saving={saving} savedId={savedId}
                 canUndo={entryFormUndo.canUndo} canRedo={entryFormUndo.canRedo} historyLength={entryFormUndo.historyLength}
                 onWorkStatusChange={(v)=>setEntryField("workStatus",v)} onDateChange={(v)=>setEntryField("date",v)} onNumWorkersChange={(v)=>setEntryField("numWorkers",v)} onLotChange={(v)=>setEntryField("lot",v)} onBunchesChange={(v)=>setEntryField("bunches",v)} onTonsChange={(v)=>setEntryField("tons",v)} onBacklogsChange={(v)=>setEntryField("backlogs",v)} onNotesChange={(v)=>setEntryField("notes",v)}
+                onLatitudeChange={(v)=>setEntryField("latitude",v)} onLongitudeChange={(v)=>setEntryField("longitude",v)} onLotLabelChange={(v)=>setEntryField("lotLabel",v)}
+                onUseMyLocation={() => {
+                  if (!navigator.geolocation) return;
+                  navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                      setEntryField("latitude", pos.coords.latitude.toFixed(7));
+                      setEntryField("longitude", pos.coords.longitude.toFixed(7));
+                    },
+                    () => {}
+                  );
+                }}
                 onSubmit={handleSubmitEntry} onNewEntry={() => { setSavedId(null); entryFormUndo.setState(emptyEntryForm, { addToHistory: false }); entryFormUndo.clearHistory(); }}
                 onClose={handleBackToOrgChart}
                 onUndo={entryFormUndo.undo} onRedo={entryFormUndo.redo} />
@@ -661,21 +686,21 @@ function TeamsContent() {
                   <ChevronLeft className="w-4 h-4" /> {t("team.backToBlocks")}
                 </motion.button>
 
-                <div className="card-glow rounded-2xl p-6 mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
-                  <div className="flex items-start justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
-                        <Users className="w-7 h-7" style={{ color: "var(--accent-primary)" }} />
+                <div className="card-glow rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                        <Users className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: "var(--accent-primary)" }} />
                       </div>
                       <div>
-                        <h2 className="page-title text-2xl text-theme">{viewingLeader.name}</h2>
+                        <h2 className="page-title text-xl sm:text-2xl text-theme">{viewingLeader.name}</h2>
                         {viewingLeader.phone && (<div className="flex items-center gap-2 mt-1"><Phone className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} /><span className="text-sm" style={{ color: "var(--text-muted)" }}>{viewingLeader.phone}</span></div>)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><MapPin className="w-4 h-4" style={{ color: "var(--accent-primary)" }} /><span className="text-sm font-medium text-theme">Block {plantation?.block}</span></div>
-                      <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><span className="text-sm" style={{ color: "var(--text-secondary)" }}>{plantation?.rancangan}</span></div>
-                      <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><span className="text-sm" style={{ color: "var(--text-secondary)" }}>Peringkat {plantation?.peringkat}</span></div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><MapPin className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} /><span className="text-xs sm:text-sm font-medium text-theme">Block {plantation?.block}</span></div>
+                      <div className="px-3 py-1.5 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><span className="text-xs sm:text-sm" style={{ color: "var(--text-secondary)" }}>{plantation?.rancangan}</span></div>
+                      <div className="px-3 py-1.5 rounded-xl" style={{ backgroundColor: "var(--accent-subtle)" }}><span className="text-xs sm:text-sm" style={{ color: "var(--text-secondary)" }}>Peringkat {plantation?.peringkat}</span></div>
                     </div>
                   </div>
                 </div>
@@ -711,23 +736,23 @@ function TeamsContent() {
                   ))}
                 </div>
 
-                <div className="card-glow rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
+                <div className="card-glow rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
                   <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
                     <div className="flex items-center gap-2">
-                      <button onClick={() => detailViewDispatch({ type: "PREV_MONTH" })} aria-label="Previous month" className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)", border: "1px solid rgba(245,158,11,0.2)" }}><ChevronLeft className="w-4 h-4" /></button>
+                      <button onClick={() => detailViewDispatch({ type: "PREV_MONTH" })} aria-label="Previous month" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)", border: "1px solid rgba(245,158,11,0.2)" }}><ChevronLeft className="w-4 h-4" /></button>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-                        <input type="month" value={detailView.month} onChange={(e) => detailViewDispatch({ type: "SET", field: "month", value: e.target.value })} className="pl-9 pr-3 py-2 rounded-xl border text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)", color: "white" }} />
+                        <Calendar className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                        <input type="month" value={detailView.month} onChange={(e) => detailViewDispatch({ type: "SET", field: "month", value: e.target.value })} className="pl-8 sm:pl-9 pr-2 sm:pr-3 py-2 rounded-xl border text-xs sm:text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)", color: "white" }} />
                       </div>
-                      <button onClick={() => detailViewDispatch({ type: "NEXT_MONTH" })} aria-label="Next month" className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)", border: "1px solid rgba(245,158,11,0.2)" }}><ChevronDown className="w-4 h-4 rotate-[-90deg]" /></button>
-                      <span className="text-sm font-semibold text-theme ml-1">{detailFormatMonthLabel(detailView.month)}</span>
+                      <button onClick={() => detailViewDispatch({ type: "NEXT_MONTH" })} aria-label="Next month" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-white/10" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)", border: "1px solid rgba(245,158,11,0.2)" }}><ChevronDown className="w-4 h-4 rotate-[-90deg]" /></button>
+                      <span className="text-xs sm:text-sm font-semibold text-theme ml-1 hidden sm:inline">{detailFormatMonthLabel(detailView.month)}</span>
                     </div>
                     <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>{detailFilteredEntries.length} {t("detail.entries")}</span>
                   </div>
-                  <div className="flex items-end gap-3 pt-3" style={{ borderTop: "1px solid rgba(245,158,11,0.12)" }}>
-                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{t("entry.from")}</label><input type="date" value={detailView.dateFrom} onChange={(e) => detailViewDispatch({ type: "SET", field: "dateFrom", value: e.target.value })} className="w-full px-3 py-2 rounded border text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
-                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{t("entry.to")}</label><input type="date" value={detailView.dateTo} onChange={(e) => detailViewDispatch({ type: "SET", field: "dateTo", value: e.target.value })} className="w-full px-3 py-2 rounded border text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
-                    {(detailView.dateFrom || detailView.dateTo) && (<button onClick={() => detailViewDispatch({ type: "RESET_MONTH" })} aria-label="Clear date range" className="px-3 py-2 rounded-xl text-xs font-medium transition-colors" style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)", border: "1px solid rgba(239,68,68,0.2)" }}>{t("entry.clearFilter")}</button>)}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3 pt-3" style={{ borderTop: "1px solid rgba(245,158,11,0.12)" }}>
+                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{t("entry.from")}</label><input type="date" value={detailView.dateFrom} onChange={(e) => detailViewDispatch({ type: "SET", field: "dateFrom", value: e.target.value })} className="w-full px-3 py-2 rounded border text-xs sm:text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
+                    <div className="flex-1"><label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{t("entry.to")}</label><input type="date" value={detailView.dateTo} onChange={(e) => detailViewDispatch({ type: "SET", field: "dateTo", value: e.target.value })} className="w-full px-3 py-2 rounded border text-xs sm:text-sm text-theme outline-none cursor-pointer" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} /></div>
+                    {(detailView.dateFrom || detailView.dateTo) && (<button onClick={() => detailViewDispatch({ type: "RESET_MONTH" })} aria-label="Clear date range" className="px-3 py-2 rounded-xl text-xs font-medium transition-colors min-h-[36px] shrink-0" style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)", border: "1px solid rgba(239,68,68,0.2)" }}>{t("entry.clearFilter")}</button>)}
                   </div>
                 </div>
 
@@ -773,22 +798,22 @@ function TeamsContent() {
                         {detailFilteredEntries.map((e: DailyEntry, idx: number) => {
                           const isNoWork = e.work_status === "no_work";
                           return (
-                            <div key={e.id} className="p-4 space-y-2">
+                            <div key={e.id} className="p-4 space-y-2.5">
                               <div className="flex items-center justify-between">
                                 <span className="text-sm text-theme font-medium">{e.date ? e.date.split("-").reverse().join("/") : "-"}</span>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5">
                                   <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isNoWork ? "var(--status-no-work-bg)" : "var(--status-work-bg)", color: isNoWork ? "var(--status-no-work)" : "var(--status-work)" }}>{isNoWork ? t("status.noWork") : t("status.work")}</span>
                                   <button onClick={() => handleDetailEditEntry(e)} aria-label="Edit entry" className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-blue)" }}><Edit2 className="w-3.5 h-3.5" /></button>
                                   <button onClick={() => handleDetailDeleteEntry(e.id)} aria-label="Delete entry" className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10" style={{ color: "var(--accent-red)" }}><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
-                              <div className="grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                                <div>{t("entry.workers")}: {isNoWork ? "-" : (e.num_workers ?? "-")}</div>
-                                <div>{t("entry.lot")}: {isNoWork ? "-" : (e.lot || "-")}</div>
-                                <div>{t("entry.bunches")}: {isNoWork ? "-" : (e.bunches ?? "-")}</div>
-                                <div>{t("entry.tons")}: {e.tons != null && e.tons !== 0 ? Number(e.tons).toFixed(2) : "-"}</div>
-                                <div>{t("entry.backlogs")}: {isNoWork ? "-" : (e.backlogs || "-")}</div>
-                                {e.notes && <div className="col-span-3 truncate" style={{ color: "var(--text-muted)" }}>{t("entry.notes")}: {e.notes}</div>}
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                                <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.workers")}</span><span className="font-medium text-theme">{isNoWork ? "-" : (e.num_workers ?? "-")}</span></div>
+                                <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.lot")}</span><span className="font-medium text-theme">{isNoWork ? "-" : (e.lot || "-")}</span></div>
+                                <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.bunches")}</span><span className="font-medium text-theme">{isNoWork ? "-" : (e.bunches ?? "-")}</span></div>
+                                <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.tons")}</span><span className="font-medium text-theme">{e.tons != null && e.tons !== 0 ? Number(e.tons).toFixed(2) : "-"}</span></div>
+                                <div className="flex justify-between"><span style={{ color: "var(--text-muted)" }}>{t("entry.backlogs")}</span><span className="font-medium text-theme">{isNoWork ? "-" : (e.backlogs || "-")}</span></div>
+                                {e.notes && <div className="col-span-2 truncate mt-1" style={{ color: "var(--text-muted)" }}>{e.notes}</div>}
                               </div>
                             </div>
                           );
@@ -803,8 +828,9 @@ function TeamsContent() {
         </AnimatePresence>
 
         {/* Detail View Edit Modal */}
-        <EditEntryModal show={detailView.showEditModal} entry={detailView.editEntry} date={detailEdit.date} workStatus={detailEdit.workStatus} numWorkers={detailEdit.numWorkers} lot={detailEdit.lot} bunches={detailEdit.bunches} tons={detailEdit.tons} backlogs={detailEdit.backlogs} notes={detailEdit.notes} saving={detailView.saving}
+        <EditEntryModal show={detailView.showEditModal} entry={detailView.editEntry} date={detailEdit.date} workStatus={detailEdit.workStatus} numWorkers={detailEdit.numWorkers} lot={detailEdit.lot} bunches={detailEdit.bunches} tons={detailEdit.tons} backlogs={detailEdit.backlogs} notes={detailEdit.notes} latitude={detailEdit.latitude} longitude={detailEdit.longitude} lotLabel={detailEdit.lotLabel} saving={detailView.saving}
           onDateChange={(v)=>setDetailEditField("date",v)} onWorkStatusChange={(v)=>setDetailEditField("workStatus",v)} onNumWorkersChange={(v)=>setDetailEditField("numWorkers",v)} onLotChange={(v)=>setDetailEditField("lot",v)} onBunchesChange={(v)=>setDetailEditField("bunches",v)} onTonsChange={(v)=>setDetailEditField("tons",v)} onBacklogsChange={(v)=>setDetailEditField("backlogs",v)} onNotesChange={(v)=>setDetailEditField("notes",v)}
+          onLatitudeChange={(v)=>setDetailEditField("latitude",v)} onLongitudeChange={(v)=>setDetailEditField("longitude",v)} onLotLabelChange={(v)=>setDetailEditField("lotLabel",v)}
           onSave={handleDetailSaveEdit} onClose={() => detailViewDispatch({ type: "CLOSE_EDIT" })} />
 
         {/* Add Leader Modal */}

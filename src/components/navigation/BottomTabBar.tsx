@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Home, Sprout, Users, BarChart3, ClipboardList } from "lucide-react";
+import { Home, Sprout, Users, BarChart3, ClipboardList, Map } from "lucide-react";
 
 const tabs = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Blocks", href: "/plantations", icon: Sprout },
   { label: "Teams", href: "/team", icon: Users },
+  { label: "Map", href: "/map", icon: Map },
   { label: "Entries", href: "/daily-entries", icon: ClipboardList },
   { label: "Reports", href: "/reports", icon: BarChart3 },
 ];

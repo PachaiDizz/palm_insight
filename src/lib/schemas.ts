@@ -23,6 +23,9 @@ export const dailyEntrySchema = z.object({
   bunches: z.string().optional(),
   tons: z.string().optional(),
   backlogs: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  lot_label: z.string().optional(),
 }).refine(
   (data) => {
     if (data.num_workers && parseInt(data.num_workers) < 0) return false;

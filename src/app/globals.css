@@ -340,6 +340,18 @@ select option {
 .text-theme-muted { color: var(--text-muted); }
 .text-theme-secondary { color: var(--text-secondary); }
 
+/* Mobile-friendly touch targets and spacing */
+@media (max-width: 639px) {
+  /* Ensure all interactive elements have minimum 44px touch target */
+  button, a, input[type="checkbox"], input[type="radio"], select {
+    min-height: 36px;
+  }
+  /* Reduce padding on small screens for tighter layouts */
+  .card-glow {
+    border-radius: 1rem;
+  }
+}
+
 /* Brand surfaces */
 .bg-accent-gradient {
   background-image: var(--accent-gradient);
@@ -378,4 +390,47 @@ select option {
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ─── Leaflet dark theme overrides ─── */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid var(--border-default) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-card) !important;
+  box-shadow: none !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+  font-size: 18px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--text-primary) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-default) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--bg-card-hover) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: rgba(255, 255, 255, 0.5) !important;
 }

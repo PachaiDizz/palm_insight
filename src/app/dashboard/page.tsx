@@ -302,30 +302,32 @@ export default function DashboardPage() {
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
           {/* Today Pulse — promoted to a prominent daily signal strip */}
           {selectedPlantation && (
-            <div className="card-glow rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ backgroundColor: "var(--bg-card)" }}>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-subtle)" }}>
-                  <Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+            <div className="card-glow rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6" style={{ backgroundColor: "var(--bg-card)" }}>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-subtle)" }}>
+                    <Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("dashboard.todaysPulse")}</div>
+                    <div className="text-sm font-semibold text-theme">Live harvest signal</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("dashboard.todaysPulse")}</div>
-                  <div className="text-sm font-semibold text-theme">Live harvest signal</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-5 sm:gap-7">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-theme">{todayPulse.bunches.toLocaleString("en-MY")}</div>
-                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("entry.bunches")}</div>
-                </div>
-                <div className="w-px h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-theme">{Number(todayPulse.tons).toFixed(2)}</div>
-                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("entry.tons")}</div>
-                </div>
-                <div className="w-px h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-theme">{todayPulse.teamsLogged}</div>
-                  <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("dashboard.activeTeams")}</div>
+                <div className="flex items-center justify-around sm:justify-start gap-4 sm:gap-7">
+                  <div className="text-center">
+                    <div className="text-lg sm:text-2xl font-bold text-theme">{todayPulse.bunches.toLocaleString("en-MY")}</div>
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("entry.bunches")}</div>
+                  </div>
+                  <div className="w-px h-7 sm:h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
+                  <div className="text-center">
+                    <div className="text-lg sm:text-2xl font-bold text-theme">{Number(todayPulse.tons).toFixed(2)}</div>
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("entry.tons")}</div>
+                  </div>
+                  <div className="w-px h-7 sm:h-9" style={{ backgroundColor: "var(--border-subtle)" }} />
+                  <div className="text-center">
+                    <div className="text-lg sm:text-2xl font-bold text-theme">{todayPulse.teamsLogged}</div>
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("dashboard.activeTeams")}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -397,13 +399,13 @@ export default function DashboardPage() {
             {!hasEntriesToday && (
               <div className="mt-3 card-glow rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3" style={{ backgroundColor: "var(--bg-card)" }}>
                 <span className="text-lg">📋</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-theme">No harvest data logged for {MONTH_NAMES[selectedMonth]} {selectedYear}.</p>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>Go to Teams to record entries.</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-theme">No harvest data logged for {MONTH_NAMES[selectedMonth]} {selectedYear}.</p>
+                  <p className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>Go to Teams to record entries.</p>
                 </div>
                 <Link
                   href="/team"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 min-h-[36px]"
                   style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
                 >
                   Go to Teams
@@ -497,7 +499,7 @@ export default function DashboardPage() {
               {recentEntries.length === 0 ? (
                 <div className="p-6 sm:p-8 text-center">
                   <ClipboardList className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>No entries for {MONTH_NAMES[selectedMonth]} {selectedYear} — go to Teams to add one.</p>
+                  <p className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>No entries for {MONTH_NAMES[selectedMonth]} {selectedYear} — go to Teams to add one.</p>
                 </div>
               ) : (
                 <div className="divide-y border-[var(--border-subtle)]">
@@ -506,20 +508,24 @@ export default function DashboardPage() {
                     const plantation = e.plantations;
                     const isWork = e.work_status === "work";
                     return (
-                      <div key={e.id} className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-3.5 hover:bg-[var(--hover-subtle)] transition-colors">
+                      <div key={e.id} className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3.5 hover:bg-[var(--hover-subtle)] transition-colors">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: isWork ? "var(--status-work-bg)" : "var(--status-no-work-bg)" }}>
-                            <Users className="w-4 h-4" style={{ color: isWork ? "var(--status-work)" : "var(--status-no-work)" }} />
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: isWork ? "var(--status-work-bg)" : "var(--status-no-work-bg)" }}>
+                            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: isWork ? "var(--status-work)" : "var(--status-no-work)" }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-theme truncate">{leader?.name || "Unknown"}</div>
-                            <div className="text-xs" style={{ color: "var(--text-muted)" }}>{plantation ? `Block ${plantation.block}` : "-"} &middot; {e.date}</div>
+                            <div className="text-xs sm:text-sm font-medium text-theme truncate">{leader?.name || "Unknown"}</div>
+                            <div className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>{plantation ? `Block ${plantation.block}` : "-"} &middot; {e.date}</div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
                           <div className="text-right hidden sm:block">
                             <div className="text-sm font-medium text-theme">{(e.bunches ?? 0).toLocaleString("en-MY")} <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>bunches</span></div>
                             <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{e.tons != null ? Number(e.tons).toFixed(2) : "0.00"} ton</div>
+                          </div>
+                          <div className="text-right sm:hidden">
+                            <div className="text-xs font-medium text-theme">{(e.bunches ?? 0).toLocaleString("en-MY")}</div>
+                            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>{e.tons != null ? Number(e.tons).toFixed(2) : "0.00"}t</div>
                           </div>
                           <Badge status={isWork ? "work" : "no-work"} size="sm" />
                         </div>

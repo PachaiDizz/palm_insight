@@ -58,7 +58,7 @@ export default function FilterPanel({
               <span className="text-sm font-medium text-theme">{t("entry.dateRange")}</span>
               <button onClick={onClear} aria-label="Clear date filter" className="text-xs px-3 py-1 rounded" style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)" }}>{t("entry.clearFilter")}</button>
             </div>
-            <div className="flex items-end gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
               <div className="flex-1">
                 <label htmlFor="filter-date" className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{t("entry.filterByDate")}</label>
                 <input id="filter-date" type="date" value={filterDate} onChange={(e) => onFilterDateChange(e.target.value)} className="w-full px-3 py-2 rounded border text-sm text-theme outline-none" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} />

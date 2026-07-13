@@ -14,6 +14,9 @@ interface EditEntryModalProps {
   tons: string;
   backlogs: string;
   notes: string;
+  latitude: string;
+  longitude: string;
+  lotLabel: string;
   saving: boolean;
   onDateChange: (val: string) => void;
   onWorkStatusChange: (val: string) => void;
@@ -23,6 +26,9 @@ interface EditEntryModalProps {
   onTonsChange: (val: string) => void;
   onBacklogsChange: (val: string) => void;
   onNotesChange: (val: string) => void;
+  onLatitudeChange: (val: string) => void;
+  onLongitudeChange: (val: string) => void;
+  onLotLabelChange: (val: string) => void;
   onSave: () => void;
   onClose: () => void;
 }
@@ -38,6 +44,9 @@ export default function EditEntryModal({
   tons,
   backlogs,
   notes,
+  latitude,
+  longitude,
+  lotLabel,
   saving,
   onDateChange,
   onWorkStatusChange,
@@ -47,6 +56,9 @@ export default function EditEntryModal({
   onTonsChange,
   onBacklogsChange,
   onNotesChange,
+  onLatitudeChange,
+  onLongitudeChange,
+  onLotLabelChange,
   onSave,
   onClose,
 }: EditEntryModalProps) {
@@ -55,7 +67,7 @@ export default function EditEntryModal({
 
   return (
     <Modal open={show} onClose={onClose} title={t("edit.title")}>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div>
           <label htmlFor="edit-date" className="block text-xs mb-1 text-[var(--text-muted)]">{t("entry.date")}</label>
           <input id="edit-date" type="date" value={date} onChange={(e) => onDateChange(e.target.value)} className="w-full px-3 py-2 rounded border bg-[var(--bg-base)] text-sm text-theme outline-none transition-colors focus:border-[#f59e0b]/50" />
@@ -99,9 +111,26 @@ export default function EditEntryModal({
           <label htmlFor="edit-notes" className="block text-xs mb-1 text-[var(--text-muted)]">{t("edit.notes")}</label>
           <textarea id="edit-notes" value={notes} onChange={(e) => onNotesChange(e.target.value)} rows={2} className="w-full px-3 py-2 rounded border bg-[var(--bg-base)] text-sm text-theme outline-none resize-none transition-colors focus:border-[#f59e0b]/50 min-h-8" placeholder={t("edit.notesPlaceholder")} />
         </div>
-        <div className="flex gap-2 pt-2">
-          <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium bg-[var(--hover-subtle)] text-[var(--text-muted)] transition-colors hover:bg-white/5">{t("action.cancel")}</button>
-          <button type="button" onClick={onSave} disabled={saving} className="flex-1 py-2.5 rounded-lg text-sm font-medium" style={{ backgroundColor: saving ? "rgba(245,158,11,0.5)" : "#f59e0b", color: "#fff" }}>
+        <div className="border-t pt-3" style={{ borderColor: "var(--border-subtle)" }}>
+          <label className="block text-xs mb-2 text-[var(--text-muted)]">{t("map.locationOptional")}</label>
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            <div>
+              <label htmlFor="edit-lat" className="block text-[10px] mb-0.5 text-[var(--text-muted)]">{t("map.latitude")}</label>
+              <input id="edit-lat" type="text" inputMode="decimal" value={latitude} onChange={(e) => onLatitudeChange(e.target.value)} className="w-full px-3 py-2 rounded border bg-[var(--bg-base)] text-sm text-theme outline-none transition-colors focus:border-[#f59e0b]/50" placeholder="-4.123456" />
+            </div>
+            <div>
+              <label htmlFor="edit-lng" className="block text-[10px] mb-0.5 text-[var(--text-muted)]">{t("map.longitude")}</label>
+              <input id="edit-lng" type="text" inputMode="decimal" value={longitude} onChange={(e) => onLongitudeChange(e.target.value)} className="w-full px-3 py-2 rounded border bg-[var(--bg-base)] text-sm text-theme outline-none transition-colors focus:border-[#f59e0b]/50" placeholder="117.654321" />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="edit-lot-label" className="block text-[10px] mb-0.5 text-[var(--text-muted)]">{t("map.lotLabel")}</label>
+            <input id="edit-lot-label" type="text" value={lotLabel} onChange={(e) => onLotLabelChange(e.target.value)} className="w-full px-3 py-2 rounded border bg-[var(--bg-base)] text-sm text-theme outline-none transition-colors focus:border-[#f59e0b]/50" placeholder={t("map.lotLabelPlaceholder")} />
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 pt-2">
+          <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium bg-[var(--hover-subtle)] text-[var(--text-muted)] transition-colors hover:bg-white/5 min-h-[40px]">{t("action.cancel")}</button>
+          <button type="button" onClick={onSave} disabled={saving} className="flex-1 py-2.5 rounded-lg text-sm font-medium min-h-[40px]" style={{ backgroundColor: saving ? "rgba(245,158,11,0.5)" : "#f59e0b", color: "#fff" }}>
             {saving ? t("team.saving") : t("edit.saveChanges")}
           </button>
         </div>
