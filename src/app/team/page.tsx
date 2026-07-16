@@ -194,7 +194,6 @@ function TeamsContent() {
   const [detailView, detailViewDispatch] = useReducer(detailViewReducer, emptyDetailViewState);
 
   const [detailEdit, detailDispatch] = useReducer(detailEditReducer, emptyDetailEdit);
-  const setDetailEditField = (field: keyof DetailEditState, value: string) => detailDispatch({ type: "SET", field, value });
 
   const [leaderForm, leaderFormDispatch] = useReducer(leaderFormReducer, emptyLeaderForm);
   const [blockLastEntries, setBlockLastEntries] = useState<Record<string, string | null>>({});
@@ -530,20 +529,32 @@ function TeamsContent() {
     detailViewDispatch({ type: "OPEN_EDIT", entry });
   };
 
-  const handleDetailSaveEdit = async () => {
+  const handleDetailSaveEdit = async (data: {
+    date: string;
+    workStatus: string;
+    numWorkers: string;
+    lot: string;
+    bunches: string;
+    tons: string;
+    backlogs: string;
+    notes: string;
+    latitude: string;
+    longitude: string;
+    lotLabel: string;
+  }) => {
     if (!detailView.editEntry || !viewingLeader) return;
     detailViewDispatch({ type: "SET", field: "saving", value: true });
     const { error } = await supabase.from("daily_entries").update({
-      work_status: detailEdit.workStatus, date: detailEdit.date,
-      num_workers: detailEdit.workStatus === "work" ? parseInt(detailEdit.numWorkers) || 0 : null,
-      lot: detailEdit.workStatus === "work" ? (detailEdit.lot || null) : null,
-      bunches: detailEdit.workStatus === "work" ? parseInt(detailEdit.bunches) || 0 : null,
-      tons: parseFloat(detailEdit.tons) || 0,
-      backlogs: detailEdit.workStatus === "work" ? parseInt(detailEdit.backlogs) || 0 : null,
-      notes: detailEdit.notes || null,
-      latitude: detailEdit.latitude ? parseFloat(detailEdit.latitude) : null,
-      longitude: detailEdit.longitude ? parseFloat(detailEdit.longitude) : null,
-      lot_label: detailEdit.lotLabel || null,
+      work_status: data.workStatus, date: data.date,
+      num_workers: data.workStatus === "work" ? parseInt(data.numWorkers) || 0 : null,
+      lot: data.workStatus === "work" ? (data.lot || null) : null,
+      bunches: data.workStatus === "work" ? parseInt(data.bunches) || 0 : null,
+      tons: parseFloat(data.tons) || 0,
+      backlogs: data.workStatus === "work" ? parseInt(data.backlogs) || 0 : null,
+      notes: data.notes || null,
+      latitude: data.latitude ? parseFloat(data.latitude) : null,
+      longitude: data.longitude ? parseFloat(data.longitude) : null,
+      lot_label: data.lotLabel || null,
     }).eq("id", detailView.editEntry.id);
     if (!error) {
       await loadDetailData(viewingLeader); setToast({ type: "success", message: t("msg.entryUpdated") });
@@ -828,9 +839,7 @@ function TeamsContent() {
         </AnimatePresence>
 
         {/* Detail View Edit Modal */}
-        <EditEntryModal show={detailView.showEditModal} entry={detailView.editEntry} date={detailEdit.date} workStatus={detailEdit.workStatus} numWorkers={detailEdit.numWorkers} lot={detailEdit.lot} bunches={detailEdit.bunches} tons={detailEdit.tons} backlogs={detailEdit.backlogs} notes={detailEdit.notes} latitude={detailEdit.latitude} longitude={detailEdit.longitude} lotLabel={detailEdit.lotLabel} saving={detailView.saving}
-          onDateChange={(v)=>setDetailEditField("date",v)} onWorkStatusChange={(v)=>setDetailEditField("workStatus",v)} onNumWorkersChange={(v)=>setDetailEditField("numWorkers",v)} onLotChange={(v)=>setDetailEditField("lot",v)} onBunchesChange={(v)=>setDetailEditField("bunches",v)} onTonsChange={(v)=>setDetailEditField("tons",v)} onBacklogsChange={(v)=>setDetailEditField("backlogs",v)} onNotesChange={(v)=>setDetailEditField("notes",v)}
-          onLatitudeChange={(v)=>setDetailEditField("latitude",v)} onLongitudeChange={(v)=>setDetailEditField("longitude",v)} onLotLabelChange={(v)=>setDetailEditField("lotLabel",v)}
+        <EditEntryModal show={detailView.showEditModal} entry={detailView.editEntry} saving={detailView.saving}
           onSave={handleDetailSaveEdit} onClose={() => detailViewDispatch({ type: "CLOSE_EDIT" })} />
 
         {/* Add Leader Modal */}

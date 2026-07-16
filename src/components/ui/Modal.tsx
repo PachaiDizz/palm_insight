@@ -92,7 +92,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center p-4"
+      className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4"
       style={{ zIndex: "var(--z-modal)" }}
       role="presentation"
     >
@@ -107,12 +107,12 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
         tabIndex={-1}
-        className={`relative w-full ${sizeClasses[size]} card-glow rounded-2xl shadow-2xl outline-none ${className}`}
+        className={`relative w-full sm:max-w-md max-h-[90vh] flex flex-col card-glow sm:rounded-2xl rounded-t-2xl shadow-2xl outline-none ${className}`}
         style={{ backgroundColor: "var(--bg-card)" }}
       >
         {title && (
           <div
-            className="flex items-center justify-between gap-3 px-5 py-4 border-b"
+            className="flex items-center justify-between gap-3 px-5 py-4 border-b shrink-0"
             style={{ borderColor: "var(--border-default)" }}
           >
             <h2 id="modal-title" className="section-heading text-base text-theme">
@@ -129,7 +129,7 @@ export default function Modal({
             </button>
           </div>
         )}
-        <div className={title ? "p-5" : "p-5"}>{children}</div>
+        <div className="overflow-y-auto flex-1 p-5">{children}</div>
       </div>
     </div>
   );

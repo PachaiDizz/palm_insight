@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import AppShell from "@/components/AppShell";
+import { OrientationHandler } from "@/components/OrientationHandler";
 import { SITE_URL, SITE_NAME, OG_IMAGE } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,8 +21,12 @@ const cabinetGrotesk = localFont({
 });
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
-  themeColor: "#f59e0b",
+  themeColor: "#10b981",
 };
 
 export const metadata: Metadata = {
@@ -77,6 +82,7 @@ export default function RootLayout({
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-4 focus:bg-white focus:text-black">
           Skip to content
         </a>
+        <OrientationHandler />
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

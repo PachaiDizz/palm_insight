@@ -33,10 +33,16 @@ export const DEFAULT_MAP_CENTER: [number, number] = [
   (119.069800 + 119.110728) / 2,  // 119.090264
 ];
 
-// Map zoom settings
-export const DEFAULT_MAP_ZOOM = 13;
+// Map zoom settings — restricted to plantation area only
+export const DEFAULT_MAP_ZOOM = 14;
 export const MAX_ZOOM = 18;
-export const MIN_ZOOM = 11;
+export const MIN_ZOOM = 13;
+
+// Max bounds — slightly wider than plantation to prevent panning to world view
+export const MAX_BOUNDS: [[number, number], [number, number]] = [
+  [5.060000, 119.050000],  // SW
+  [5.145000, 119.125000],  // NE
+];
 
 // PDF overlay image path (extracted plantation map)
 export const PDF_OVERLAY_URL = "/maps/sahabat5_map.jpg";

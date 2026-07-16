@@ -434,3 +434,108 @@ select option {
 .leaflet-control-attribution a {
   color: rgba(255, 255, 255, 0.5) !important;
 }
+
+/* Map right panel control boxes */
+.map-control-box {
+  background: #0f1a0f;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.map-control-box h4 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #10b981;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* Custom range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Global Responsive Rules ─── */
+
+/* Fluid typography — scales with viewport */
+html {
+  font-size: clamp(13px, 1.2vw, 16px);
+}
+
+/* Prevent horizontal overflow on any page */
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* All images and media scale with container */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Inputs readable on mobile — prevent iOS zoom on focus */
+input, select, textarea {
+  font-size: max(16px, 1em);
+}
+
+/* Touch targets minimum size */
+button, a, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Orientation handling */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Compact layout for landscape mobile */
+  .page-header { padding: 8px 16px; }
+  .dashboard-stats { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Large screens — cap content width for readability */
+@media (min-width: 1600px) {
+  .main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* Small phones (320px) */
+@media (max-width: 360px) {
+  .card { padding: 10px; }
+  .stat-value { font-size: 1.5rem; }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar { width: 200px; }
+  .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+}
