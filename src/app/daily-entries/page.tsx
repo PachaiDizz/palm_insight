@@ -12,6 +12,7 @@ import { StatCardSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/
 import { useI18n } from "@/lib/i18n";
 import ImportDataModal from "@/components/ImportDataModal";
 import Toast from "@/components/ui/Toast";
+import { downloadString } from "@/lib/download";
 
 export default function DailyEntriesPage() {
   const { user } = useAuth();
@@ -147,13 +148,7 @@ export default function DailyEntriesPage() {
       return [e.date, leader?.name || "", `Block ${plantation?.block || ""}`, e.work_status, e.num_workers, e.bunches, e.tons, e.backlogs, e.notes || ""];
     });
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `daily-entries-${currentMonth}${selectedIds.size > 0 ? "-selected" : ""}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadString(csv, `daily-entries-${currentMonth}${selectedIds.size > 0 ? "-selected" : ""}.csv`, "text/csv");
   };
 
   if (loading) {

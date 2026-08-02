@@ -1,21 +1,37 @@
 "use client";
 import { useEffect } from "react";
 
+/**
+ * Handles mobile viewport height issues on orientation change.
+ * Uses CSS custom property with dvh fallback for mobile browsers.
+ */
 export function OrientationHandler() {
   useEffect(() => {
-    const handleOrientationChange = () => {
-      // Force layout recalculation after orientation change
-      document.documentElement.style.height = `${window.innerHeight}px`;
-      setTimeout(() => {
-        document.documentElement.style.height = "";
-      }, 100);
+    // Set CSS custom property for dynamic viewport height
+    const updateViewportHeight = () => {
+      if (window.visualViewport) {
+        document.documentElement.style.setProperty(
+          "--app-height",
+          `${window.visualViewport.height}px`
+        );
+      } else {
+        document.documentElement.style.setProperty(
+          "--app-height",
+          `${window.innerHeight}px`
+        );
+      }
     };
 
-    window.addEventListener("orientationchange", handleOrientationChange);
-    window.addEventListener("resize", handleOrientationChange);
+    updateViewportHeight();
+
+    window.visualViewport?.addEventListener("resize", updateViewportHeight);
+    window.addEventListener("orientationchange", () => {
+      // Small delay to let browser settle after orientation change
+      setTimeout(updateViewportHeight, 150);
+    });
+
     return () => {
-      window.removeEventListener("orientationchange", handleOrientationChange);
-      window.removeEventListener("resize", handleOrientationChange);
+      window.visualViewport?.removeEventListener("resize", updateViewportHeight);
     };
   }, []);
   return null;

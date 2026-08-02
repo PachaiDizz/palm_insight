@@ -9,7 +9,7 @@ import { Plus, Edit, Trash2, Sprout, Users, X, Loader2 } from "lucide-react";
 import { Plantation } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import Toast, { ToastData } from "@/components/ui/Toast";
-import { plantationSchema } from "@/lib/schemas";
+import { PlantationSchema } from "@/lib/schemas";
 import { PlantationCardSkeleton, FadeIn } from "@/components/ui/Skeleton";
 import { useI18n } from "@/lib/i18n";
 
@@ -30,6 +30,7 @@ export default function PlantationsPage() {
   const [newLeaderName, setNewLeaderName] = useState("");
   const [newLeaderPhone, setNewLeaderPhone] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [leaderCounts, setLeaderCounts] = useState<Record<string, number>>({});
@@ -96,7 +97,7 @@ export default function PlantationsPage() {
     setToast(null);
     setFieldErrors({});
 
-    const result = plantationSchema.safeParse(formData);
+    const result = PlantationSchema.safeParse(formData);
     if (!result.success) {
       const errors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
@@ -167,9 +168,14 @@ export default function PlantationsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this plantation and all its team leaders?")) return;
-    await supabase.from("team_leaders").delete().eq("plantation_id", id);
-    await supabase.from("plantations").delete().eq("id", id);
-    await loadData();
+    setDeletingId(id);
+    try {
+      await supabase.from("team_leaders").delete().eq("plantation_id", id);
+      await supabase.from("plantations").delete().eq("id", id);
+      await loadData();
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -197,7 +203,7 @@ export default function PlantationsPage() {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-theme transition-all hover:scale-[1.02]"
                   style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}
                 >
-                  <Plus className="w-4 h-4" /> Add Plantation
+                  <Plus className="w-4 h-4" /> {t("plantations.addPlantationBtn")}
                 </button>
               }
             />
@@ -214,7 +220,7 @@ export default function PlantationsPage() {
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="mb-3 sm:mb-4">
-                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Basic Information</div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>{t("plantations.basicInformation")}</div>
                           <div className="grid grid-cols-3 gap-2 sm:gap-4">
                             <div>
                               <div className="text-[10px] sm:text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Rancangan</div>
@@ -231,7 +237,7 @@ export default function PlantationsPage() {
                           </div>
                         </div>
                         <div className="mb-3 sm:mb-4">
-                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Management Details</div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>{t("plantations.managementDetails")}</div>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                             <div>
                               <div className="text-[10px] sm:text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Ketua Block</div>
@@ -252,7 +258,7 @@ export default function PlantationsPage() {
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Area Information</div>
+                          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>{t("plantations.areaInformation")}</div>
                           <div className="text-xs sm:text-sm font-medium text-theme">{p.area_hectare ? `${p.area_hectare} ha` : "-"}</div>
                         </div>
 
@@ -277,7 +283,12 @@ export default function PlantationsPage() {
                         <button onClick={() => { setEditing(p); setFormData({ rancangan: p.rancangan || "", peringkat: p.peringkat || "", block: p.block || "", ketua_block: p.ketua_block || "", biro_ladang: p.biro_ladang || "", penyelia: p.penyelia || "", mandor: p.mandor || "", area_hectare: p.area_hectare?.toString() || "" }); setShowModal(true); }} className="p-2 rounded-lg transition-colors hover:bg-white/10 min-h-[36px] min-w-[36px] flex items-center justify-center" style={{ color: "var(--text-muted)" }}>
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(p.id)} className="p-2 rounded-lg transition-colors hover:bg-white/10 min-h-[36px] min-w-[36px] flex items-center justify-center" style={{ color: "var(--accent-red)" }}>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          disabled={deletingId === p.id}
+                          className="p-2 rounded-lg transition-colors hover:bg-white/10 min-h-[36px] min-w-[36px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ color: "var(--accent-red)" }}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -299,15 +310,15 @@ export default function PlantationsPage() {
                   <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Basic Information</div>
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <div>
-                      <input placeholder="Rancangan" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.rancangan ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.rancangan} onChange={(e) => { setFormData({ ...formData, rancangan: e.target.value }); if (fieldErrors.rancangan) setFieldErrors((p) => ({ ...p, rancangan: "" })); }} />
+                      <input placeholder="Rancangan" aria-label="Rancangan" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.rancangan ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.rancangan} onChange={(e) => { setFormData({ ...formData, rancangan: e.target.value }); if (fieldErrors.rancangan) setFieldErrors((p) => ({ ...p, rancangan: "" })); }} />
                       {fieldErrors.rancangan && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.rancangan}</p>}
                     </div>
                     <div>
-                      <input type="number" min="0" placeholder="Peringkat" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.peringkat ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.peringkat} onChange={(e) => { setFormData({ ...formData, peringkat: e.target.value }); if (fieldErrors.peringkat) setFieldErrors((p) => ({ ...p, peringkat: "" })); }} />
+                      <input type="number" min="0" placeholder="Peringkat" aria-label="Peringkat" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.peringkat ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.peringkat} onChange={(e) => { setFormData({ ...formData, peringkat: e.target.value }); if (fieldErrors.peringkat) setFieldErrors((p) => ({ ...p, peringkat: "" })); }} />
                       {fieldErrors.peringkat && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.peringkat}</p>}
                     </div>
                     <div>
-                      <input type="number" min="0" placeholder="Block" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.block ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.block} onChange={(e) => { setFormData({ ...formData, block: e.target.value }); if (fieldErrors.block) setFieldErrors((p) => ({ ...p, block: "" })); }} />
+                      <input type="number" min="0" placeholder="Block" aria-label="Block" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.block ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.block} onChange={(e) => { setFormData({ ...formData, block: e.target.value }); if (fieldErrors.block) setFieldErrors((p) => ({ ...p, block: "" })); }} />
                       {fieldErrors.block && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.block}</p>}
                     </div>
                   </div>
@@ -317,7 +328,7 @@ export default function PlantationsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {["ketua_block", "biro_ladang", "penyelia", "mandor"].map((field) => (
                       <div key={field}>
-                        <input placeholder={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors[field] ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData[field as keyof typeof formData]} onChange={(e) => { setFormData({ ...formData, [field]: e.target.value }); if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" })); }} />
+                        <input placeholder={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} aria-label={field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors[field] ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData[field as keyof typeof formData]} onChange={(e) => { setFormData({ ...formData, [field]: e.target.value }); if (fieldErrors[field]) setFieldErrors((p) => ({ ...p, [field]: "" })); }} />
                         {fieldErrors[field] && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors[field]}</p>}
                       </div>
                     ))}
@@ -325,14 +336,14 @@ export default function PlantationsPage() {
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Area Information</div>
-                  <input type="number" step="0.01" min="0" placeholder="Area (hectare)" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.area_hectare ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.area_hectare} onChange={(e) => { setFormData({ ...formData, area_hectare: e.target.value }); if (fieldErrors.area_hectare) setFieldErrors((p) => ({ ...p, area_hectare: "" })); }} />
+                  <input type="number" step="0.01" min="0" placeholder="Area (hectare)" aria-label="Area in hectares" className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: fieldErrors.area_hectare ? "var(--accent-red)" : "rgba(245,158,11,0.12)" }} value={formData.area_hectare} onChange={(e) => { setFormData({ ...formData, area_hectare: e.target.value }); if (fieldErrors.area_hectare) setFieldErrors((p) => ({ ...p, area_hectare: "" })); }} />
                   {fieldErrors.area_hectare && <p className="text-xs mt-1" style={{ color: "var(--accent-red)" }}>{fieldErrors.area_hectare}</p>}
                 </div>
 
                 {/* Team Leaders Section */}
                 {!editing && (
                   <div>
-                    <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>Team Leaders</div>
+                    <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(245,158,11,0.7)" }}>{t("plantations.teamLeaders")}</div>
                     {leaders.length > 0 && (
                       <div className="space-y-2 mb-3">
                         {leaders.map((l) => (
@@ -349,16 +360,16 @@ export default function PlantationsPage() {
                       </div>
                     )}
                     <div className="flex flex-col sm:flex-row gap-2">
-                      <input placeholder="Leader name" className="flex-1 px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderName} onChange={(e) => setNewLeaderName(e.target.value)} />
-                      <input placeholder="Phone (optional)" className="w-full sm:w-36 px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderPhone} onChange={(e) => setNewLeaderPhone(e.target.value)} />
-                      <button type="button" onClick={addLeader} className="px-4 py-2.5 rounded-xl text-sm font-medium min-h-[44px]" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>Add</button>
+                      <input placeholder="Leader name" aria-label="Leader name" className="flex-1 px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderName} onChange={(e) => setNewLeaderName(e.target.value)} />
+                      <input placeholder="Phone (optional)" aria-label="Phone number" className="w-full sm:w-36 px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40" style={{ backgroundColor: "var(--bg-base)", borderColor: "var(--border-default)" }} value={newLeaderPhone} onChange={(e) => setNewLeaderPhone(e.target.value)} />
+                      <button type="button" onClick={addLeader} className="px-4 py-2.5 rounded-xl text-sm font-medium min-h-[44px]" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>{t("plantations.add")}</button>
                     </div>
-                    {leaders.length === 0 && <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>At least 1 team leader is required.</p>}
+                    {leaders.length === 0 && <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>{t("plantations.atLeastOneLeader")}</p>}
                   </div>
                 )}
 
                 <div className="flex justify-end gap-2 pt-2">
-                  <button type="button" onClick={() => { setShowModal(false); setToast(null); }} className="px-4 py-2 rounded-xl text-sm min-h-[40px]" style={{ color: "var(--text-muted)" }}>Cancel</button>
+                  <button type="button" onClick={() => { setShowModal(false); setToast(null); }} className="px-4 py-2 rounded-xl text-sm min-h-[40px]" style={{ color: "var(--text-muted)" }}>{t("plantations.cancel")}</button>
                   <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl text-sm font-medium text-theme flex items-center gap-2 disabled:opacity-50 min-h-[40px]" style={{ background: "linear-gradient(to right, #f59e0b, #d97706)" }}>
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     {saving ? "Saving..." : editing ? "Update" : "Save"}

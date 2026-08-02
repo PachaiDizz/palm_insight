@@ -1,42 +1,56 @@
 import { z } from "zod";
 
-export const plantationSchema = z.object({
-  rancangan: z.string().min(1, "Rancangan is required"),
-  peringkat: z.string().min(1, "Peringkat is required"),
-  block: z.string().min(1, "Block is required"),
-  ketua_block: z.string().min(1, "Ketua Block is required"),
-  biro_ladang: z.string().min(1, "Biro Ladang is required"),
-  penyelia: z.string().min(1, "Penyelia is required"),
-  mandor: z.string().min(1, "Mandor is required"),
-  area_hectare: z.string().min(1, "Area is required").refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, "Area must be a positive number"),
+export const PlantationSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  rancangan: z.string(),
+  peringkat: z.string(),
+  block: z.string(),
+  ketua_block: z.string().nullable(),
+  biro_ladang: z.string().nullable(),
+  penyelia: z.string().nullable(),
+  mandor: z.string().nullable(),
+  area_hectare: z.number().nullable(),
+  created_at: z.string(),
 });
 
-export const teamLeaderSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  phone: z.string().optional(),
+export const TeamLeaderSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  plantation_id: z.string(),
+  name: z.string(),
+  phone: z.string().nullable(),
+  created_at: z.string(),
+  plantations: PlantationSchema.optional(),
 });
 
-export const dailyEntrySchema = z.object({
-  date: z.string().min(1, "Date is required"),
-  num_workers: z.string().optional(),
-  lot: z.string().optional(),
-  bunches: z.string().optional(),
-  tons: z.string().optional(),
-  backlogs: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
-  lot_label: z.string().optional(),
-}).refine(
-  (data) => {
-    if (data.num_workers && parseInt(data.num_workers) < 0) return false;
-    if (data.bunches && parseInt(data.bunches) < 0) return false;
-    if (data.tons && parseFloat(data.tons) < 0) return false;
-    if (data.backlogs && parseInt(data.backlogs) < 0) return false;
-    return true;
-  },
-  { message: "Values cannot be negative" }
-);
+export const DailyEntrySchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  team_leader_id: z.string(),
+  plantation_id: z.string(),
+  work_status: z.enum(["work", "no_work"]),
+  date: z.string(),
+  num_workers: z.number().nullable(),
+  lot: z.string().nullable(),
+  bunches: z.number().nullable(),
+  tons: z.number().nullable(),
+  backlogs: z.number().nullable(),
+  notes: z.string().nullable(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  lot_label: z.string().nullable(),
+  created_at: z.string(),
+  team_leaders: TeamLeaderSchema.optional(),
+});
 
-export type PlantationFormData = z.infer<typeof plantationSchema>;
-export type TeamLeaderFormData = z.infer<typeof teamLeaderSchema>;
-export type DailyEntryFormData = z.infer<typeof dailyEntrySchema>;
+export const DailyEntryWithRelationsSchema = DailyEntrySchema.extend({
+  team_leaders: z
+    .object({ name: z.string() })
+    .nullable()
+    .optional(),
+  plantations: z
+    .object({ block: z.string() })
+    .nullable()
+    .optional(),
+});

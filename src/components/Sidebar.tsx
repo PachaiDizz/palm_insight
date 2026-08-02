@@ -8,21 +8,25 @@ import { TreePalm, Home, Sprout, Users, BarChart3, Settings, LogOut, ChevronLeft
 import { useState } from "react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import NotificationPanel from "@/components/notifications/NotificationPanel";
-import { useNotifications } from "@/components/notifications/useNotifications";
+import type { Notification } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
 interface SidebarProps {
   onMobileClose: () => void;
+  notifications: Notification[];
+  unreadCount: number;
+  onMarkAsRead: (id: string) => Promise<void>;
+  onMarkAllAsRead: () => Promise<void>;
+  onDismiss: (id: string) => Promise<void>;
 }
 
-export default function Sidebar({ onMobileClose }: SidebarProps) {
+export default function Sidebar({ onMobileClose, notifications, unreadCount, onMarkAsRead, onMarkAllAsRead, onDismiss }: SidebarProps) {
   const pathname = usePathname();
   const { user, profile } = useAuth();
   const router = useRouter();
   const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
 
   const navItems = [
     { label: t("nav.dashboard"), href: "/dashboard", icon: Home },
@@ -58,9 +62,9 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
             <NotificationPanel
               notifications={notifications}
               unreadCount={unreadCount}
-              onMarkAsRead={markAsRead}
-              onMarkAllAsRead={markAllAsRead}
-              onDismiss={dismiss}
+              onMarkAsRead={onMarkAsRead}
+              onMarkAllAsRead={onMarkAllAsRead}
+              onDismiss={onDismiss}
               onClose={() => setPanelOpen(false)}
             />
           )}

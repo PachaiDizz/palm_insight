@@ -32,12 +32,15 @@ export default function Modal({
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const wasOpenRef = useRef(false);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !panelRef.current) return;
@@ -60,26 +63,32 @@ export default function Modal({
         first.focus();
       }
     },
-    [onClose]
+    []
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      wasOpenRef.current = false;
+      return;
+    }
 
     previousFocus.current = document.activeElement as HTMLElement | null;
     document.addEventListener("keydown", handleKeyDown);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    // Focus first interactive element or the panel itself
-    requestAnimationFrame(() => {
-      const panel = panelRef.current;
-      if (!panel) return;
-      const first = panel.querySelector<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      (first || panel).focus();
-    });
+    // Only focus first interactive element on initial open, not on re-renders
+    if (!wasOpenRef.current) {
+      wasOpenRef.current = true;
+      requestAnimationFrame(() => {
+        const panel = panelRef.current;
+        if (!panel) return;
+        const first = panel.querySelector<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        (first || panel).focus();
+      });
+    }
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);

@@ -14,6 +14,7 @@ interface LeaderOrgChartProps {
   onBack: () => void;
   onBijiRelai: () => void;
   focusedLeaderId?: string | null;
+  deletingId?: string | null;
 }
 
 // Block card: fade in from below
@@ -48,6 +49,7 @@ export default function LeaderOrgChart({
   onBack,
   onBijiRelai,
   focusedLeaderId,
+  deletingId,
 }: LeaderOrgChartProps) {
   const { t } = useI18n();
   const sortedLeaders = focusedLeaderId
@@ -184,7 +186,8 @@ export default function LeaderOrgChart({
                         <button
                           onClick={() => onDeleteLeader(leader.id)}
                           aria-label={`Remove ${leader.name}`}
-                          className="p-2 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-muted)] shrink-0"
+                          disabled={deletingId === leader.id}
+                          className="p-2 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-muted)] shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -1,10 +1,7 @@
 import * as XLSX from "xlsx-js-style";
 import { supabase } from "./supabaseClient";
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+import { downloadBlob } from "./download";
+import { MONTH_NAMES } from "./date";
 
 function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
@@ -247,26 +244,26 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
     }
   }
   let bijiCum = 0;
-  let totalBiji = 0;
   for (let d = 1; d <= days; d++) {
     const dc = dayCol(d);
-    if (bijiByDay[d] !== undefined) {
-      rows[R_BIJI][dc] = bijiByDay[d];
-      bijiCum = round2(bijiCum + bijiByDay[d]);
-      totalBiji = round2(totalBiji + bijiByDay[d]);
+    const bijiRelaiValue = bijiByDay[d] !== undefined ? Math.round((bijiByDay[d] || 0) * 100) / 100 : undefined;
+    if (bijiRelaiValue !== undefined) {
+      rows[R_BIJI][dc] = bijiRelaiValue;
+      bijiCum = round2(bijiCum + bijiRelaiValue);
     }
     if (bijiCum > 0) {
       rows[R_BIJI_CUM][dc] = bijiCum;
     }
   }
+  const totalBiji = Math.round(Object.values(bijiByDay).reduce((sum, v) => sum + (v || 0), 0) * 100) / 100;
   rows[R_BIJI][38] = totalBiji;
-  rows[R_BIJI_CUM][38] = bijiCum;
+  rows[R_BIJI_CUM][38] = totalBiji;
 
   rows[R_SUMMARY][0] = "Jumlah Hasil (M/t)";
   rows[R_SUMMARY][3] = "Hari ini";
   rows[R_SUMMARY_CUM][3] = "Hingga Hari Ini";
 
-  // Compute summary per day
+  // Compute summary per day (leaders + biji relai)
   let grandHi = 0;
   let grandCum = 0;
   for (let d = 1; d <= days; d++) {
@@ -275,15 +272,20 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
     for (const leader of leaders) {
       const entry = (entriesByLeader[leader.id] || {})[d];
       if (entry && entry.tons !== null && entry.tons !== undefined && entry.tons !== "") {
-        dayHi = round2(dayHi + Number(entry.tons));
-        grandCum = round2(grandCum + Number(entry.tons));
+        const t = round2(Number(entry.tons));
+        dayHi = round2(dayHi + t);
+        grandCum = round2(grandCum + t);
       }
+    }
+    if (bijiByDay[d] !== undefined) {
+      dayHi = round2(dayHi + bijiByDay[d]);
+      grandCum = round2(grandCum + bijiByDay[d]);
     }
     if (dayHi > 0) rows[R_SUMMARY][dc] = dayHi;
     if (grandCum > 0) rows[R_SUMMARY_CUM][dc] = grandCum;
   }
   for (const lt of leaderTotals) grandHi = round2(grandHi + lt.hi);
-  rows[R_SUMMARY][38] = grandHi;
+  rows[R_SUMMARY][38] = Math.round((grandHi + totalBiji) * 100) / 100;
   rows[R_SUMMARY_CUM][38] = grandCum;
 
   // -- Signatures
@@ -453,7 +455,7 @@ export function buildHarvestingMonthlyWorksheet(data: HarvestingData): XLSX.Work
   colWidths[1] = { wch: 16 };      // B
   colWidths[2] = { wch: 11.71 };   // C
   colWidths[3] = { wch: 16.29 };   // D
-  for (let d = 1; d <= 31; d++) colWidths[dayCol(d)] = { wch: 4.5 };
+  for (let d = 1; d <= 31; d++) colWidths[dayCol(d)] = { wch: 7 };
   colWidths[35] = { wch: 8 };      // AJ
   colWidths[36] = { wch: 8 };      // AK
   colWidths[37] = { wch: 8 };      // AL
@@ -568,12 +570,5 @@ export async function exportHarvestingMonthly(params: {
 
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, filename);
 }

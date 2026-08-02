@@ -72,11 +72,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="PalmInsight" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         {/* Prevent theme flash: apply light/dark before React hydrates */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('palm-insight-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}var r=document.documentElement;r.classList.remove('light','dark');r.classList.add(t);}catch(e){}})();`,
-          }}
-        />
+        <script src="/theme-init.js" />
       </head>
       <body className={`${inter.className} font-body`}>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-4 focus:bg-white focus:text-black">

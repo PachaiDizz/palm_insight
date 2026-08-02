@@ -9,6 +9,7 @@
 /* Base tokens */
 @layer base {
   :root, .dark {
+    --app-height: 100dvh;
     --background: 230 20% 7%;
     --foreground: 210 40% 98%;
     --card: 230 16% 10%;
@@ -393,46 +394,56 @@ select option {
 }
 
 /* ─── Leaflet dark theme overrides ─── */
+/* Popup wrapper/tip get !important — Leaflet sets these via inline styles */
+.dark .leaflet-popup-content-wrapper,
 .leaflet-popup-content-wrapper {
   background: var(--bg-card) !important;
-  color: var(--text-primary) !important;
-  border-radius: 12px !important;
+  color: var(--text-primary);
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid var(--border-default) !important;
+  border: 1px solid var(--border-default);
 }
 
+.dark .leaflet-popup-tip,
 .leaflet-popup-tip {
   background: var(--bg-card) !important;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
+.dark .leaflet-popup-close-button,
 .leaflet-popup-close-button {
-  color: var(--text-muted) !important;
-  font-size: 18px !important;
+  color: var(--text-muted);
+  font-size: 18px;
 }
 
+.dark .leaflet-popup-close-button:hover,
 .leaflet-popup-close-button:hover {
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
 }
 
+/* Zoom/attribution controls — no inline styles, specificity replaces !important */
+.dark .leaflet-control-zoom a,
 .leaflet-control-zoom a {
-  background: var(--bg-card) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-default) !important;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-default);
 }
 
+.dark .leaflet-control-zoom a:hover,
 .leaflet-control-zoom a:hover {
-  background: var(--bg-card-hover) !important;
+  background: var(--bg-card-hover);
 }
 
+.dark .leaflet-control-attribution,
 .leaflet-control-attribution {
-  background: rgba(0, 0, 0, 0.5) !important;
-  color: rgba(255, 255, 255, 0.4) !important;
-  font-size: 9px !important;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 9px;
 }
 
+.dark .leaflet-control-attribution a,
 .leaflet-control-attribution a {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* Map right panel control boxes */

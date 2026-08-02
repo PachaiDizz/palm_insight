@@ -1,0 +1,17 @@
+# robots.txt - Prevent search engines from indexing authenticated pages
+User-agent: *
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /team/
+Disallow: /daily-entries/
+Disallow: /reports/
+Disallow: /map/
+Disallow: /onboarding/
+
+# Allow public pages
+Allow: /login
+Allow: /register
+Allow: /confirm
+Allow: /reset-password
+
+Sitemap: https://palminsight.app/sitemap.xml

@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, X, CheckCircle, Calendar, Truck, Loader2, Edit2, Trash2 } from "lucide-react";
+import { Save, X, Calendar, Truck, Loader2, Edit2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Plantation, BijiRelai } from "@/types";
 import { useI18n } from "@/lib/i18n";
@@ -11,6 +11,7 @@ interface BijiRelaiModalProps {
   onClose: () => void;
   plantation: Plantation;
   entries: BijiRelai[];
+  month: string;
   date: string;
   tons: string;
   saving: boolean;
@@ -21,6 +22,7 @@ interface BijiRelaiModalProps {
   onNewEntry: () => void;
   onEdit: (entry: BijiRelai) => void;
   onDelete: (id: string) => void;
+  onChangeMonth: (direction: "prev" | "next") => void;
 }
 
 export default function BijiRelaiModal({
@@ -28,6 +30,7 @@ export default function BijiRelaiModal({
   onClose,
   plantation,
   entries,
+  month,
   date,
   tons,
   saving,
@@ -38,15 +41,32 @@ export default function BijiRelaiModal({
   onNewEntry,
   onEdit,
   onDelete,
+  onChangeMonth,
 }: BijiRelaiModalProps) {
   const { t } = useI18n();
   const [editingEntry, setEditingEntry] = useState<BijiRelai | null>(null);
   const [editDate, setEditDate] = useState("");
   const [editTons, setEditTons] = useState("");
   const [editSaving, setEditSaving] = useState(false);
+  const tonsInputRef = useRef<HTMLInputElement>(null);
 
-  const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date));
+  // Auto-focus tons input after new entry or when modal opens with empty tons
+  useEffect(() => {
+    if (open && !saving && !savedId) {
+      const timer = setTimeout(() => tonsInputRef.current?.focus(), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [open, saving, savedId]);
+
+  // Filter entries to the viewed month
+  const monthEntries = entries.filter((e) => e.date && e.date.startsWith(month));
+  const sorted = [...monthEntries].sort((a, b) => b.date.localeCompare(a.date));
   const totalTons = sorted.reduce((sum, e) => sum + (Number(e.tons) || 0), 0);
+
+  const monthLabel = (() => {
+    const [y, m] = month.split("-").map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  })();
 
   const handleStartEdit = (entry: BijiRelai) => {
     setEditingEntry(entry);
@@ -109,6 +129,7 @@ export default function BijiRelaiModal({
               {t("entry.tons")} (Biji Relai)
             </label>
             <input
+              ref={tonsInputRef}
               type="text"
               inputMode="decimal"
               className="w-full px-3 sm:px-4 py-2.5 rounded-xl text-sm text-theme outline-none border transition-colors"
@@ -148,21 +169,40 @@ export default function BijiRelaiModal({
       </form>
 
       {/* History */}
-      {sorted.length > 0 && (
-        <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "var(--border-default)" }}>
-          <div className="px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-default)" }}>
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4" style={{ color: "#22c55e" }} />
-              <h3 className="text-xs sm:text-sm font-semibold text-theme">{t("bijiRelai.history")}</h3>
+      <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "var(--border-default)" }}>
+        <div className="px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2" style={{ borderBottom: "1px solid var(--border-default)" }}>
+          <div className="flex items-center gap-2">
+            <Truck className="w-4 h-4" style={{ color: "#22c55e" }} />
+            <h3 className="text-xs sm:text-sm font-semibold text-theme">{t("bijiRelai.history")}</h3>
+          </div>
+          <div className="flex items-center justify-between sm:justify-end gap-3">
+            <div className="flex items-center gap-1">
+              <button onClick={() => onChangeMonth("prev")} aria-label="Previous month"
+                className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs sm:text-sm font-semibold text-theme min-w-[110px] text-center">{monthLabel}</span>
+              <button onClick={() => onChangeMonth("next")} aria-label="Next month"
+                className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>{sorted.length} entries</span>
-              <span className="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{totalTons.toFixed(2)} {t("entry.tons")}</span>
+              <span className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>{sorted.length} {t("bijiRelai.entries")}</span>
+              {sorted.length > 0 && (
+                <span className="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{totalTons.toFixed(2)} {t("entry.tons")}</span>
+              )}
             </div>
           </div>
+        </div>
 
-          <div className="rounded-xl border bg-[var(--bg-elevated)]/50">
-            {/* Desktop table */}
+        {sorted.length === 0 ? (
+          <div className="py-8 text-center text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>
+            {t("bijiRelai.noEntries")}
+          </div>
+        ) : (
+        <div className="rounded-xl border bg-[var(--bg-elevated)]/50">
+          {/* Desktop table */}
             <table className="w-full border-collapse hidden md:table">
               <thead>
                 <tr className="border-b" style={{ borderColor: "var(--border-default)" }}>
@@ -293,8 +333,8 @@ export default function BijiRelaiModal({
               })()}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Modal>
   );
 }

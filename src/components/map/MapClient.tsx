@@ -2,9 +2,10 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/components/AuthProvider";
-import { useMapEntries, useAllTeamLeaders } from "@/lib/useMapEntries";
+import { useMapEntries, useAllTeamLeaders, type MapEntry } from "@/lib/useMapEntries";
 import { usePlantations } from "@/lib/queries";
 import { useI18n } from "@/lib/i18n";
+import { getLotCoordinates } from "@/lib/lotCoordinates";
 import { toLocalDateKey } from "@/lib/date";
 import { supabase } from "@/lib/supabaseClient";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,6 +55,21 @@ export default function MapClient() {
   const [drawings, setDrawings] = useState<Drawing[]>([]);
   const [selectedColor, setSelectedColor] = useState("#ffffff");
   const [selectedWeight, setSelectedWeight] = useState<"thin" | "normal" | "thick">("normal");
+  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState<number | null>(null);
+  const [filterTeamId, setFilterTeamId] = useState<string | null>(null);
+
+  // Map markers (stored separately in localStorage, not in database)
+  interface MapMarker {
+    id: string;
+    lat: number;
+    lng: number;
+    teamLeaderId: string;
+    leaderName: string;
+    block: string;
+    lotLabel: string | null;
+    date: string;
+  }
+  const [mapMarkers, setMapMarkers] = useState<MapMarker[]>([]);
 
   // Zoom level
   const [zoomLevel, setZoomLevel] = useState(14);
@@ -73,22 +89,55 @@ export default function MapClient() {
     } catch {}
   }, []);
 
+  // Persist map markers
+  useEffect(() => {
+    try {
+      localStorage.setItem("palminsight_map_markers", JSON.stringify(mapMarkers));
+    } catch {}
+  }, [mapMarkers]);
+
+  // Load map markers from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("palminsight_map_markers");
+      if (stored) setMapMarkers(JSON.parse(stored));
+    } catch {}
+  }, []);
+
   const { data: entries = [], isLoading } = useMapEntries(user?.id, selectedDate);
   const { data: allLeaders = [] } = useAllTeamLeaders(user?.id);
   const { data: plantations = [] } = usePlantations(user?.id);
 
-  // Local state for entries to enable immediate updates without page refresh
-  const [entriesLocal, setEntriesLocal] = useState(entries);
-
-  // Sync with query data when it changes
-  useEffect(() => {
-    setEntriesLocal(entries);
-  }, [entries]);
-
   const filteredEntries = useMemo(() => {
-    if (selectedBlock === "all") return entriesLocal;
-    return entriesLocal.filter((e) => e.block === selectedBlock);
-  }, [entriesLocal, selectedBlock]);
+    if (selectedBlock === "all") return entries;
+    return entries.filter((e) => e.block === selectedBlock);
+  }, [entries, selectedBlock]);
+
+  const entriesWithLocation = useMemo(() => {
+    return filteredEntries.filter(
+      (e) => (e.latitude && e.longitude) || (e.lotLabel && getLotCoordinates(e.lotLabel))
+    );
+  }, [filteredEntries]);
+
+  // Merge manual map markers with auto-generated markers from entries with resolved coordinates
+  const allMapMarkers = useMemo(() => {
+    const autoMarkers: MapMarker[] = entriesWithLocation
+      .filter((e) => e.latitude && e.longitude)
+      .map((e) => ({
+        id: e.id,
+        lat: e.latitude!,
+        lng: e.longitude!,
+        teamLeaderId: e.teamLeaderId,
+        leaderName: e.leaderName,
+        block: e.block,
+        lotLabel: e.lotLabel,
+        date: e.date,
+      }));
+    // Manual markers take precedence (avoid duplicates by id)
+    const autoIds = new Set(autoMarkers.map((m) => m.id));
+    const manualOnly = mapMarkers.filter((m) => !autoIds.has(m.id));
+    return [...autoMarkers, ...manualOnly];
+  }, [entriesWithLocation, mapMarkers]);
 
   const handleSelectTeam = (lat: number, lng: number) => {
     setFlyToTarget([lat, lng]);
@@ -104,41 +153,30 @@ export default function MapClient() {
   };
 
   const handleSaveMarker = async () => {
-    if (!user || !clickedMarker || !selectedTeamLeader) return;
+    if (!clickedMarker || !selectedTeamLeader) return;
     setSaving(true);
 
-    const { data: leader } = await supabase
-      .from("team_leaders")
-      .select("id, plantation_id")
-      .eq("id", selectedTeamLeader)
-      .single();
-
+    const leader = allLeaders.find((l) => l.id === selectedTeamLeader);
     if (!leader) {
       setSaving(false);
       return;
     }
 
-    const { error } = await supabase.from("daily_entries").insert({
-      user_id: user.id,
-      team_leader_id: leader.id,
-      plantation_id: leader.plantation_id,
-      work_status: "work",
+    const newMarker: MapMarker = {
+      id: `map_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      lat: clickedMarker.lat,
+      lng: clickedMarker.lng,
+      teamLeaderId: leader.id,
+      leaderName: leader.name,
+      block: leader.block,
+      lotLabel: lotLabel || null,
       date: markerDate,
-      latitude: clickedMarker.lat,
-      longitude: clickedMarker.lng,
-      lot_label: lotLabel || null,
-      num_workers: 0,
-      bunches: 0,
-      tons: 0,
-    });
+    };
 
-    if (!error) {
-      setClickedMarker(null);
-      setLotLabel("");
-      setSelectedTeamLeader("");
-      // Update local entries by adding the new marker
-      queryClient.invalidateQueries({ queryKey: ["mapEntries", user?.id] });
-    }
+    setMapMarkers((prev) => [...prev, newMarker]);
+    setClickedMarker(null);
+    setLotLabel("");
+    setSelectedTeamLeader("");
     setSaving(false);
   };
 
@@ -153,37 +191,28 @@ export default function MapClient() {
     setDrawStart(null);
   }, []);
 
-  const handleDeleteMarker = useCallback(async (markerId: string) => {
-    if (!user) return;
-    const { error } = await supabase
-      .from("daily_entries")
-      .update({ latitude: null, longitude: null, lot_label: null })
-      .eq("id", markerId)
-      .eq("user_id", user.id);
+  const handleDeleteDrawing = useCallback((index: number) => {
+    setDrawings((prev) => prev.filter((_, i) => i !== index));
+    setSelectedDrawingIndex(null);
+  }, []);
 
-    if (!error) {
-      // Remove from local state without page refresh
-      setEntriesLocal((prev) => prev.filter((e) => e.id !== markerId));
-    }
-  }, [user]);
+  const handleUpdateDrawing = useCallback((index: number, updatedDrawing: Drawing) => {
+    setDrawings((prev) => prev.map((d, i) => i === index ? updatedDrawing : d));
+  }, []);
 
-  const handleClearAllMarkers = useCallback(async () => {
-    if (!user) return;
-    const { error } = await supabase
-      .from("daily_entries")
-      .update({ latitude: null, longitude: null, lot_label: null })
-      .eq("user_id", user.id)
-      .eq("date", selectedDate)
-      .not("latitude", "is", null)
-      .not("longitude", "is", null);
+  const handleMarkerMove = useCallback((id: string, lat: number, lng: number) => {
+    setMapMarkers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, lat, lng } : m))
+    );
+  }, []);
 
-    if (!error) {
-      // Remove from local state without page refresh
-      setEntriesLocal((prev) =>
-        prev.filter((e) => !(e.date === selectedDate && e.latitude != null))
-      );
-    }
-  }, [user, selectedDate]);
+  const handleDeleteMarker = useCallback((markerId: string) => {
+    setMapMarkers((prev) => prev.filter((m) => m.id !== markerId));
+  }, []);
+
+  const handleClearAllMarkers = useCallback(() => {
+    setMapMarkers([]);
+  }, []);
 
   const adjustDate = (offset: number) => {
     const d = new Date(selectedDate + "T00:00:00");
@@ -205,10 +234,13 @@ export default function MapClient() {
         setDrawMode("select");
         setDrawStart(null);
       }
+      if (e.key === "Escape" && selectedDrawingIndex !== null) {
+        setSelectedDrawingIndex(null);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [drawMode]);
+  }, [drawMode, selectedDrawingIndex]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -286,7 +318,7 @@ export default function MapClient() {
               className="text-xs px-2.5 py-1 rounded-full font-medium"
               style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
             >
-              {filteredEntries.length} {filteredEntries.length === 1 ? "marker" : "markers"}
+              {entriesWithLocation.length} {entriesWithLocation.length === 1 ? "marker" : "markers"}
             </span>
           </div>
         </div>
@@ -300,6 +332,8 @@ export default function MapClient() {
             entries={filteredEntries}
             allLeaders={allLeaders}
             onSelectTeam={handleSelectTeam}
+            filterTeamId={filterTeamId}
+            onFilterTeam={setFilterTeamId}
           />
         </div>
 
@@ -329,18 +363,26 @@ export default function MapClient() {
           ) : (
             <MapView
               entries={filteredEntries}
+              mapMarkers={allMapMarkers}
               flyTo={flyToTarget}
               overlayOpacity={overlayOpacity}
               onMapClick={handleMapClick}
               onDeleteMarker={handleDeleteMarker}
+              onMarkerMove={handleMarkerMove}
               zoomLevel={zoomLevel}
+              onZoomChange={setZoomLevel}
               drawMode={drawMode}
               drawStart={drawStart}
               onDrawStartChange={setDrawStart}
               drawings={drawings}
               onDrawingComplete={(drawing) => setDrawings((prev) => [...prev, drawing])}
+              onUpdateDrawing={handleUpdateDrawing}
               selectedColor={selectedColor}
               selectedWeight={selectedWeight === "thin" ? 1.5 : selectedWeight === "thick" ? 4.0 : 2.5}
+              selectedDrawingIndex={selectedDrawingIndex}
+              onSelectDrawing={setSelectedDrawingIndex}
+              onDeleteDrawing={handleDeleteDrawing}
+              filterTeamId={filterTeamId}
             />
           )}
 
@@ -388,7 +430,7 @@ export default function MapClient() {
             selectedWeight={selectedWeight}
             onWeightChange={setSelectedWeight}
             onClearDrawings={handleClearDrawings}
-            markerCount={filteredEntries.length}
+            markerCount={entriesWithLocation.length}
             onClearAllMarkers={handleClearAllMarkers}
           />
         </div>
@@ -400,6 +442,8 @@ export default function MapClient() {
           entries={filteredEntries}
           allLeaders={allLeaders}
           onSelectTeam={handleSelectTeam}
+          filterTeamId={filterTeamId}
+          onFilterTeam={setFilterTeamId}
         />
       </div>
 
@@ -442,7 +486,7 @@ export default function MapClient() {
                 selectedWeight={selectedWeight}
                 onWeightChange={setSelectedWeight}
                 onClearDrawings={handleClearDrawings}
-                markerCount={filteredEntries.length}
+                markerCount={entriesWithLocation.length}
                 onClearAllMarkers={handleClearAllMarkers}
               />
             </motion.div>
@@ -540,11 +584,17 @@ export default function MapClient() {
                     }}
                   >
                     <option value="">Select Team Leader</option>
-                    {allLeaders.map((leader, index) => (
-                      <option key={leader.id} value={leader.id}>
-                        Team {index + 1} - {leader.name} (Block {leader.block})
-                      </option>
-                    ))}
+                    {[...allLeaders]
+                      .sort((a, b) => {
+                        const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
+                        if (blockCompare !== 0) return blockCompare;
+                        return a.name.localeCompare(b.name);
+                      })
+                      .map((leader, index) => (
+                        <option key={leader.id} value={leader.id}>
+                          {leader.block} - {leader.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
 

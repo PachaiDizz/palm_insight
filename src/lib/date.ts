@@ -2,6 +2,11 @@
 // calendar dates users actually see. toISOString() shifts dates in UTC+X
 // timezones and must not be used for date keys.
 
+export const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 export function getMonthRange(year: number, month: number) {
   const mm = String(month + 1).padStart(2, "0");
   const startDate = `${year}-${mm}-01`;

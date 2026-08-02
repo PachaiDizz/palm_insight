@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Save, X, CheckCircle, Calendar, Users, MapPin, TrendingUp, Truck, AlertCircle, Loader2, Undo2, Redo2, Crosshair } from "lucide-react";
 import { TeamLeader, Plantation } from "@/types";
 import { useI18n } from "@/lib/i18n";
+import { LOT_COORDINATES, getLotCoordinates } from "@/lib/lotCoordinates";
 
 interface EntryFormProps {
   leader: TeamLeader;
@@ -311,12 +312,30 @@ export default function EntryForm({
             <label className="block text-xs mb-1 text-[var(--text-muted)]">{t("map.lotLabel")}</label>
             <input
               type="text"
+              list="lot-suggestions"
               placeholder="LOT 747"
               value={lotLabel}
-              onChange={(e) => onLotLabelChange(e.target.value)}
+              onChange={(e) => onLotLabelChange(e.target.value.toUpperCase())}
               className="w-full px-4 py-3 rounded-xl text-sm text-theme outline-none border bg-[var(--bg-base)] transition-colors focus:border-[#f59e0b]/50"
             />
-            <p className="text-xs mt-1 text-[var(--text-muted)]">Type the lot number shown on the map</p>
+            <datalist id="lot-suggestions">
+              {Object.keys(LOT_COORDINATES).map((lot) => (
+                <option key={lot} value={lot} />
+              ))}
+            </datalist>
+            {lotLabel && getLotCoordinates(lotLabel) && (
+              <p className="text-xs mt-1" style={{ color: "#10b981" }}>
+                Lot recognized — marker will appear on map automatically
+              </p>
+            )}
+            {lotLabel && !getLotCoordinates(lotLabel) && lotLabel.length > 3 && (
+              <p className="text-xs mt-1" style={{ color: "#f59e0b" }}>
+                Lot not in map database — no marker will be placed
+              </p>
+            )}
+            {!lotLabel && (
+              <p className="text-xs mt-1 text-[var(--text-muted)]">Type the lot number shown on the map</p>
+            )}
           </div>
 
           {/* Coordinates */}

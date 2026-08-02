@@ -228,6 +228,8 @@ const translations = {
     "bijiRelai.history": "Biji Relai History",
     "bijiRelai.cumulative": "Cumulative",
     "bijiRelai.description": "Palm seed tonnage collected per block",
+    "bijiRelai.entries": "entries",
+    "bijiRelai.noEntries": "No Biji Relai entries for this month.",
 
     // Edit modal
     "edit.title": "Edit Entry",
@@ -271,6 +273,48 @@ const translations = {
     "map.locationOptional": "LOCATION (OPTIONAL)",
     "map.useMyLocation": "Use My Location",
     "map.flyTo": "Show on Map",
+
+    // Dashboard - additional
+    "dashboard.currentPlantation": "Current Plantation",
+    "dashboard.liveHarvestSignal": "Live harvest signal",
+    "dashboard.totalBunches": "Total Bunches",
+    "dashboard.teamsActive": "Teams Active",
+    "dashboard.noHarvestData": "No harvest data logged for {month} {year}.",
+    "dashboard.goToTeams": "Go to Teams to record entries.",
+    "dashboard.monthlyTrend": "Monthly Trend",
+    "dashboard.bunches": "Bunches",
+    "dashboard.tons": "Tons",
+    "dashboard.quickActions": "Quick Actions",
+    "dashboard.viewTeams": "View Teams",
+    "dashboard.viewReports": "View Reports",
+    "dashboard.open": "Open →",
+    "dashboard.analyticsProductivity": "Analytics & productivity",
+    "dashboard.noEntriesMonth": "No entries for {month} {year} — go to Teams to add one.",
+
+    // Plantations - additional
+    "plantations.addPlantationBtn": "Add Plantation",
+    "plantations.basicInformation": "Basic Information",
+    "plantations.managementDetails": "Management Details",
+    "plantations.areaInformation": "Area Information",
+    "plantations.teamLeaders": "Team Leaders",
+    "plantations.add": "Add",
+    "plantations.atLeastOneLeader": "At least 1 team leader is required.",
+    "plantations.cancel": "Cancel",
+
+    // Settings - additional
+    "settings.email": "Email",
+    "settings.updatePassword": "Update your password",
+    "settings.newPassword": "New Password",
+    "settings.confirmPassword": "Confirm Password",
+    "settings.updating": "Updating...",
+    "settings.updatePasswordBtn": "Update Password",
+    "settings.browserPushNotifications": "Browser Push Notifications",
+    "settings.blocked": "Blocked",
+    "settings.downloadAllData": "Download all data as JSON",
+    "settings.exportHarvestingMonthly": "Export Harvesting Monthly",
+    "settings.generateExcelReport": "Generate Excel report in harvesting format",
+    "settings.restoreDataDesc": "Import data from a backup file",
+    "settings.permanentlyDeleteAll": "Permanently delete all data",
   },
   ms: {
     // Navigation
@@ -496,6 +540,8 @@ const translations = {
     "bijiRelai.history": "Sejarah Biji Relai",
     "bijiRelai.cumulative": "Kumulatif",
     "bijiRelai.description": "Tan benih sawit dikutip mengikut blok",
+    "bijiRelai.entries": "entri",
+    "bijiRelai.noEntries": "Tiada entri Biji Relai untuk bulan ini.",
 
     // Edit modal
     "edit.title": "Edit Entri",
@@ -539,6 +585,48 @@ const translations = {
     "map.locationOptional": "LOKASI (PILIHAN)",
     "map.useMyLocation": "Gunakan Lokasi Saya",
     "map.flyTo": "Tunjukkan di Peta",
+
+    // Dashboard - additional
+    "dashboard.currentPlantation": "Kebun Semasa",
+    "dashboard.liveHarvestSignal": "Isyarat panen langsung",
+    "dashboard.totalBunches": "Jumlah Bunches",
+    "dashboard.teamsActive": "Pasukan Aktif",
+    "dashboard.noHarvestData": "Tiada data panen untuk {month} {year}.",
+    "dashboard.goToTeams": "Pergi ke Pasukan untuk mencatat entri.",
+    "dashboard.monthlyTrend": "Trend Bulanan",
+    "dashboard.bunches": "Bunches",
+    "dashboard.tons": "Tan",
+    "dashboard.quickActions": "Tindakan Pantas",
+    "dashboard.viewTeams": "Lihat Pasukan",
+    "dashboard.viewReports": "Lihat Laporan",
+    "dashboard.open": "Buka →",
+    "dashboard.analyticsProductivity": "Analitik & produktiviti",
+    "dashboard.noEntriesMonth": "Tiada entri untuk {month} {year} — pergi ke Pasukan untuk menambah.",
+
+    // Plantations - additional
+    "plantations.addPlantationBtn": "Tambah Kebun",
+    "plantations.basicInformation": "Maklumat Asas",
+    "plantations.managementDetails": "Butiran Pengurusan",
+    "plantations.areaInformation": "Maklumat Kawasan",
+    "plantations.teamLeaders": "Ketua Pasukan",
+    "plantations.add": "Tambah",
+    "plantations.atLeastOneLeader": "Sekurang-kurangnya 1 ketua pasukan diperlukan.",
+    "plantations.cancel": "Batal",
+
+    // Settings - additional
+    "settings.email": "Emel",
+    "settings.updatePassword": "Kemas kini kata laluan anda",
+    "settings.newPassword": "Kata Laluan Baru",
+    "settings.confirmPassword": "Sahkan Kata Laluan",
+    "settings.updating": "Mengemas kini...",
+    "settings.updatePasswordBtn": "Kemas Kini Kata Laluan",
+    "settings.browserPushNotifications": "Pemberitahuan Push Pelayar",
+    "settings.blocked": "Disekat",
+    "settings.downloadAllData": "Muat turun semua data sebagai JSON",
+    "settings.exportHarvestingMonthly": "Eksport Panen Bulanan",
+    "settings.generateExcelReport": "Hasilkan laporan Excel dalam format panen",
+    "settings.restoreDataDesc": "Import data dari fail sandaran",
+    "settings.permanentlyDeleteAll": "Padam semua data secara kekal",
   },
 } as const;
 

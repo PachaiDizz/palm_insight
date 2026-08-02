@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Loader2 } from "lucide-react";
 import { UserProfile } from "@/types";
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
     try {
       const { data } = await supabase
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch profile:", error);
     }
-  };
+  }, [user]);
 
   // Fetch profile when user logs in
   useEffect(() => {
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setProfile(null);
     }
-  }, [user]);
+  }, [user, fetchProfile]);
 
   return (
     <AuthContext.Provider value={{ user, loading, profile, fetchProfile }}>

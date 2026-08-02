@@ -24,10 +24,45 @@ if (typeof window !== "undefined") {
   });
 }
 
+interface MapMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  teamLeaderId: string;
+  leaderName: string;
+  block: string;
+  lotLabel: string | null;
+  date: string;
+}
+
+interface MapViewProps {
+  entries: MapEntry[];
+  mapMarkers?: MapMarker[];
+  flyTo?: [number, number] | null;
+  overlayOpacity?: number;
+  onMapClick?: (lat: number, lng: number) => void;
+  onDeleteMarker?: (id: string) => void;
+  onMarkerMove?: (id: string, lat: number, lng: number) => void;
+  zoomLevel?: number;
+  onZoomChange?: (zoom: number) => void;
+  drawMode?: DrawMode;
+  drawStart?: [number, number] | null;
+  onDrawStartChange?: (point: [number, number] | null) => void;
+  drawings?: Drawing[];
+  onDrawingComplete?: (drawing: Drawing) => void;
+  onUpdateDrawing?: (index: number, drawing: Drawing) => void;
+  selectedColor?: string;
+  selectedWeight?: number;
+  selectedDrawingIndex?: number | null;
+  onSelectDrawing?: (index: number | null) => void;
+  onDeleteDrawing?: (index: number) => void;
+  filterTeamId?: string | null;
+}
+
 interface MapEntry {
   id: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   leaderName: string;
   block: string;
   lotLabel: string | null;
@@ -39,20 +74,19 @@ interface MapEntry {
   teamLeaderId: string;
 }
 
-interface MapViewProps {
-  entries: MapEntry[];
-  flyTo?: [number, number] | null;
-  overlayOpacity?: number;
-  onMapClick?: (lat: number, lng: number) => void;
-  onDeleteMarker?: (id: string) => void;
-  zoomLevel?: number;
-  drawMode?: DrawMode;
-  drawStart?: [number, number] | null;
-  onDrawStartChange?: (point: [number, number] | null) => void;
-  drawings?: Drawing[];
-  onDrawingComplete?: (drawing: Drawing) => void;
-  selectedColor?: string;
-  selectedWeight?: number;
+// Distinct team color palette — visible on dark map backgrounds
+const TEAM_COLORS = [
+  "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6",
+  "#06b6d4", "#f97316", "#ec4899", "#14b8a6",
+  "#6366f1", "#84cc16", "#e11d48", "#0ea5e9",
+];
+
+// Build a stable color map from sorted unique teamLeaderIds
+function buildTeamColorMap(entries: MapEntry[]): Map<string, string> {
+  const ids = [...new Set(entries.map((e) => e.teamLeaderId))].sort();
+  const map = new Map<string, string>();
+  ids.forEach((id, i) => map.set(id, TEAM_COLORS[i % TEAM_COLORS.length]));
+  return map;
 }
 
 // Calculate bearing between two points — 0 = North, clockwise
@@ -76,18 +110,26 @@ function getPointBefore(
 
 export default function MapView({
   entries,
+  mapMarkers = [],
   flyTo,
   overlayOpacity = 1.0,
   onMapClick,
   onDeleteMarker,
+  onMarkerMove,
   zoomLevel = DEFAULT_MAP_ZOOM,
+  onZoomChange,
   drawMode = "select",
   drawStart = null,
   onDrawStartChange,
   drawings = [],
   onDrawingComplete,
+  onUpdateDrawing,
   selectedColor = "#ffffff",
   selectedWeight = 2.5,
+  selectedDrawingIndex = null,
+  onSelectDrawing,
+  onDeleteDrawing,
+  filterTeamId = null,
 }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -97,22 +139,30 @@ export default function MapView({
   const boundariesLayerRef = useRef<L.LayerGroup | null>(null);
   const onMapClickRef = useRef(onMapClick);
   const onDeleteMarkerRef = useRef(onDeleteMarker);
+  const onMarkerMoveRef = useRef(onMarkerMove);
+  const onDrawingCompleteRef = useRef(onDrawingComplete);
+  const onUpdateDrawingRef = useRef(onUpdateDrawing);
   const drawModeRef = useRef(drawMode);
   const drawStartRef = useRef(drawStart);
   const onDrawStartChangeRef = useRef(onDrawStartChange);
-  const onDrawingCompleteRef = useRef(onDrawingComplete);
+  const onZoomChangeRef = useRef(onZoomChange);
   const selectedColorRef = useRef(selectedColor);
   const selectedWeightRef = useRef(selectedWeight);
+  const filterTeamIdRef = useRef(filterTeamId);
 
   // Keep refs in sync
   onMapClickRef.current = onMapClick;
   onDeleteMarkerRef.current = onDeleteMarker;
+  onMarkerMoveRef.current = onMarkerMove;
+  onDrawingCompleteRef.current = onDrawingComplete;
+  onUpdateDrawingRef.current = onUpdateDrawing;
   drawModeRef.current = drawMode;
   drawStartRef.current = drawStart;
   onDrawStartChangeRef.current = onDrawStartChange;
-  onDrawingCompleteRef.current = onDrawingComplete;
+  onZoomChangeRef.current = onZoomChange;
   selectedColorRef.current = selectedColor;
   selectedWeightRef.current = selectedWeight;
+  filterTeamIdRef.current = filterTeamId;
 
   // Initialize map — dragging enabled
   useEffect(() => {
@@ -175,6 +225,11 @@ export default function MapView({
       }
     });
 
+    // Sync zoom back to parent when user scrolls/clicks zoom
+    map.on("zoomend", () => {
+      onZoomChangeRef.current?.(map.getZoom());
+    });
+
     mapInstanceRef.current = map;
     markersLayerRef.current = markersLayer;
     drawingsLayerRef.current = drawingsLayer;
@@ -234,14 +289,17 @@ export default function MapView({
 
     markersLayer.clearLayers();
 
-    entries.forEach((entry) => {
-      const isWork = entry.workStatus === "work";
-      const isNoWork = entry.workStatus === "no_work";
+    const filteredMarkers = filterTeamId
+      ? mapMarkers.filter((m) => m.teamLeaderId === filterTeamId)
+      : mapMarkers;
 
-      const WorkIcon = L.divIcon({
+    filteredMarkers.forEach((markerData) => {
+      const teamColor = "#10b981";
+
+      const markerIcon = L.divIcon({
         className: "",
         html: `<div style="
-          width:20px;height:20px;background:#10b981;border:2px solid white;
+          width:20px;height:20px;background:${teamColor};border:2px solid white;
           border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4);
           display:flex;align-items:center;justify-content:center;font-size:10px;
         ">👤</div>`,
@@ -250,56 +308,39 @@ export default function MapView({
         popupAnchor: [0, -12],
       });
 
-      const NoWorkIcon = L.divIcon({
-        className: "",
-        html: `<div style="
-          width:20px;height:20px;background:#6b7280;border:2px solid white;
-          border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4);
-          display:flex;align-items:center;justify-content:center;font-size:10px;
-        ">✖</div>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
-        popupAnchor: [0, -12],
+      const isDrawMode = drawMode === "draw";
+      const marker = L.marker([markerData.lat, markerData.lng], {
+        icon: markerIcon,
+        draggable: !isDrawMode,
+        interactive: !isDrawMode,
       });
 
-      const UnknownIcon = L.divIcon({
-        className: "",
-        html: `<div style="
-          width:20px;height:20px;background:#f59e0b;border:2px solid white;
-          border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4);
-          display:flex;align-items:center;justify-content:center;font-size:10px;
-        ">?</div>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
-        popupAnchor: [0, -12],
-      });
-
-      const icon = isWork ? WorkIcon : isNoWork ? NoWorkIcon : UnknownIcon;
-
-      const marker = L.marker([entry.latitude, entry.longitude], { icon });
+      if (!isDrawMode) {
+        marker.on("dragend", (e) => {
+          const pos = e.target.getLatLng();
+          onMarkerMoveRef.current?.(markerData.id, pos.lat, pos.lng);
+        });
+      }
 
       const popupContent = `
         <div style="font-family:Inter,system-ui,sans-serif;min-width:180px;">
-          <div style="font-weight:700;font-size:14px;margin-bottom:6px;color:#1a1a1a;">
-            ${entry.leaderName}
+          <div style="font-weight:700;font-size:14px;margin-bottom:6px;color:${teamColor};">
+            ${markerData.leaderName}
           </div>
           <div style="font-size:12px;color:#555;margin-bottom:8px;">
             <div style="margin-bottom:2px;">
-              <strong>📍</strong> Block ${entry.block}${entry.lotLabel ? ` — ${entry.lotLabel}` : ""}
+              <strong>📍</strong> Block ${markerData.block}${markerData.lotLabel ? ` — ${markerData.lotLabel}` : ""}
             </div>
-            ${isWork && entry.numWorkers != null ? `<div style="margin-bottom:2px;"><strong>👷</strong> Workers: ${entry.numWorkers}</div>` : ""}
-            ${isWork && entry.bunches != null ? `<div style="margin-bottom:2px;"><strong>🌿</strong> Bunches: ${entry.bunches.toLocaleString("en-MY")}</div>` : ""}
-            ${entry.tons != null && entry.tons > 0 ? `<div style="margin-bottom:2px;"><strong>⚖️</strong> Tons: ${Number(entry.tons).toFixed(2)}</div>` : ""}
             <div style="margin-top:4px;padding-top:4px;border-top:1px solid #eee;">
-              <strong>📅</strong> ${entry.date}
+              <strong>📅</strong> ${markerData.date}
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <div style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;
-              background:${isWork ? "#d1fae5" : "#e5e7eb"};color:${isWork ? "#065f46" : "#374151"};">
-              ${isWork ? "Work Day" : "No Work"}
+              background:${teamColor}20;color:${teamColor};">
+              Map Marker
             </div>
-            <button onclick="window.__deleteMarker('${entry.id}')" style="
+            <button onclick="window.__deleteMarker('${markerData.id}')" style="
               padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;
               background:#fee2e2;color:#dc2626;border:none;cursor:pointer;
             ">Delete</button>
@@ -310,7 +351,7 @@ export default function MapView({
       marker.bindPopup(popupContent);
       marker.addTo(markersLayer);
     });
-  }, [entries]);
+  }, [mapMarkers, filterTeamId, drawMode]);
 
   // Render drawings (arrows)
   useEffect(() => {
@@ -319,17 +360,28 @@ export default function MapView({
 
     drawingsLayer.clearLayers();
 
-    drawings.forEach((drawing) => {
-      // Draw shortened line (stops before arrowhead)
-      const lineEnd = getPointBefore(drawing.from, drawing.to, 0.88);
+    drawings.forEach((drawing, index) => {
+      const isSelected = selectedDrawingIndex === index;
+
+      // Draw full line from start to end
       const polyline = L.polyline(
-        [drawing.from, lineEnd],
+        [drawing.from, drawing.to],
         {
           color: drawing.color,
-          weight: drawing.weight,
+          weight: isSelected ? drawing.weight + 2 : drawing.weight,
           opacity: 1,
+          className: isSelected ? "selected-drawing" : "",
         }
       );
+
+      // Make line clickable when in select mode
+      if (drawMode === "select") {
+        polyline.on("click", (e) => {
+          L.DomEvent.stop(e);
+          onSelectDrawing?.(index);
+        });
+      }
+
       polyline.addTo(drawingsLayer);
 
       // Draw arrowhead at endpoint using CSS border triangle
@@ -354,8 +406,90 @@ export default function MapView({
 
       const arrowHead = L.marker(drawing.to, { icon: arrowHeadIcon, interactive: false });
       arrowHead.addTo(drawingsLayer);
+
+      // Show controls for selected drawing
+      if (isSelected && drawMode === "select") {
+        const midPoint: [number, number] = [
+          (drawing.from[0] + drawing.to[0]) / 2,
+          (drawing.from[1] + drawing.to[1]) / 2,
+        ];
+
+        // Drag handle (move arrow)
+        const dragIcon = L.divIcon({
+          className: "",
+          html: `<div style="
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            font-size: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            border: 2px solid white;
+          ">✥</div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        });
+        const dragMarker = L.marker(midPoint, { icon: dragIcon, zIndexOffset: 1000, draggable: true });
+        dragMarker.on("dragstart", (e) => {
+          L.DomEvent.stop(e);
+        });
+        dragMarker.on("drag", (e) => {
+          const newPos = e.target.getLatLng();
+          const deltaLat = newPos.lat - midPoint[0];
+          const deltaLng = newPos.lng - midPoint[1];
+          const newFrom: [number, number] = [drawing.from[0] + deltaLat, drawing.from[1] + deltaLng];
+          const newTo: [number, number] = [drawing.to[0] + deltaLat, drawing.to[1] + deltaLng];
+          onUpdateDrawingRef.current?.(index, { ...drawing, from: newFrom, to: newTo });
+        });
+        dragMarker.on("dragend", (e) => {
+          const newPos = e.target.getLatLng();
+          const deltaLat = newPos.lat - midPoint[0];
+          const deltaLng = newPos.lng - midPoint[1];
+          const newFrom: [number, number] = [drawing.from[0] + deltaLat, drawing.from[1] + deltaLng];
+          const newTo: [number, number] = [drawing.to[0] + deltaLat, drawing.to[1] + deltaLng];
+          onUpdateDrawingRef.current?.(index, { ...drawing, from: newFrom, to: newTo });
+        });
+        dragMarker.addTo(drawingsLayer);
+
+        // Delete button
+        const deleteIcon = L.divIcon({
+          className: "",
+          html: `<div style="
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            border: 2px solid white;
+          ">×</div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+        const deleteMarker = L.marker(
+          [midPoint[0], midPoint[1] - 0.00005],
+          { icon: deleteIcon, zIndexOffset: 1000 }
+        );
+        deleteMarker.on("click", (e) => {
+          L.DomEvent.stop(e);
+          onDeleteDrawing?.(index);
+          onSelectDrawing?.(null);
+        });
+        deleteMarker.addTo(drawingsLayer);
+      }
     });
-  }, [drawings]);
+  }, [drawings, selectedDrawingIndex, drawMode, onSelectDrawing, onDeleteDrawing]);
 
   // Render draw start indicator (green dot)
   useEffect(() => {

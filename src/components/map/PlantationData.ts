@@ -35,8 +35,8 @@ export const DEFAULT_MAP_CENTER: [number, number] = [
 
 // Map zoom settings — restricted to plantation area only
 export const DEFAULT_MAP_ZOOM = 14;
-export const MAX_ZOOM = 18;
-export const MIN_ZOOM = 13;
+export const MAX_ZOOM = 16;
+export const MIN_ZOOM = 14;
 
 // Max bounds — slightly wider than plantation to prevent panning to world view
 export const MAX_BOUNDS: [[number, number], [number, number]] = [
@@ -62,19 +62,42 @@ export function flipCoordinate(lat: number, lng: number): [number, number] {
   ];
 }
 
-// Lot boundaries — populate with real data from the GeoPDF
-// Use Global Mapper's Digitizer tool to extract lot polygon coordinates
+// =====================================================================
+// LOT BOUNDARIES
+// =====================================================================
+//
+// CRITICAL: Do NOT guess coordinates. They will be wrong.
+//
+// The map image is 2209x3000 pixels covering:
+//   SW: [5.074852, 119.069800]
+//   NE: [5.129434, 119.110728]
+//
+// To extract REAL lot boundaries, you MUST use GIS software:
+//
+// Option 1: Global Mapper (Recommended - easiest)
+//   1. Download Global Mapper (free trial: https://www.bluemarblegeo.com/products/global-mapper.php)
+//   2. File > Open > select SAHABAT 5.pdf
+//   3. The PDF will auto-georeference using embedded CTM
+//   4. Use Vector > Digitizer Tool to trace each lot polygon
+//   5. Right-click polygon > Edit Feature Attributes > set name (e.g., "LOT 747")
+//   6. Export: Vector > Export > Export Vector/Lidar Format
+//   7. Choose CSV or GeoJSON, WGS84 projection
+//   8. Convert exported coordinates to [lat, lng] format
+//
+// Option 2: QGIS (Free)
+//   1. Install QGIS from https://qgis.org
+//   2. Layer > Add Layer > Add Raster Layer
+//   3. Select SAHABAT 5.pdf (should auto-georeference)
+//   4. Use Sketching tools to trace lot polygons
+//   5. Export as GeoJSON
+//
+// Option 3: Manual with pixel coordinates
+//   Image pixel (px, py) → WGS84:
+//     lng = 0.000075792249 * (36 + px/2209 * 540) + 119.067071738726
+//     lat = 0.000075807892 * (756 - py/3000 * 720) + 5.072123187189
+//
+
 export const LOT_BOUNDARIES: LotBoundary[] = [
-  // Example — replace with real lot data from SAHABAT 5.pdf:
-  //
-  // {
-  //   name: "LOT 747",
-  //   block: "04",
-  //   coordinates: [
-  //     [5.100, 119.080],  // NW corner
-  //     [5.100, 119.095],  // NE corner
-  //     [5.090, 119.095],  // SE corner
-  //     [5.090, 119.080],  // SW corner
-  //   ],
-  // },
+  // Add extracted lot boundaries here
+  // Format: { name: "LOT 747", block: "04", coordinates: [[lat, lng], ...] }
 ];

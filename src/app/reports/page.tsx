@@ -4,7 +4,8 @@ import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { usePlantations, useReportEntries } from "@/lib/queries";
 import DashboardLayout from "@/components/DashboardLayout";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { lazy, Suspense } from "react";
+const ReportsCharts = lazy(() => import("@/components/dashboard/ReportsCharts"));
 import { Calendar, TrendingUp, Filter, ChevronDown, FileText, FileSpreadsheet } from "lucide-react";
 import { Plantation, DailyEntry, TeamLeader } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
@@ -13,12 +14,8 @@ import StatCard from "@/components/ui/StatCard";
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/ui/Skeleton";
 import ExportHarvestingModal from "@/components/ExportHarvestingModal";
 import { useI18n } from "@/lib/i18n";
-
-const months = [
-  "January", "February", "March", "April",
-  "May", "June", "July", "August",
-  "September", "October", "November", "December"
-];
+import { downloadString } from "@/lib/download";
+import { MONTH_NAMES } from "@/lib/date";
 
 export default function ReportsPage() {
   const { user } = useAuth();
@@ -88,13 +85,7 @@ export default function ReportsPage() {
       return [e.date, leader?.name || "", `Block ${leader?.plantations?.block || ""}`, e.work_status, e.num_workers, e.bunches, e.tons, e.backlogs, e.notes || ""];
     });
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `palminsight-report-${months[selectedMonth]}-${selectedYear}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadString(csv, `palminsight-report-${MONTH_NAMES[selectedMonth]}-${selectedYear}.csv`, "text/csv");
   };
 
   const exportJSON = () => {
@@ -102,14 +93,8 @@ export default function ReportsPage() {
       const leader = e.team_leaders;
       return { date: e.date, leader: leader?.name, block: leader?.plantations?.block, status: e.work_status, workers: e.num_workers, bunches: e.bunches, tons: e.tons, backlogs: e.backlogs, notes: e.notes };
     });
-    const json = JSON.stringify({ month: months[selectedMonth], year: selectedYear, stats, entries: data }, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `palminsight-report-${months[selectedMonth]}-${selectedYear}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const json = JSON.stringify({ month: MONTH_NAMES[selectedMonth], year: selectedYear, stats, entries: data }, null, 2);
+    downloadString(json, `palminsight-report-${MONTH_NAMES[selectedMonth]}-${selectedYear}.json`, "application/json");
   };
 
   return (
@@ -137,7 +122,7 @@ export default function ReportsPage() {
           <>
             <PageHeader
               title={t("reports.title")}
-              subtitle={`${months[selectedMonth]} ${selectedYear}`}
+              subtitle={`${MONTH_NAMES[selectedMonth]} ${selectedYear}`}
               action={
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <button onClick={() => setShowExportModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm transition-all hover:bg-[var(--hover-subtle)] min-h-[40px]" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
@@ -166,7 +151,7 @@ export default function ReportsPage() {
                 className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none min-h-[40px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
-                {months.map((m, i) => (
+                {MONTH_NAMES.map((m, i) => (
                   <option key={i} value={i}>{m}</option>
                 ))}
               </select>
@@ -177,7 +162,7 @@ export default function ReportsPage() {
                 className="px-4 py-2.5 rounded-xl text-sm text-theme outline-none border appearance-none min-h-[40px]"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)" }}
               >
-                {[2024, 2025, 2026, 2027].map((y) => (
+                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 2 + i).map((y) => (
                   <option key={y} value={y}>{y}</option>
                 ))}
               </select>
@@ -232,67 +217,14 @@ export default function ReportsPage() {
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-              <div className="lg:col-span-2 card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
-                <h3 className="card-title text-sm text-theme mb-4">Daily Production</h3>
-                {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
-                      <XAxis dataKey="date" tick={{ fill: "var(--chart-axis)", fontSize: 10 }} tickFormatter={(d: string) => d.slice(5)} interval="preserveStartEnd" minTickGap={20} />
-                      <YAxis tick={{ fill: "var(--chart-axis)", fontSize: 10 }} />
-                      <Tooltip contentStyle={{ backgroundColor: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: "12px" }} />
-                      <Bar dataKey="bunches" fill="var(--chart-bunches)" name="Bunches" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="tons" fill="var(--chart-tons)" name="Tons" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No data for this period</p>
-                  </div>
-                )}
-              </div>
-              <div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)" }}>
-                <h3 className="card-title text-sm text-theme mb-4">Work Status</h3>
-                {stats.workDays + stats.noWorkDays > 0 ? (
-                  <div className="relative" style={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
-                          {pieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip contentStyle={{ backgroundColor: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: "12px" }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-3xl font-bold text-theme">{stats.workDays + stats.noWorkDays}</span>
-                      <span className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Total Days</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No data</p>
-                  </div>
-                )}
-                <div className="flex justify-center gap-4 mt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--status-work)" }} />
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>Work ({stats.workDays})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--status-no-work)" }} />
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>No Work ({stats.noWorkDays})</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Suspense fallback={<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6"><div className="lg:col-span-2 card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)", height: 360 }} /><div className="card-glow rounded-2xl p-5" style={{ backgroundColor: "var(--bg-card)", height: 360 }} /></div>}>
+              <ReportsCharts chartData={chartData} pieData={pieData} totalDays={stats.workDays + stats.noWorkDays} workDays={stats.workDays} noWorkDays={stats.noWorkDays} />
+            </Suspense>
 
             {/* Entries Table */}
             <div className="card-glow rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)" }}>
               <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
-                <h3 className="card-title text-sm text-theme">All Entries — {months[selectedMonth]} {selectedYear}</h3>
+                <h3 className="card-title text-sm text-theme">All Entries — {MONTH_NAMES[selectedMonth]} {selectedYear}</h3>
               </div>
               {filteredEntries.length === 0 ? (
                 <div className="p-12 text-center">

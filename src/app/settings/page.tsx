@@ -6,6 +6,7 @@ import { useTheme } from "@/components/ThemeContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Download, Upload, Trash2, User, Mail, Lock, Sun, Moon, CheckCircle, AlertTriangle, Bell, BellOff, FileSpreadsheet, Globe } from "lucide-react";
 import { getNotificationPrefs, saveNotificationPrefs } from "@/components/notifications/notificationHelpers";
+import { downloadString } from "@/lib/download";
 import type { NotificationPrefs } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import { getAllUserPlantations } from "@/lib/onboarding";
@@ -18,6 +19,7 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useI18n();
   const [importing, setImporting] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Account state
   const [displayName, setDisplayName] = useState(profile?.full_name || "");
@@ -97,42 +99,92 @@ export default function SettingsPage() {
     const { data: leaders } = await supabase.from("team_leaders").select("*").eq("user_id", user.id);
     const { data: entries } = await supabase.from("daily_entries").select("*").eq("user_id", user.id);
     const json = JSON.stringify({ plantations, team_leaders: leaders, daily_entries: entries }, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `palminsight-backup-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadString(json, `palminsight-backup-${new Date().toISOString().split('T')[0]}.json`, "application/json");
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImporting(true);
-    const text = await file.text();
-    const data = JSON.parse(text);
-    if (user) {
-      await supabase.from("plantations").delete().eq("user_id", user.id);
-      await supabase.from("team_leaders").delete().eq("user_id", user.id);
-      await supabase.from("daily_entries").delete().eq("user_id", user.id);
 
-      if (data.plantations) await supabase.from("plantations").insert(data.plantations.map((p: any) => ({ ...p, user_id: user.id })));
-      if (data.team_leaders) await supabase.from("team_leaders").insert(data.team_leaders.map((t: any) => ({ ...t, user_id: user.id })));
-      if (data.daily_entries) await supabase.from("daily_entries").insert(data.daily_entries.map((e: any) => ({ ...e, user_id: user.id })));
+    let data: any;
+    try {
+      const text = await file.text();
+      data = JSON.parse(text);
+    } catch {
+      alert("Invalid backup file. Please select a valid JSON file.");
+      return;
     }
-    setImporting(false);
-    alert("Data restored successfully!");
+
+    const plantationCount = data.plantations?.length || 0;
+    const leaderCount = data.team_leaders?.length || 0;
+    const entryCount = data.daily_entries?.length || 0;
+
+    if (plantationCount === 0 && leaderCount === 0 && entryCount === 0) {
+      alert("No data found in backup file.");
+      return;
+    }
+
+    const confirmed = confirm(
+      `This will REPLACE all existing data with the backup:\n\n` +
+      `• ${plantationCount} plantation(s)\n` +
+      `• ${leaderCount} team leader(s)\n` +
+      `• ${entryCount} daily entr(y/ies)\n\n` +
+      `This action cannot be undone. Continue?`
+    );
+    if (!confirmed) return;
+
+    setImporting(true);
+    try {
+      if (user) {
+        // Delete existing data
+        const { error: delErr1 } = await supabase.from("plantations").delete().eq("user_id", user.id);
+        if (delErr1) throw new Error(`Failed to clear plantations: ${delErr1.message}`);
+        const { error: delErr2 } = await supabase.from("team_leaders").delete().eq("user_id", user.id);
+        if (delErr2) throw new Error(`Failed to clear team leaders: ${delErr2.message}`);
+        const { error: delErr3 } = await supabase.from("daily_entries").delete().eq("user_id", user.id);
+        if (delErr3) throw new Error(`Failed to clear entries: ${delErr3.message}`);
+
+        // Insert new data
+        if (data.plantations?.length) {
+          const { error } = await supabase.from("plantations").insert(data.plantations.map((p: any) => ({ ...p, user_id: user.id })));
+          if (error) throw new Error(`Failed to import plantations: ${error.message}`);
+        }
+        if (data.team_leaders?.length) {
+          const { error } = await supabase.from("team_leaders").insert(data.team_leaders.map((t: any) => ({ ...t, user_id: user.id })));
+          if (error) throw new Error(`Failed to import team leaders: ${error.message}`);
+        }
+        if (data.daily_entries?.length) {
+          const { error } = await supabase.from("daily_entries").insert(data.daily_entries.map((e: any) => ({ ...e, user_id: user.id })));
+          if (error) throw new Error(`Failed to import entries: ${error.message}`);
+        }
+      }
+      alert("Data restored successfully!");
+      window.location.reload();
+    } catch (err: any) {
+      alert(`Import failed: ${err.message}\n\nSome data may have been lost. Please import your backup again.`);
+    } finally {
+      setImporting(false);
+      // Reset file input
+      e.target.value = "";
+    }
   };
 
   const handleDeleteAll = async () => {
     if (!confirm("Are you sure? All data will be permanently deleted.")) return;
     if (!user) return;
-    await supabase.from("plantations").delete().eq("user_id", user.id);
-    await supabase.from("team_leaders").delete().eq("user_id", user.id);
-    await supabase.from("daily_entries").delete().eq("user_id", user.id);
-    alert("All data deleted.");
-    window.location.reload();
+    setDeleteMessage(null);
+    try {
+      const { error: e1 } = await supabase.from("plantations").delete().eq("user_id", user.id);
+      if (e1) throw e1;
+      const { error: e2 } = await supabase.from("team_leaders").delete().eq("user_id", user.id);
+      if (e2) throw e2;
+      const { error: e3 } = await supabase.from("daily_entries").delete().eq("user_id", user.id);
+      if (e3) throw e3;
+      setPlantations([]);
+      setDeleteMessage({ type: "success", text: "All data deleted." });
+    } catch (err: any) {
+      setDeleteMessage({ type: "error", text: err.message || "Failed to delete data." });
+    }
   };
 
   const toggleNotifPref = (key: keyof NotificationPrefs) => {
@@ -174,10 +226,10 @@ export default function SettingsPage() {
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-subtle)" }}>
                     <User className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                   </div>
-                  <div className="text-sm font-medium text-theme sm:hidden">Display Name</div>
+                  <div className="text-sm font-medium text-theme sm:hidden">{t("settings.displayName")}</div>
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-theme hidden sm:block">Display Name</div>
+                  <div className="text-sm font-medium text-theme hidden sm:block">{t("settings.displayName")}</div>
                   <input
                     type="text"
                     value={displayName}
@@ -210,7 +262,7 @@ export default function SettingsPage() {
                   <Mail className="w-5 h-5" style={{ color: "var(--accent-blue)" }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-theme">Email</div>
+                  <div className="text-sm font-medium text-theme">{t("settings.email")}</div>
                   <div className="text-sm mt-1 truncate" style={{ color: "var(--text-muted)" }}>{user?.email || "-"}</div>
                 </div>
               </div>
@@ -224,14 +276,14 @@ export default function SettingsPage() {
                     <Lock className="w-5 h-5" style={{ color: "var(--accent-amber)" }} />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-theme">Change Password</div>
-                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>Update your password</div>
+                    <div className="text-sm font-medium text-theme">{t("settings.changePassword")}</div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("settings.updatePassword")}</div>
                   </div>
                 </div>
                 <div className="space-y-3 sm:ml-13">
                   <input
                     type="password"
-                    placeholder="New Password"
+                    placeholder={t("settings.newPassword")}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40"
@@ -239,7 +291,7 @@ export default function SettingsPage() {
                   />
                   <input
                     type="password"
-                    placeholder="Confirm Password"
+                    placeholder={t("settings.confirmPassword")}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-xl text-sm text-theme outline-none border placeholder:opacity-40"
@@ -251,7 +303,7 @@ export default function SettingsPage() {
                     className="px-4 py-2 rounded-xl text-sm font-medium text-theme disabled:opacity-50 min-h-[40px]"
                     style={{ backgroundColor: "rgba(245,158,11,0.2)", color: "var(--accent-amber)" }}
                   >
-                    {updatingPassword ? "Updating..." : "Update Password"}
+                    {updatingPassword ? t("settings.updating") : t("settings.updatePasswordBtn")}
                   </button>
                 </div>
                 {passwordMessage && (
@@ -303,7 +355,7 @@ export default function SettingsPage() {
                     {notifPrefs.browserPush ? <Bell className="w-5 h-5" style={{ color: "var(--accent-primary)" }} /> : <BellOff className="w-5 h-5" style={{ color: "var(--text-muted)" }} />}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-theme">Browser Push Notifications</div>
+                    <div className="text-sm font-medium text-theme">{t("settings.browserPushNotifications")}</div>
                     <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                       {pushPermission === "granted" ? "Enabled" : pushPermission === "denied" ? "Blocked by browser" : "Receive alerts even when the app is not open"}
                     </div>
@@ -330,7 +382,7 @@ export default function SettingsPage() {
                     Enable Push Notifications
                   </button>
                 ) : (
-                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>Blocked</span>
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("settings.blocked")}</span>
                 )}
               </div>
             </div>
@@ -416,8 +468,8 @@ export default function SettingsPage() {
                       <Download className="w-5 h-5" style={{ color: "var(--accent-blue)" }} />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-theme">Export Data</div>
-                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>Download all data as JSON</div>
+                      <div className="text-sm font-medium text-theme">{t("settings.exportData")}</div>
+                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("settings.downloadAllData")}</div>
                     </div>
                   </div>
                   <button onClick={handleExport} className="px-3 sm:px-4 py-2 rounded-xl text-sm font-medium text-theme shrink-0 min-h-[40px]" style={{ backgroundColor: "rgba(59,130,246,0.2)", color: "var(--accent-blue)" }}>
@@ -433,8 +485,8 @@ export default function SettingsPage() {
                       <FileSpreadsheet className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-theme">Export Harvesting Monthly</div>
-                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>Generate Excel report in harvesting format</div>
+                      <div className="text-sm font-medium text-theme">{t("settings.exportHarvestingMonthly")}</div>
+                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("settings.generateExcelReport")}</div>
                     </div>
                   </div>
                   <button onClick={() => setShowExportModal(true)} className="px-3 sm:px-4 py-2 rounded-xl text-sm font-medium text-theme shrink-0 min-h-[40px]" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
@@ -449,8 +501,8 @@ export default function SettingsPage() {
                     <Upload className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-theme">Restore Data</div>
-                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{importing ? "Restoring..." : "Import from JSON backup"}</div>
+                    <div className="text-sm font-medium text-theme">{t("settings.restoreData")}</div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("settings.restoreDataDesc")}</div>
                   </div>
                   <label className="px-3 sm:px-4 py-2 rounded-xl text-sm font-medium cursor-pointer shrink-0 min-h-[40px] flex items-center" style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}>
                     Choose File
@@ -466,14 +518,20 @@ export default function SettingsPage() {
                       <Trash2 className="w-5 h-5" style={{ color: "var(--accent-red)" }} />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-theme">Danger Zone</div>
-                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>Permanently delete all data</div>
+                      <div className="text-sm font-medium text-theme">{t("settings.dangerZone")}</div>
+                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("settings.permanentlyDeleteAll")}</div>
                     </div>
                   </div>
                   <button onClick={handleDeleteAll} className="px-3 sm:px-4 py-2 rounded-xl text-sm font-medium shrink-0 min-h-[40px]" style={{ backgroundColor: "var(--accent-red-light)", color: "var(--accent-red)" }}>
                     Delete All
                   </button>
                 </div>
+                {deleteMessage && (
+                  <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg mt-3" style={{ backgroundColor: deleteMessage.type === "success" ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)", color: deleteMessage.type === "success" ? "var(--accent-primary)" : "var(--accent-red)" }}>
+                    {deleteMessage.type === "success" ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+                    {deleteMessage.text}
+                  </div>
+                )}
               </div>
             </div>
           </section>

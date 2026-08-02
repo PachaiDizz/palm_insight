@@ -3,10 +3,10 @@ import { RotateCcw, Trash2 } from "lucide-react";
 import { DrawMode, Drawing } from "./MapClient";
 
 const DRAW_COLORS = [
-  { color: '#ffffff', label: 'White' },
   { color: '#000000', label: 'Black' },
-  { color: '#10b981', label: 'Green' },
-  { color: '#ef4444', label: 'Red' },
+  { color: '#06b6d4', label: 'Cyan' },
+  { color: '#f97316', label: 'Orange' },
+  { color: '#312e81', label: 'Indigo' },
 ];
 
 const WEIGHTS = {

@@ -26,6 +26,23 @@ interface ImportDataModalProps {
   plantations: { id: string; block: string }[];
 }
 
+const MAX_STRING_LENGTH = 500;
+const MAX_NOTES_LENGTH = 1000;
+
+function sanitizeString(value: string, maxLength: number = MAX_STRING_LENGTH): string {
+  // Remove control characters, trim, and limit length
+  return value
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function isValidDate(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const date = new Date(dateStr);
+  return !isNaN(date.getTime());
+}
+
 function parseCSV(text: string): ImportRow[] {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) return [];
@@ -34,16 +51,41 @@ function parseCSV(text: string): ImportRow[] {
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
     if (cols.length < 7) continue;
+
+    const date = sanitizeString(cols[0] || "");
+    const leaderName = sanitizeString(cols[1] || "");
+    const block = sanitizeString(cols[2] || "");
+    const status = sanitizeString(cols[3] || "work").toLowerCase();
+    const workers = sanitizeString(cols[4] || "");
+    const bunches = sanitizeString(cols[5] || "");
+    const tons = sanitizeString(cols[6] || "");
+    const backlogs = sanitizeString(cols[7] || "");
+    const notes = sanitizeString(cols[8] || "", MAX_NOTES_LENGTH);
+
+    // Validate required fields
+    if (!date || !leaderName || !block) continue;
+    if (!isValidDate(date)) continue;
+
+    // Validate numeric fields (allow empty, but reject non-numeric)
+    const numericPattern = /^-?\d*\.?\d*$/;
+    if (workers && !numericPattern.test(workers)) continue;
+    if (bunches && !numericPattern.test(bunches)) continue;
+    if (tons && !numericPattern.test(tons)) continue;
+    if (backlogs && !numericPattern.test(backlogs)) continue;
+
+    // Validate status
+    const validStatus = status.includes("work") && !status.includes("no") ? "work" : "no_work";
+
     rows.push({
-      date: cols[0] || "",
-      leaderName: cols[1] || "",
-      block: cols[2] || "",
-      status: cols[3] || "work",
-      workers: cols[4] || "",
-      bunches: cols[5] || "",
-      tons: cols[6] || "",
-      backlogs: cols[7] || "",
-      notes: cols[8] || "",
+      date,
+      leaderName,
+      block,
+      status: validStatus,
+      workers,
+      bunches,
+      tons,
+      backlogs,
+      notes,
     });
   }
   return rows;

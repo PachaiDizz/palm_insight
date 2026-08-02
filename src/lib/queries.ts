@@ -2,7 +2,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabaseClient";
 import { getUserTeamLeaders } from "./onboarding";
 import { getMonthRange, toLocalDateKey } from "./date";
-import { Plantation, TeamLeader, DailyEntry, DailyEntryWithRelations } from "@/types";
+import {
+  PlantationSchema,
+  TeamLeaderSchema,
+  DailyEntrySchema,
+  DailyEntryWithRelationsSchema,
+} from "./schemas";
+import type { Plantation, TeamLeader, DailyEntry, DailyEntryWithRelations } from "@/types";
 
 export async function fetchPlantations(userId: string): Promise<Plantation[]> {
   const { data } = await supabase
@@ -11,17 +17,17 @@ export async function fetchPlantations(userId: string): Promise<Plantation[]> {
     .eq("user_id", userId)
     .order("created_at", { ascending: true });
 
-  return (data || []) as Plantation[];
+  return PlantationSchema.array().parse(data ?? []);
 }
 
 export async function fetchTeamLeaders(userId: string): Promise<TeamLeader[]> {
   const { data } = await supabase
     .from("team_leaders")
-    .select("*, plantations(id, rancangan, peringkat, block)")
+    .select("*, plantations(*)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  return (data || []) as TeamLeader[];
+  return TeamLeaderSchema.array().parse(data ?? []);
 }
 
 export async function fetchTeamLeadersForPlantation(userId: string, plantationId: string): Promise<TeamLeader[]> {
@@ -31,7 +37,7 @@ export async function fetchTeamLeadersForPlantation(userId: string, plantationId
     .eq("user_id", userId)
     .eq("plantation_id", plantationId);
 
-  return (data || []) as TeamLeader[];
+  return TeamLeaderSchema.array().parse(data ?? []);
 }
 
 export async function fetchLeaderEntries(leaderId: string): Promise<DailyEntry[]> {
@@ -41,17 +47,17 @@ export async function fetchLeaderEntries(leaderId: string): Promise<DailyEntry[]
     .eq("team_leader_id", leaderId)
     .order("date", { ascending: false });
 
-  return (data || []) as DailyEntry[];
+  return DailyEntrySchema.array().parse(data ?? []);
 }
 
 export async function fetchAllUserEntries(userId: string): Promise<DailyEntry[]> {
   const { data } = await supabase
     .from("daily_entries")
-    .select("*, team_leaders(name, plantation_id, plantations(block, rancangan))")
+    .select("*, team_leaders(*, plantations(*))")
     .eq("user_id", userId)
     .order("date", { ascending: false });
 
-  return (data || []) as DailyEntry[];
+  return DailyEntrySchema.array().parse(data ?? []);
 }
 
 export async function fetchLatestEntriesForLeaders(leaderIds: string[]): Promise<Record<string, DailyEntry>> {
@@ -64,7 +70,7 @@ export async function fetchLatestEntriesForLeaders(leaderIds: string[]): Promise
     .order("date", { ascending: false });
 
   const latestMap: Record<string, DailyEntry> = {};
-  (data || []).forEach((entry: DailyEntry) => {
+  DailyEntrySchema.array().parse(data ?? []).forEach((entry) => {
     if (!latestMap[entry.team_leader_id]) {
       latestMap[entry.team_leader_id] = entry;
     }
@@ -166,13 +172,13 @@ export function useDashboardMonthEntries(
     queryFn: async () => {
       const { data } = await supabase
         .from("daily_entries")
-        .select("date, bunches, tons, backlogs, team_leader_id, work_status")
+        .select("*")
         .eq("user_id", userId)
         .eq("plantation_id", plantationId)
         .gte("date", startDate)
         .lte("date", endDate)
         .order("date", { ascending: true });
-      return (data || []) as DailyEntry[];
+      return DailyEntrySchema.array().parse(data ?? []);
     },
     enabled: !!userId && !!plantationId,
     staleTime: 30_000,
@@ -198,7 +204,7 @@ export function useDashboardRecentEntries(
         .lte("date", endDate)
         .order("date", { ascending: false })
         .limit(10);
-      return (data || []) as DailyEntryWithRelations[];
+      return DailyEntryWithRelationsSchema.array().parse(data ?? []);
     },
     enabled: !!userId && !!plantationId,
     staleTime: 30_000,
@@ -216,11 +222,11 @@ export function useTodayPulse(
     queryFn: async () => {
       const { data } = await supabase
         .from("daily_entries")
-        .select("bunches, tons, team_leader_id, work_status")
+        .select("*")
         .eq("user_id", userId)
         .eq("plantation_id", plantationId)
         .eq("date", today);
-      return (data || []) as DailyEntry[];
+      return DailyEntrySchema.array().parse(data ?? []);
     },
     enabled: !!userId && !!plantationId,
     staleTime: 30_000,
@@ -238,12 +244,12 @@ export function useReportEntries(
     queryFn: async () => {
       const { data } = await supabase
         .from("daily_entries")
-        .select("*, team_leaders(plantation_id, plantations(rancangan, peringkat, block))")
+        .select("*, team_leaders(*, plantations(*))")
         .eq("user_id", userId)
         .gte("date", startDate)
         .lte("date", endDate)
         .order("date", { ascending: false });
-      return (data || []) as DailyEntry[];
+      return DailyEntrySchema.array().parse(data ?? []);
     },
     enabled: !!userId,
     staleTime: 30_000,

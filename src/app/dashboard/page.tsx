@@ -14,15 +14,15 @@ import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
 import { Users, ChevronDown, ChevronLeft, ChevronRight, MapPin, Truck, AlertCircle, BarChart3, Sprout, ClipboardList, Tractor, Clock, TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Plantation, TodayStats } from "@/types";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { lazy, Suspense } from "react";
+const MonthlyTrendChart = lazy(() => import("@/components/dashboard/MonthlyTrendChart"));
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { FadeIn } from "@/components/ui/Skeleton";
 import StatCard from "@/components/ui/StatCard";
 import Badge from "@/components/ui/Badge";
 import GuidedTour from "@/components/GuidedTour";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
-
-const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+import { MONTH_NAMES } from "@/lib/date";
 
 function getGreeting(t: (key: TranslationKey) => string) {
   const hour = new Date().getHours();
@@ -130,7 +130,7 @@ export default function DashboardPage() {
     };
   }, [todayEntries]);
 
-  const hasEntriesToday = monthEntries.length > 0;
+  const hasMonthEntries = monthEntries.length > 0;
 
   useEffect(() => {
     if (!user) return;
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                   >
                     <MapPin className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                     <div className="text-left">
-                      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Current Plantation</div>
+                      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{t("dashboard.currentPlantation")}</div>
                       <div className="text-sm font-semibold" style={{ color: "var(--text-on-gradient)" }}>{selectedPlantation?.rancangan} - Block {selectedPlantation?.block}</div>
                     </div>
                     <ChevronDown className="w-4 h-4 text-theme/50" />
@@ -310,7 +310,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <div className="text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{t("dashboard.todaysPulse")}</div>
-                    <div className="text-sm font-semibold text-theme">Live harvest signal</div>
+                    <div className="text-sm font-semibold text-theme">{t("dashboard.liveHarvestSignal")}</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-around sm:justify-start gap-4 sm:gap-7">
@@ -379,10 +379,10 @@ export default function DashboardPage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {[
-                { label: "Total Bunches", value: monthlyStats.bunches, icon: Sprout, color: "var(--chart-bunches)", glow: true },
+                { label: t("dashboard.totalBunches"), value: monthlyStats.bunches, icon: Sprout, color: "var(--chart-bunches)", glow: true },
                 { label: "Transported", value: `${Number(monthlyStats.transported).toFixed(2)} ton`, icon: Truck, color: "var(--chart-tons)", glow: false },
                 { label: "Backlogs", value: monthlyStats.backlogs, icon: AlertCircle, color: "var(--accent-red)", glow: false },
-                { label: "Teams Active", value: `${monthlyStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--status-work)", glow: false },
+                { label: t("dashboard.teamsActive"), value: `${monthlyStats.teamsActive}/${teamLeaders.length}`, icon: Users, color: "var(--status-work)", glow: false },
               ].map((s) => (
                 <StatCard
                   key={s.label}
@@ -396,12 +396,12 @@ export default function DashboardPage() {
             </div>
 
             {/* No entries notice */}
-            {!hasEntriesToday && (
+            {!hasMonthEntries && (
               <div className="mt-3 card-glow rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3" style={{ backgroundColor: "var(--bg-card)" }}>
                 <span className="text-lg">📋</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-theme">No harvest data logged for {MONTH_NAMES[selectedMonth]} {selectedYear}.</p>
-                  <p className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>Go to Teams to record entries.</p>
+                  <p className="text-xs sm:text-sm font-medium text-theme">{t("dashboard.noHarvestData", { month: MONTH_NAMES[selectedMonth], year: selectedYear })}</p>
+                  <p className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>{t("dashboard.goToTeams")}</p>
                 </div>
                 <Link
                   href="/team"
@@ -420,34 +420,11 @@ export default function DashboardPage() {
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <BarChart3 className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-                <h2 className="section-heading text-base sm:text-lg text-theme">Monthly Trend</h2>
+                <h2 className="section-heading text-base sm:text-lg text-theme">{t("dashboard.monthlyTrend")}</h2>
               </div>
-              <div className="card-glow rounded-2xl p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)" }}>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--chart-bunches)" }} />
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>Bunches</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--chart-tons)" }} />
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>Tons</span>
-                  </div>
-                </div>
-                <div style={{ height: 220 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={weeklyTrend} barGap={2}>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} interval="preserveStartEnd" minTickGap={12} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} width={35} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: 12, fontSize: 12 }}
-                        cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                      />
-                      <Bar dataKey="bunches" fill="var(--chart-bunches)" radius={[4, 4, 0, 0]} maxBarSize={20} />
-                      <Bar dataKey="tons" fill="var(--chart-tons)" radius={[4, 4, 0, 0]} maxBarSize={20} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+              <Suspense fallback={<div className="card-glow rounded-2xl p-3 sm:p-5" style={{ backgroundColor: "var(--bg-card)", height: 280 }} />}>
+                <MonthlyTrendChart data={weeklyTrend} bunchLabel={t("dashboard.bunches")} tonsLabel={t("dashboard.tons")} />
+              </Suspense>
             </div>
           )}
 
@@ -455,7 +432,7 @@ export default function DashboardPage() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <TrendingUp className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="section-heading text-base sm:text-lg text-theme">Quick Actions</h2>
+              <h2 className="section-heading text-base sm:text-lg text-theme">{t("dashboard.quickActions")}</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Link
@@ -467,10 +444,10 @@ export default function DashboardPage() {
                   <Users className="w-6 h-6 text-theme" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-theme mb-0.5">View Teams</div>
+                  <div className="text-sm font-semibold text-theme mb-0.5">{t("dashboard.viewTeams")}</div>
                   <div className="text-xs" style={{ color: "var(--text-muted)" }}>{teamLeaders.length} team leader{teamLeaders.length !== 1 ? "s" : ""} assigned</div>
                 </div>
-                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>Open →</div>
+                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>{t("dashboard.open")}</div>
               </Link>
               <Link
                 href="/reports"
@@ -481,10 +458,10 @@ export default function DashboardPage() {
                   <BarChart3 className="w-6 h-6 text-theme" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-theme mb-0.5">View Reports</div>
-                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>Analytics & productivity</div>
+                  <div className="text-sm font-semibold text-theme mb-0.5">{t("dashboard.viewReports")}</div>
+                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("dashboard.analyticsProductivity")}</div>
                 </div>
-                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>Open →</div>
+                <div className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>{t("dashboard.open")}</div>
               </Link>
             </div>
           </div>
@@ -499,7 +476,7 @@ export default function DashboardPage() {
               {recentEntries.length === 0 ? (
                 <div className="p-6 sm:p-8 text-center">
                   <ClipboardList className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
-                  <p className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>No entries for {MONTH_NAMES[selectedMonth]} {selectedYear} — go to Teams to add one.</p>
+                  <p className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>{t("dashboard.noEntriesMonth", { month: MONTH_NAMES[selectedMonth], year: selectedYear })}</p>
                 </div>
               ) : (
                 <div className="divide-y border-[var(--border-subtle)]">
