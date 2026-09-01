@@ -57,7 +57,7 @@ export default function PlantationForm() {
       biro_ladang: formData.biro_ladang,
       penyelia: formData.penyelia,
       mandor: formData.mandor,
-      area_hectare: parseFloat(formData.area_hectare) || 0,
+      area_hectare: parseFloat(formData.area_hectare ?? "") || 0,
     });
 
     if (insertError) {

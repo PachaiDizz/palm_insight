@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+export const plantationSchema = z.object({
+  rancangan: z.string().min(1, "Rancangan is required"),
+  peringkat: z.string().min(1, "Peringkat is required"),
+  block: z.string().min(1, "Block is required"),
+  ketua_block: z.string().optional(),
+  biro_ladang: z.string().optional(),
+  penyelia: z.string().optional(),
+  mandor: z.string().optional(),
+  area_hectare: z.string().optional(),
+});
+
+export type PlantationFormData = z.infer<typeof plantationSchema>;
+
 export const PlantationSchema = z.object({
   id: z.string(),
   user_id: z.string(),

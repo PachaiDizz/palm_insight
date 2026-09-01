@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
+import { useAllUserEntries, useInvalidateEntries } from "@/lib/queries";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar, Download, Upload, ChevronLeft, ChevronRight, TrendingUp, Truck, AlertCircle, Trash2, CheckSquare, Square, MinusSquare } from "lucide-react";
@@ -12,13 +13,12 @@ import { StatCardSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/
 import { useI18n } from "@/lib/i18n";
 import ImportDataModal from "@/components/ImportDataModal";
 import Toast from "@/components/ui/Toast";
-import { downloadString } from "@/lib/download";
+import { downloadString, toCSV } from "@/lib/download";
 
 export default function DailyEntriesPage() {
   const { user } = useAuth();
   const router = useRouter();
   const { t } = useI18n();
-  const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [plantations, setPlantations] = useState<Plantation[]>([]);
   const [selectedPlantationId, setSelectedPlantationId] = useState<string>("all");
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -30,6 +30,10 @@ export default function DailyEntriesPage() {
   const [showImport, setShowImport] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [leaders, setLeaders] = useState<{ id: string; name: string; plantation_id: string }[]>([]);
+
+  // Entries come from React Query (cached + invalidated on mutations).
+  const { data: entries = [], isLoading: entriesLoading } = useAllUserEntries(user?.id);
+  const invalidateEntries = useInvalidateEntries();
 
   useEffect(() => {
     if (user) loadData();
@@ -46,20 +50,12 @@ export default function DailyEntriesPage() {
     const allP = await getAllUserPlantations(user.id);
     setPlantations(allP);
 
-    const [entriesRes, leadersRes] = await Promise.all([
-      supabase
-        .from("daily_entries")
-        .select("*, team_leaders(name, plantation_id, plantations(block, rancangan))")
-        .eq("user_id", user.id)
-        .order("date", { ascending: false }),
-      supabase
-        .from("team_leaders")
-        .select("id, name, plantation_id")
-        .eq("user_id", user.id),
-    ]);
+    const { data: leadersRes } = await supabase
+      .from("team_leaders")
+      .select("id, name, plantation_id")
+      .eq("user_id", user.id);
 
-    setEntries((entriesRes.data || []) as DailyEntry[]);
-    setLeaders(leadersRes.data || []);
+    setLeaders(leadersRes || []);
     setLoading(false);
   }
 
@@ -109,8 +105,8 @@ export default function DailyEntriesPage() {
     const ids = Array.from(selectedIds);
     const { error } = await supabase.from("daily_entries").delete().in("id", ids);
     if (!error) {
-      setEntries((prev) => prev.filter((e) => !selectedIds.has(e.id)));
       setSelectedIds(new Set());
+      invalidateEntries();
       setToast({ type: "success", message: t("bulk.deleted", { count: ids.length }) });
     }
   };
@@ -147,11 +143,11 @@ export default function DailyEntriesPage() {
       const plantation = leader?.plantations as Plantation | undefined;
       return [e.date, leader?.name || "", `Block ${plantation?.block || ""}`, e.work_status, e.num_workers, e.bunches, e.tons, e.backlogs, e.notes || ""];
     });
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    downloadString(csv, `daily-entries-${currentMonth}${selectedIds.size > 0 ? "-selected" : ""}.csv`, "text/csv");
+    const csv = toCSV(headers, rows);
+    downloadString(csv, `daily-entries-${currentMonth}${selectedIds.size > 0 ? "-selected" : ""}.csv`, "text/csv;charset=utf-8");
   };
 
-  if (loading) {
+  if (loading || entriesLoading) {
     return (
       <DashboardLayout>
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">

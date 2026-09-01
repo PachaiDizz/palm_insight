@@ -14,7 +14,7 @@ import StatCard from "@/components/ui/StatCard";
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton, FadeIn, Skeleton } from "@/components/ui/Skeleton";
 import ExportHarvestingModal from "@/components/ExportHarvestingModal";
 import { useI18n } from "@/lib/i18n";
-import { downloadString } from "@/lib/download";
+import { downloadString, toCSV } from "@/lib/download";
 import { MONTH_NAMES } from "@/lib/date";
 
 export default function ReportsPage() {
@@ -84,8 +84,8 @@ export default function ReportsPage() {
       const leader = e.team_leaders;
       return [e.date, leader?.name || "", `Block ${leader?.plantations?.block || ""}`, e.work_status, e.num_workers, e.bunches, e.tons, e.backlogs, e.notes || ""];
     });
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    downloadString(csv, `palminsight-report-${MONTH_NAMES[selectedMonth]}-${selectedYear}.csv`, "text/csv");
+    const csv = toCSV(headers, rows);
+    downloadString(csv, `palminsight-report-${MONTH_NAMES[selectedMonth]}-${selectedYear}.csv`, "text/csv;charset=utf-8");
   };
 
   const exportJSON = () => {

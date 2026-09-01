@@ -37,6 +37,7 @@ export async function updateSession(request: NextRequest) {
     "/reports",
     "/settings",
     "/onboarding",
+    "/map",
   ];
 
   const isProtected = protectedPaths.some((path) =>

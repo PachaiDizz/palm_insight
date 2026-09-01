@@ -18,3 +18,20 @@ export function downloadString(content: string, filename: string, mimeType: stri
   const blob = new Blob([content], { type: mimeType });
   downloadBlob(blob, filename);
 }
+
+/**
+ * Build a CSV string from rows, escaping commas, quotes and newlines so the
+ * output stays valid regardless of cell content.
+ */
+export function toCSV(headers: string[], rows: (string | number | null | undefined)[][]): string {
+  const escapeCell = (value: string | number | null | undefined): string => {
+    if (value === null || value === undefined) return "";
+    const str = String(value);
+    if (/[",\r\n]/.test(str)) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  return [headers, ...rows].map((row) => row.map(escapeCell).join(",")).join("\r\n");
+}
