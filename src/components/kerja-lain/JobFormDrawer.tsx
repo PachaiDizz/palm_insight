@@ -46,7 +46,16 @@ function defaultsFor(type: OtherWorkType): Record<string, string> {
     case "mencuci_merumput":
       return { method: "manual", area_hectare: "", chemical_name: "", chemical_qty_liter: "" };
     case "membaja":
-      return { fertilizer_type: "npk", quantity_value: "", quantity_unit: "kg", area_hectare: "", tree_count: "", rate_per_tree_kg: "" };
+      return {
+        contractor: "",
+        driver_name: "",
+        lorry_no: "",
+        fertilizer_type: "FELDA COMPACT",
+        items: JSON.stringify([{ name: "FELDA COMPACT", bags: "", kg: "" }]),
+        chekar_area_ha: "",
+        blocks: "",
+        rate_per_palm_kg: "",
+      };
     case "pruning":
       return { pruning_type: "rutin", tree_count: "", area_hectare: "" };
     case "cuci_parit":
@@ -63,10 +72,47 @@ function toStringRecord(d: Record<string, unknown> | null | undefined): Record<s
   if (d) {
     for (const k of Object.keys(d)) {
       const v = d[k];
-      out[k] = v === null || v === undefined ? "" : String(v);
+      out[k] =
+        v === null || v === undefined
+          ? ""
+          : typeof v === "object"
+            ? JSON.stringify(v)
+            : String(v);
     }
   }
   return out;
+}
+
+const letterFor = (i: number) => String.fromCharCode(65 + (i % 26));
+
+function parseFertilizerItems(raw?: string) {
+  let arr: unknown = [];
+  try {
+    arr = JSON.parse(raw || "[]");
+  } catch {
+    arr = [];
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((r, i) => {
+      const o = (r ?? {}) as Record<string, unknown>;
+      return {
+        label: letterFor(i),
+        name: String(o.name ?? "").trim().toUpperCase(),
+        bags: numOrUndef(String(o.bags ?? "")),
+        kg: numOrUndef(String(o.kg ?? "")),
+      };
+    })
+    .filter((r) => !(r.name === "" && r.bags === undefined && r.kg === undefined));
+}
+
+function parseBlocks(raw?: string): string[] {
+  try {
+    const a = JSON.parse(raw || "[]");
+    return Array.isArray(a) ? a.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
 }
 
 function numOrUndef(s?: string): number | undefined {
@@ -75,7 +121,7 @@ function numOrUndef(s?: string): number | undefined {
   return Number.isFinite(n) ? n : NaN;
 }
 function strOrUndef(s?: string): string | undefined {
-  const t = (s ?? "").trim();
+  const t = (s ?? "").trim().replace(/\s+/g, " ");
   return t ? t.toUpperCase() : undefined;
 }
 
@@ -92,12 +138,14 @@ function buildCandidate(type: OtherWorkType, raw: Record<string, string>) {
     case "membaja":
       return {
         type,
-        fertilizer_type: raw.fertilizer_type || "npk",
-        quantity_value: numOrUndef(raw.quantity_value),
-        quantity_unit: raw.quantity_unit || "kg",
-        area_hectare: numOrUndef(raw.area_hectare),
-        tree_count: numOrUndef(raw.tree_count),
-        rate_per_tree_kg: numOrUndef(raw.rate_per_tree_kg),
+        contractor: (raw.contractor ?? "").trim().toUpperCase(),
+        driver_name: strOrUndef(raw.driver_name),
+        lorry_no: strOrUndef(raw.lorry_no),
+        fertilizer_type: (raw.fertilizer_type ?? "").trim().toUpperCase(),
+        items: parseFertilizerItems(raw.items),
+        chekar_area_ha: numOrUndef(raw.chekar_area_ha),
+        blocks: parseBlocks(raw.blocks),
+        rate_per_palm_kg: numOrUndef(raw.rate_per_palm_kg),
       };
     case "pruning":
       return {
@@ -165,6 +213,7 @@ interface JobFormDrawerProps {
   editing?: OtherWork | null;
   existingGroups?: string[];
   existingLeaders?: string[];
+  existingContractors?: string[];
 }
 
 export default function JobFormDrawer({
@@ -176,6 +225,7 @@ export default function JobFormDrawer({
   editing = null,
   existingGroups = [],
   existingLeaders = [],
+  existingContractors = [],
 }: JobFormDrawerProps) {
   const { user } = useAuth();
 
@@ -231,7 +281,7 @@ export default function JobFormDrawer({
     const parsed = otherWorkDetailsSchema.safeParse(candidate);
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
-        const key = String(issue.path[0]);
+        const key = issue.path.join(".") || "form";
         if (key !== "type" && !nextErrors[key]) nextErrors[key] = issue.message.toUpperCase();
       }
     }
@@ -247,6 +297,16 @@ export default function JobFormDrawer({
     const parsedDetails = parsed.data as Record<string, unknown>;
     const detailData: Record<string, unknown> = { ...parsedDetails };
     delete detailData.type;
+
+    // Totals are always derived from rows on save (never trusted from the UI).
+    if (type === "membaja") {
+      const items = (detailData.items as { bags: number; kg: number }[] | undefined) ?? [];
+      detailData.total_bags = items.reduce((s, it) => s + (Number(it.bags) || 0), 0);
+      detailData.total_kg = items.reduce((s, it) => s + (Number(it.kg) || 0), 0);
+      const blocksArr = (detailData.blocks as string[] | undefined) ?? [];
+      detailData.blocks =
+        blocksArr.length > 0 ? blocksArr : plantationId ? [plantationId] : [];
+    }
 
     const finalTitle = (titleTouched && title.trim() ? title.trim() : autoTitle).toUpperCase();
     const finalProgress =
@@ -293,7 +353,16 @@ export default function JobFormDrawer({
       case "mencuci_merumput":
         return <MencuciFields value={details} onChange={setDetail} errors={errors} />;
       case "membaja":
-        return <MembajaFields value={details} onChange={setDetail} errors={errors} />;
+        return (
+          <MembajaFields
+            value={details}
+            onChange={setDetail}
+            errors={errors}
+            plantations={plantations}
+            primaryPlantationId={plantationId}
+            contractorSuggestions={existingContractors}
+          />
+        );
       case "pruning":
         return <PruningFields value={details} onChange={setDetail} errors={errors} />;
       case "cuci_parit":

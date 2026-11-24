@@ -1,8 +1,8 @@
 "use client";
 
-import { MapPin, Users, Clock, Timer, Pencil, Truck, type LucideIcon } from "lucide-react";
+import { MapPin, Users, Clock, Timer, Pencil, Truck, Eye, type LucideIcon } from "lucide-react";
 import type { OtherWork } from "@/types";
-import { getJobTypeMeta, getDetailChips } from "./jobMeta";
+import { getJobTypeMeta, getDetailChips, getMembajaSubline } from "./jobMeta";
 import JobStatusChip from "./JobStatusChip";
 import { formatDateTime, formatDuration } from "@/lib/otherWorks";
 
@@ -21,10 +21,12 @@ export default function JobCard({
   job,
   onEdit,
   onOpenTrips,
+  onView,
 }: {
   job: OtherWork;
   onEdit?: (job: OtherWork) => void;
   onOpenTrips?: (job: OtherWork) => void;
+  onView?: (job: OtherWork) => void;
 }) {
   const typeMeta = getJobTypeMeta(job.type);
   const Icon = typeMeta.icon;
@@ -37,6 +39,7 @@ export default function JobCard({
   const duration = formatDuration(job.started_at, job.ended_at);
   const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
   const chips = getDetailChips(job.type, job.details);
+  const subline = job.type === "membaja" ? getMembajaSubline(job.details) : null;
 
   return (
     <article
@@ -61,6 +64,17 @@ export default function JobCard({
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <JobStatusChip status={job.status} />
+          {onView && (
+            <button
+              type="button"
+              onClick={() => onView(job)}
+              aria-label={`Lihat butiran ${job.title}`}
+              className="p-1.5 rounded-lg transition-colors hover:bg-[var(--hover-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+          )}
           {onEdit && (
             <button
               type="button"
@@ -91,6 +105,16 @@ export default function JobCard({
             </span>
           ))}
         </div>
+      )}
+
+      {/* Membaja contractor / lorry subline */}
+      {subline && (
+        <p
+          className="text-[10px] font-semibold uppercase tracking-wide"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {subline}
+        </p>
       )}
 
       {/* Meta */}

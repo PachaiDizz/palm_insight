@@ -81,10 +81,10 @@ export function getDetailChips(
     case "membaja": {
       chips.push("MEMBAJA");
       push(asStr(d.fertilizer_type));
-      const q = asNum(d.quantity_value);
-      if (q != null) push(`${q} ${asStr(d.quantity_unit) ?? ""}`.trim());
-      const trees = asNum(d.tree_count);
-      if (trees != null) push(`${trees} POKOK`);
+      const bags = asNum(d.total_bags);
+      if (bags != null) push(`${bags.toLocaleString("en-MY")} BAG`);
+      const kg = asNum(d.total_kg);
+      if (kg != null) push(`${kg.toLocaleString("en-MY")} KG`);
       break;
     }
     case "pruning": {
@@ -119,4 +119,17 @@ export function getDetailChips(
   }
 
   return chips.filter(Boolean).slice(0, 4);
+}
+
+/** Second-line summary for MEMBAJA cards: "KONTRAKTOR: X · LORI: Y". */
+export function getMembajaSubline(
+  details: Record<string, unknown> | null
+): string | null {
+  const d = details ?? {};
+  const parts: string[] = [];
+  const contractor = asStr(d.contractor);
+  if (contractor) parts.push(`KONTRAKTOR: ${contractor}`);
+  const lorry = asStr(d.lorry_no);
+  if (lorry) parts.push(`LORI: ${lorry}`);
+  return parts.length ? parts.join(" · ") : null;
 }

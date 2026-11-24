@@ -135,12 +135,23 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("membaja"),
-    fertilizer_type: z.enum(["npk", "urea", "mop", "kieserite", "lain_lain"]),
-    quantity_value: reqNum,
-    quantity_unit: z.enum(["kg", "bag"]),
-    area_hectare: reqNum,
-    tree_count: reqNum,
-    rate_per_tree_kg: optNum,
+    contractor: z.string().min(1, "KONTRAKTOR DIPERLUKAN"),
+    driver_name: z.string().optional(),
+    lorry_no: z.string().optional(),
+    fertilizer_type: z.string().min(1, "JENIS BAJA DIPERLUKAN"),
+    items: z
+      .array(
+        z.object({
+          label: z.string(),
+          name: z.string().min(1, "NAMA BAJA DIPERLUKAN"),
+          bags: z.coerce.number().int("BAG MESTI NOMBOR BULAT").gt(0, "BAG MESTI > 0"),
+          kg: z.coerce.number().gt(0, "KG MESTI > 0"),
+        })
+      )
+      .min(1, "SEKURANG-KURANGNYA SATU BARIS"),
+    chekar_area_ha: optNum,
+    blocks: z.array(z.string()).optional(),
+    rate_per_palm_kg: optNum,
   }),
   z.object({
     type: z.literal("pruning"),

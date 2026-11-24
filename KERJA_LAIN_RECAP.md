@@ -188,6 +188,24 @@ component with numeric unit-suffix inputs + segmented controls; values reset on 
 **Job cards** show uppercase detail chips (e.g. `MEMBAJA · NPK · 120 KG · 124 POKOK`),
 group/leader, worker count, and the Membaja "Urus Trip Baja" button.
 
+## 11. Membaja v2 — JADUAL BAJA (contractor + fertilizer table)
+
+MEMBAJA only. Old qty/luas/pokok fields replaced. Stored in `other_works.details`:
+```
+{ contractor, driver_name, lorry_no, fertilizer_type,
+  items: [{ label, name, bags, kg }], total_bags, total_kg,
+  chekar_area_ha, blocks: [id], rate_per_palm_kg }
+```
+- `MembajaFields` + reusable `FertilizerTable` (rows A/B/C…, auto-relabel on delete,
+  live JUMLAH, mobile stacked cards, KG thousands display).
+- `total_bags`/`total_kg` are recomputed from `items` on save (client totals ignored).
+- Contractor & Jenis Baja are creatable inputs (Jenis default FELDA COMPACT).
+- Blocks support multi-select (`details.blocks`); NaN-safe defaults to primary block.
+- Zod `otherWorkDetailsSchema` membaja member updated (validates items per-row).
+- Jobs cards show `MEMBAJA · <FERT> · <bags> BAG · <kg> KG` + `KONTRAKTOR · LORI` subline.
+- New `JobDetailDrawer` (Eye button) shows the full JADUAL BAJA + summary + time range.
+- No new SQL needed (uses existing `details` jsonb).
+
 ## Notes / future
 - Delete action for jobs is not implemented (add/edit only) — add if needed.
 - Dashboard counts are month-scoped by `created_at`.

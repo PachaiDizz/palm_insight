@@ -127,6 +127,28 @@ export interface OtherWork {
   plantations?: { block: string; rancangan: string } | null;
 }
 
+// ─── MEMBAJA details (stored in other_works.details) ────────────────────────
+
+export interface MembajaItem {
+  label: string;
+  name: string;
+  bags: number;
+  kg: number;
+}
+
+export interface MembajaDetails {
+  contractor: string;
+  driver_name: string | null;
+  lorry_no: string | null;
+  fertilizer_type: string;
+  items: MembajaItem[];
+  total_bags: number;
+  total_kg: number;
+  chekar_area_ha: number | null;
+  blocks: string[];
+  rate_per_palm_kg: number | null;
+}
+
 // Per-day fertilizer trips for a Membaja (baja) job.
 export interface BajaTrip {
   id: string;
