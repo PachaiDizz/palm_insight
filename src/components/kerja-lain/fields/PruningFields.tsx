@@ -1,28 +1,28 @@
 "use client";
 
-import { SegmentedControl, NumberField } from "../form/controls";
+import { NumberField } from "../form/controls";
+import CreatableCombobox from "../form/CreatableCombobox";
 import type { FieldGroupProps } from "./types";
 
-export default function PruningFields({ value, onChange, errors }: FieldGroupProps) {
+export default function PruningFields({
+  value,
+  onChange,
+  errors,
+  plantationId,
+  onToast,
+}: FieldGroupProps) {
   return (
     <div className="space-y-3">
-      <div>
-        <span
-          className="block text-[11px] font-semibold tracking-wide mb-1.5"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Jenis pruning
-        </span>
-        <SegmentedControl
-          ariaLabel="Jenis pruning"
-          value={value.pruning_type ?? "rutin"}
-          onChange={(v) => onChange("pruning_type", v)}
-          options={[
-            { value: "rutin", label: "Rutin" },
-            { value: "sanitasi", label: "Sanitasi" },
-          ]}
-        />
-      </div>
+      <CreatableCombobox
+        category="pruning_type"
+        plantationId={plantationId}
+        value={value.pruning_type ?? ""}
+        onChange={(v) => onChange("pruning_type", v)}
+        onToast={onToast}
+        label="Jenis Pruning"
+        placeholder="PILIH JENIS PRUNING"
+        error={errors.pruning_type}
+      />
 
       <NumberField
         label="Bilangan pokok dipruning"

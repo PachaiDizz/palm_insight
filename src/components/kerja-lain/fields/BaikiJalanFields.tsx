@@ -1,9 +1,16 @@
 "use client";
 
-import { SegmentedControl, NumberField, TextField } from "../form/controls";
+import { NumberField } from "../form/controls";
+import CreatableCombobox from "../form/CreatableCombobox";
 import type { FieldGroupProps } from "./types";
 
-export default function BaikiJalanFields({ value, onChange, errors }: FieldGroupProps) {
+export default function BaikiJalanFields({
+  value,
+  onChange,
+  errors,
+  plantationId,
+  onToast,
+}: FieldGroupProps) {
   return (
     <div className="space-y-3">
       <NumberField
@@ -15,29 +22,27 @@ export default function BaikiJalanFields({ value, onChange, errors }: FieldGroup
         onChange={(v) => onChange("road_length_m", v)}
         error={errors.road_length_m}
       />
-      <div>
-        <span
-          className="block text-[11px] font-semibold tracking-wide mb-1.5"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Bahan
-        </span>
-        <SegmentedControl
-          ariaLabel="Bahan"
-          value={value.material ?? "batu"}
-          onChange={(v) => onChange("material", v)}
-          options={[
-            { value: "batu", label: "Batu" },
-            { value: "tanah_merah", label: "Tanah Merah" },
-            { value: "lain_lain", label: "Lain-lain" },
-          ]}
-        />
-      </div>
-      <TextField
-        label="Mesin digunakan (pilihan)"
-        placeholder="Cth. Jentera / grader"
+
+      <CreatableCombobox
+        category="material"
+        plantationId={plantationId}
+        value={value.material ?? ""}
+        onChange={(v) => onChange("material", v)}
+        onToast={onToast}
+        label="Bahan"
+        placeholder="PILIH BAHAN"
+        error={errors.material}
+      />
+
+      <CreatableCombobox
+        category="machine"
+        plantationId={plantationId}
         value={value.machine ?? ""}
         onChange={(v) => onChange("machine", v)}
+        onToast={onToast}
+        label="Mesin Digunakan (pilihan)"
+        placeholder="PILIH / TAMBAH MESIN"
+        error={errors.machine}
       />
     </div>
   );

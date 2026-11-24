@@ -7,6 +7,18 @@ import { formatDateTime } from "@/lib/otherWorks";
 import { Clock } from "lucide-react";
 import type { OtherWork } from "@/types";
 
+const MONTHS = [
+  "JAN", "FEB", "MAC", "APR", "MEI", "JUN",
+  "JUL", "OGOS", "SEP", "OKT", "NOV", "DIS",
+];
+
+function fmtDate(v?: unknown): string {
+  if (typeof v !== "string") return "";
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return "";
+  return `${m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}`;
+}
+
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
@@ -32,6 +44,8 @@ export default function JobDetailDrawer({
   const chips = getDetailChips(job.type, job.details);
 
   const isMembaja = job.type === "membaja";
+  const isMencuci = job.type === "mencuci_merumput";
+
   const rawItems = Array.isArray(details.items) ? (details.items as unknown[]) : [];
   const items = rawItems.map((r) => {
     const o = (r ?? {}) as Record<string, unknown>;
@@ -43,6 +57,21 @@ export default function JobDetailDrawer({
   });
   const totalBags = Number(details.total_bags) || items.reduce((s, i) => s + i.bags, 0);
   const totalKg = Number(details.total_kg) || items.reduce((s, i) => s + i.kg, 0);
+  const tripCount = Number(details.trip_count) || 0;
+
+  const rawRounds = Array.isArray(details.rounds) ? (details.rounds as unknown[]) : [];
+  const rounds = rawRounds.map((r, i) => {
+    const o = (r ?? {}) as Record<string, unknown>;
+    return {
+      no: Number(o.no) || i + 1,
+      start_date: String(o.start_date ?? ""),
+      end_date: String(o.end_date ?? ""),
+      area_ha: o.area_ha == null || o.area_ha === "" ? null : Number(o.area_ha),
+      worker_count:
+        o.worker_count == null || o.worker_count === "" ? null : Number(o.worker_count),
+      notes: String(o.notes ?? ""),
+    };
+  });
 
   const blockText = job.plantations?.block ? `BLOK ${job.plantations.block}` : "";
 
@@ -95,9 +124,6 @@ export default function JobDetailDrawer({
         {/* Common meta */}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Blok" value={blockText} />
-          {!isMembaja && (
-            <Field label="Kumpulan" value={[job.group_name, job.leader_name].filter(Boolean).join(" · ")} />
-          )}
           <Field label="Pekerja" value={`${job.worker_count} pekerja`} />
           <Field label="Status" value={job.status.replace("_", " ")} />
         </div>
@@ -115,6 +141,7 @@ export default function JobDetailDrawer({
           <>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Kontraktor" value={String(details.contractor ?? "")} />
+              <Field label="Bilangan Trip" value={tripCount ? `${tripCount} TRIP` : ""} />
               <Field label="Jenis Baja" value={String(details.fertilizer_type ?? "")} />
               <Field label="Nama Driver" value={String(details.driver_name ?? "")} />
               <Field label="No. Lori" value={String(details.lorry_no ?? "")} />
@@ -172,6 +199,94 @@ export default function JobDetailDrawer({
                   <span className="text-right tabular-nums">{totalBags.toLocaleString("en-MY")}</span>
                   <span className="text-right tabular-nums">{totalKg.toLocaleString("en-MY")}</span>
                 </div>
+              </div>
+              {tripCount > 0 && (
+                <p className="mt-2 text-[11px] font-semibold" style={{ color: "var(--accent-primary)" }}>
+                  JUMLAH TRIP: {tripCount.toLocaleString("en-MY")} TRIP
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* MENCUCI / MERUMPUT specifics */}
+        {isMencuci && (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Kaedah" value={String(details.method ?? "")} />
+              <Field
+                label="Luas"
+                value={details.area_ha != null ? `${Number(details.area_ha)} HA` : ""}
+              />
+              <Field label="Nama Racun" value={String(details.chemical_name ?? "")} />
+              <Field
+                label="Kuantiti Racun"
+                value={details.chemical_qty_l != null ? `${Number(details.chemical_qty_l)} L` : ""}
+              />
+            </div>
+
+            {(details.first_work_date || details.last_work_date) && (
+              <Field
+                label="Tempoh Kerja"
+                value={[fmtDate(details.first_work_date), fmtDate(details.last_work_date)]
+                  .filter(Boolean)
+                  .join(" - ")}
+              />
+            )}
+
+            <div>
+              <h3 className="text-[11px] font-bold tracking-[0.14em] mb-2" style={{ color: "var(--accent-primary)" }}>
+                Pusingan
+              </h3>
+              {rounds.length === 0 ? (
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Tiada pusingan
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {rounds.map((r) => {
+                    const range =
+                      [fmtDate(r.start_date), fmtDate(r.end_date)].filter(Boolean).join(" - ") || "—";
+                    return (
+                      <div
+                        key={r.no}
+                        className="rounded-xl border p-3"
+                        style={{ borderColor: "var(--border-default)", backgroundColor: "var(--bg-input)" }}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold tracking-wide" style={{ color: "var(--accent-primary)" }}>
+                            Pusingan {r.no}
+                          </span>
+                          <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>
+                            {range}
+                          </span>
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]" style={{ color: "var(--text-muted)" }}>
+                          {r.area_ha != null && <span>{r.area_ha} HA</span>}
+                          {r.worker_count != null && <span>{r.worker_count} PEKERJA</span>}
+                        </div>
+                        {r.notes && (
+                          <p className="mt-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                            {r.notes}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <div
+                className="mt-2 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold"
+                style={{
+                  backgroundColor: "var(--accent-primary-light)",
+                  border: "1px solid var(--accent-primary-border)",
+                  color: "var(--accent-primary)",
+                }}
+              >
+                <span>JUMLAH PUSINGAN: {Number(details.total_rounds) || rounds.length}</span>
+                <span>
+                  JUMLAH LUAS: {Number(details.total_round_area_ha || 0).toLocaleString("en-MY")} HA
+                </span>
               </div>
             </div>
           </>

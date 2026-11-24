@@ -114,8 +114,6 @@ export interface OtherWork {
   status: OtherWorkStatus;
   progress: number;
   worker_count: number;
-  group_name: string | null;
-  leader_name: string | null;
   /** Type-specific values; shape depends on `type`. */
   details: Record<string, unknown> | null;
   started_at: string | null;
@@ -141,12 +139,57 @@ export interface MembajaDetails {
   worker_count: number;
   driver_name: string | null;
   lorry_no: string | null;
-  fertilizer_type: string;
+  trip_count: number;
+  fertilizer_type: string | null;
   items: MembajaItem[];
   total_bags: number;
   total_kg: number;
   chekar_area_ha: number | null;
   rate_per_palm_kg: number | null;
+}
+
+// ─── MENCUCI / MERUMPUT details (stored in other_works.details) ─────────────
+
+export interface MencuciRound {
+  no: number;
+  start_date: string;
+  end_date: string | null;
+  area_ha: number | null;
+  worker_count: number | null;
+  notes: string | null;
+}
+
+export interface MencuciDetails {
+  method: string | null;
+  area_ha: number | null;
+  chemical_name: string | null;
+  chemical_qty_l: number | null;
+  first_work_date: string | null;
+  last_work_date: string | null;
+  rounds: MencuciRound[];
+  total_rounds: number;
+  total_round_area_ha: number;
+}
+
+// ─── Saved creatable dropdown options (work_options) ────────────────────────
+
+export type WorkOptionCategory =
+  | "contractor"
+  | "fertilizer_type"
+  | "fertilizer_name"
+  | "method"
+  | "chemical_name"
+  | "pruning_type"
+  | "material"
+  | "machine";
+
+export interface WorkOption {
+  id: string;
+  plantation_id: string | null;
+  category: WorkOptionCategory;
+  value: string;
+  created_by: string | null;
+  created_at?: string;
 }
 
 // Per-day fertilizer trips for a Membaja (baja) job.

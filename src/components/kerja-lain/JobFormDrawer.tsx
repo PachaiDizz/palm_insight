@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { otherWorkDetailsSchema } from "@/lib/schemas";
 import { toLocalInput, fromLocalInput } from "@/lib/otherWorks";
+import { persistWorkOptions } from "@/lib/workOptions";
 import { toLocalDateKey } from "@/lib/date";
 import { getJobTypeLabel, JOB_TYPES } from "./jobMeta";
 import {
@@ -15,12 +16,10 @@ import {
   FieldLabel,
   IconTileGrid,
   SegmentedControl,
-  Stepper,
   ProgressSlider,
   TextField,
   type SegOption,
 } from "./form/controls";
-import CreatableInput from "./form/CreatableInput";
 import DateTimeField from "./form/DateTimeField";
 import MencuciFields from "./fields/MencuciFields";
 import MembajaFields from "./fields/MembajaFields";
@@ -28,6 +27,8 @@ import PruningFields from "./fields/PruningFields";
 import CuciParitFields from "./fields/CuciParitFields";
 import BaikiJalanFields from "./fields/BaikiJalanFields";
 import LainFields from "./fields/LainFields";
+import type { ToastData } from "@/components/ui/Toast";
+import type { WorkOptionCategory } from "@/types";
 import type { OtherWork, OtherWorkStatus, OtherWorkType, Plantation } from "@/types";
 
 const MONTHS_SHORT = [
@@ -44,23 +45,32 @@ function fmtDate(key: string): string {
 function defaultsFor(type: OtherWorkType): Record<string, string> {
   switch (type) {
     case "mencuci_merumput":
-      return { method: "manual", area_hectare: "", chemical_name: "", chemical_qty_liter: "" };
+      return {
+        method: "",
+        area_ha: "",
+        chemical_name: "",
+        chemical_qty_l: "",
+        first_work_date: "",
+        last_work_date: "",
+        rounds: "[]",
+      };
     case "membaja":
       return {
         contractor: "",
         driver_name: "",
         lorry_no: "",
-        fertilizer_type: "FELDA COMPACT",
-        items: JSON.stringify([{ name: "FELDA COMPACT", bags: "", kg: "" }]),
+        trip_count: "0",
+        fertilizer_type: "",
+        items: JSON.stringify([{ name: "", bags: "", kg: "" }]),
         chekar_area_ha: "",
         rate_per_palm_kg: "",
       };
     case "pruning":
-      return { pruning_type: "rutin", tree_count: "", area_hectare: "" };
+      return { pruning_type: "", tree_count: "", area_hectare: "" };
     case "cuci_parit":
       return { ditch_length_m: "", ditch_count: "", depth_cm: "" };
     case "baiki_jalan":
-      return { road_length_m: "", material: "batu", machine: "" };
+      return { road_length_m: "", material: "", machine: "" };
     case "lain_lain":
       return { description: "", quantity: "", unit: "" };
   }
@@ -105,6 +115,27 @@ function parseFertilizerItems(raw?: string) {
     .filter((r) => !(r.name === "" && r.bags === undefined && r.kg === undefined));
 }
 
+function parseRounds(raw?: string) {
+  let arr: unknown = [];
+  try {
+    arr = JSON.parse(raw || "[]");
+  } catch {
+    arr = [];
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr.map((r, i) => {
+    const o = (r ?? {}) as Record<string, unknown>;
+    return {
+      no: i + 1,
+      start_date: String(o.start_date ?? "").trim(),
+      end_date: String(o.end_date ?? "").trim() || undefined,
+      area_ha: numOrUndef(String(o.area_ha ?? "")),
+      worker_count: numOrUndef(String(o.worker_count ?? "")),
+      notes: strOrUndef(String(o.notes ?? "")),
+    };
+  });
+}
+
 function numOrUndef(s?: string): number | undefined {
   if (s == null || s.trim() === "") return undefined;
   const n = Number(s);
@@ -124,10 +155,13 @@ function buildCandidate(
     case "mencuci_merumput":
       return {
         type,
-        method: raw.method || "manual",
-        area_hectare: numOrUndef(raw.area_hectare),
+        method: strOrUndef(raw.method),
+        area_ha: numOrUndef(raw.area_ha),
         chemical_name: strOrUndef(raw.chemical_name),
-        chemical_qty_liter: numOrUndef(raw.chemical_qty_liter),
+        chemical_qty_l: numOrUndef(raw.chemical_qty_l),
+        first_work_date: raw.first_work_date?.trim() || undefined,
+        last_work_date: raw.last_work_date?.trim() || undefined,
+        rounds: parseRounds(raw.rounds),
       };
     case "membaja":
       return {
@@ -136,7 +170,8 @@ function buildCandidate(
         worker_count: Math.max(0, Math.round(workerCount)),
         driver_name: strOrUndef(raw.driver_name),
         lorry_no: strOrUndef(raw.lorry_no),
-        fertilizer_type: (raw.fertilizer_type ?? "").trim().toUpperCase(),
+        trip_count: Math.max(0, Math.round(Number(raw.trip_count) || 0)),
+        fertilizer_type: strOrUndef(raw.fertilizer_type),
         items: parseFertilizerItems(raw.items),
         chekar_area_ha: numOrUndef(raw.chekar_area_ha),
         rate_per_palm_kg: numOrUndef(raw.rate_per_palm_kg),
@@ -144,7 +179,7 @@ function buildCandidate(
     case "pruning":
       return {
         type,
-        pruning_type: raw.pruning_type || "rutin",
+        pruning_type: strOrUndef(raw.pruning_type),
         tree_count: numOrUndef(raw.tree_count),
         area_hectare: numOrUndef(raw.area_hectare),
       };
@@ -159,7 +194,7 @@ function buildCandidate(
       return {
         type,
         road_length_m: numOrUndef(raw.road_length_m),
-        material: raw.material || "batu",
+        material: strOrUndef(raw.material),
         machine: strOrUndef(raw.machine),
       };
     case "lain_lain":
@@ -205,9 +240,7 @@ interface JobFormDrawerProps {
   plantations: Plantation[];
   defaultPlantationId?: string;
   editing?: OtherWork | null;
-  existingGroups?: string[];
-  existingLeaders?: string[];
-  existingContractors?: string[];
+  onToast?: (toast: ToastData) => void;
 }
 
 export default function JobFormDrawer({
@@ -217,9 +250,7 @@ export default function JobFormDrawer({
   plantations,
   defaultPlantationId,
   editing = null,
-  existingGroups = [],
-  existingLeaders = [],
-  existingContractors = [],
+  onToast,
 }: JobFormDrawerProps) {
   const { user } = useAuth();
 
@@ -230,8 +261,6 @@ export default function JobFormDrawer({
   const [plantationId, setPlantationId] = useState(
     editing?.plantation_id ?? defaultPlantationId ?? plantations[0]?.id ?? ""
   );
-  const [groupName, setGroupName] = useState(editing?.group_name ?? "");
-  const [leaderName, setLeaderName] = useState(editing?.leader_name ?? "");
   const [workerCount, setWorkerCount] = useState(editing?.worker_count ?? 0);
   const [progress, setProgress] = useState(editing?.progress ?? 0);
   const [startedAt, setStartedAt] = useState(
@@ -269,6 +298,20 @@ export default function JobFormDrawer({
     const nextErrors: Record<string, string> = {};
     if (!plantationId) nextErrors.plantation_id = "BLOK DIPERLUKAN";
 
+    // Cross-field date checks for MENCUCI / MERUMPUT.
+    if (type === "mencuci_merumput") {
+      const first = details.first_work_date?.trim();
+      const last = details.last_work_date?.trim();
+      if (first && last && last < first) {
+        nextErrors.last_work_date = "TARIKH TAMAT TIDAK BOLEH SEBELUM TARIKH PERTAMA";
+      }
+      parseRounds(details.rounds).forEach((r, i) => {
+        if (r.end_date && r.start_date && r.end_date < r.start_date) {
+          nextErrors[`rounds.${i}.end_date`] = "TARIKH TAMAT SEBELUM TARIKH MULA";
+        }
+      });
+    }
+
     const candidate = buildCandidate(type, details, workerCount);
     const parsed = otherWorkDetailsSchema.safeParse(candidate);
     if (!parsed.success) {
@@ -290,18 +333,24 @@ export default function JobFormDrawer({
     const detailData: Record<string, unknown> = { ...parsedDetails };
     delete detailData.type;
 
-    // Totals are always derived from rows on save (never trusted from the UI).
+    // Totals are always derived on save (never trusted from the UI).
     if (type === "membaja") {
       const items = (detailData.items as { bags: number; kg: number }[] | undefined) ?? [];
       detailData.total_bags = items.reduce((s, it) => s + (Number(it.bags) || 0), 0);
       detailData.total_kg = items.reduce((s, it) => s + (Number(it.kg) || 0), 0);
+    } else if (type === "mencuci_merumput") {
+      const rounds = (detailData.rounds as { area_ha?: number }[] | undefined) ?? [];
+      detailData.total_rounds = rounds.length;
+      detailData.total_round_area_ha = rounds.reduce(
+        (s, r) => s + (Number(r.area_ha) || 0),
+        0
+      );
     }
 
     const finalTitle = (title.trim() ? title.trim() : autoTitle).toUpperCase();
     const finalProgress =
       status === "completed" ? 100 : status === "running" ? Math.max(0, Math.min(100, progress)) : 0;
 
-    const isMembaja = type === "membaja";
     const payload = {
       plantation_id: plantationId,
       type,
@@ -309,16 +358,6 @@ export default function JobFormDrawer({
       status,
       progress: finalProgress,
       worker_count: Math.max(0, Math.round(workerCount)),
-      group_name: isMembaja
-        ? null
-        : groupName.trim()
-          ? groupName.trim().toUpperCase()
-          : null,
-      leader_name: isMembaja
-        ? null
-        : leaderName.trim()
-          ? leaderName.trim().toUpperCase()
-          : null,
       details: detailData,
       started_at: fromLocalInput(startedAt),
       ended_at: fromLocalInput(endedAt),
@@ -336,11 +375,30 @@ export default function JobFormDrawer({
       const msg = error.message || "GAGAL MENYIMPAN KERJA";
       const needsMigration = /does not exist|schema cache|column .* does not exist|check constraint/i.test(msg);
       const hint = needsMigration
-        ? " — SILA JALANKAN SQL MIGRATION (other_works_schema.sql / other_works_v2_upgrade.sql / membaja_trips_schema.sql)"
+        ? " — SILA JALANKAN SQL MIGRATION (SETUP_other_works.sql / work_options_setup.sql)"
         : "";
       setErrors({ form: `${msg}${hint}`.toUpperCase() });
       return;
     }
+
+    // Persist any typed-but-unsaved creatable values against the block.
+    const optionEntries: { category: WorkOptionCategory; value: string | null | undefined }[] = [];
+    if (type === "membaja") {
+      optionEntries.push({ category: "contractor", value: details.contractor });
+      optionEntries.push({ category: "fertilizer_type", value: details.fertilizer_type });
+      for (const it of parseFertilizerItems(details.items)) {
+        optionEntries.push({ category: "fertilizer_name", value: it.name });
+      }
+    } else if (type === "mencuci_merumput") {
+      optionEntries.push({ category: "method", value: details.method });
+      optionEntries.push({ category: "chemical_name", value: details.chemical_name });
+    } else if (type === "pruning") {
+      optionEntries.push({ category: "pruning_type", value: details.pruning_type });
+    } else if (type === "baiki_jalan") {
+      optionEntries.push({ category: "material", value: details.material });
+      optionEntries.push({ category: "machine", value: details.machine });
+    }
+    void persistWorkOptions(optionEntries, plantationId);
 
     onSaved(editing ? "Kerja dikemas kini" : "Kerja ditambah");
     onClose();
@@ -349,7 +407,15 @@ export default function JobFormDrawer({
   const renderDetails = () => {
     switch (type) {
       case "mencuci_merumput":
-        return <MencuciFields value={details} onChange={setDetail} errors={errors} />;
+        return (
+          <MencuciFields
+            value={details}
+            onChange={setDetail}
+            errors={errors}
+            plantationId={plantationId}
+            onToast={onToast}
+          />
+        );
       case "membaja":
         return (
           <MembajaFields
@@ -358,15 +424,32 @@ export default function JobFormDrawer({
             errors={errors}
             workerCount={workerCount}
             onWorkerCountChange={setWorkerCount}
-            contractorSuggestions={existingContractors}
+            plantationId={plantationId}
+            onToast={onToast}
           />
         );
       case "pruning":
-        return <PruningFields value={details} onChange={setDetail} errors={errors} />;
+        return (
+          <PruningFields
+            value={details}
+            onChange={setDetail}
+            errors={errors}
+            plantationId={plantationId}
+            onToast={onToast}
+          />
+        );
       case "cuci_parit":
         return <CuciParitFields value={details} onChange={setDetail} errors={errors} />;
       case "baiki_jalan":
-        return <BaikiJalanFields value={details} onChange={setDetail} errors={errors} />;
+        return (
+          <BaikiJalanFields
+            value={details}
+            onChange={setDetail}
+            errors={errors}
+            plantationId={plantationId}
+            onToast={onToast}
+          />
+        );
       case "lain_lain":
         return <LainFields value={details} onChange={setDetail} errors={errors} />;
     }
@@ -434,8 +517,8 @@ export default function JobFormDrawer({
           </div>
         </Section>
 
-        {/* LOKASI & KUMPULAN */}
-        <Section title="Lokasi & Kumpulan">
+        {/* LOKASI */}
+        <Section title="Lokasi">
           <label className="block">
             <FieldLabel required>Blok</FieldLabel>
             <select
@@ -458,30 +541,6 @@ export default function JobFormDrawer({
               </p>
             )}
           </label>
-
-          {type !== "membaja" && (
-            <>
-              <CreatableInput
-                label="Kumpulan"
-                value={groupName}
-                onChange={setGroupName}
-                suggestions={existingGroups}
-                placeholder="Taip nama kumpulan"
-              />
-              <CreatableInput
-                label="Ketua"
-                value={leaderName}
-                onChange={setLeaderName}
-                suggestions={existingLeaders}
-                placeholder="Taip nama ketua"
-              />
-
-              <div>
-                <FieldLabel>Bilangan Pekerja</FieldLabel>
-                <Stepper value={workerCount} onChange={setWorkerCount} ariaLabel="Bilangan pekerja" />
-              </div>
-            </>
-          )}
         </Section>
 
         {/* BUTIRAN KERJA (dynamic) */}

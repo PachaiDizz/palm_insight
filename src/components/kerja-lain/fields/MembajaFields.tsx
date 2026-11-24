@@ -1,11 +1,9 @@
 "use client";
 
-import { NumberField, TextField, FieldLabel, Stepper } from "../form/controls";
-import CreatableInput from "../form/CreatableInput";
+import { NumberField, FieldLabel, Stepper } from "../form/controls";
+import CreatableCombobox from "../form/CreatableCombobox";
 import FertilizerTable, { type FertRow } from "../form/FertilizerTable";
 import type { FieldGroupProps } from "./types";
-
-const FERTILIZER_SUGGESTIONS = ["FELDA COMPACT", "NPK", "UREA", "MOP", "KIESERITE"];
 
 function parseRows(raw?: string): FertRow[] {
   if (!raw) return [{ name: "", bags: "", kg: "" }];
@@ -30,19 +28,24 @@ export default function MembajaFields({
   errors,
   workerCount = 0,
   onWorkerCountChange,
-  contractorSuggestions = [],
+  plantationId,
+  onToast,
 }: FieldGroupProps) {
   const rows = parseRows(value.items);
+  const tripCount = Math.max(0, Math.round(Number(value.trip_count) || 0));
 
   return (
     <div className="space-y-3">
       {/* 1) KONTRAKTOR */}
-      <CreatableInput
-        label="Kontraktor"
+      <CreatableCombobox
+        category="contractor"
+        plantationId={plantationId}
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        suggestions={contractorSuggestions}
-        placeholder="Taip nama kontraktor"
+        onToast={onToast}
+        label="Kontraktor"
+        placeholder="PILIH KONTRAKTOR"
+        required
         error={errors.contractor}
       />
 
@@ -58,44 +61,71 @@ export default function MembajaFields({
 
       {/* 3) NAMA DRIVER + 4) NO. LORI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <TextField
-          label="Nama Driver (pilihan)"
-          placeholder="Nama driver lori"
-          value={value.driver_name ?? ""}
-          onChange={(v) => onChange("driver_name", v)}
-          error={errors.driver_name}
-        />
-        <TextField
-          label="No. Lori (pilihan)"
-          placeholder="Cth. SAB 1234 A"
-          value={value.lorry_no ?? ""}
-          onChange={(v) => onChange("lorry_no", v)}
-          error={errors.lorry_no}
-        />
+        <div>
+          <label className="block">
+            <FieldLabel>Nama Driver (pilihan)</FieldLabel>
+            <input
+              type="text"
+              value={value.driver_name ?? ""}
+              onChange={(e) => onChange("driver_name", e.target.value)}
+              placeholder="NAMA DRIVER LORI"
+              className="w-full min-w-0 box-border h-11 px-[14px] rounded-xl text-sm outline-none border transition-colors duration-150 bg-[var(--bg-input-field)] border-[var(--border-input-field)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30"
+            />
+          </label>
+        </div>
+        <div>
+          <label className="block">
+            <FieldLabel>No. Lori (pilihan)</FieldLabel>
+            <input
+              type="text"
+              value={value.lorry_no ?? ""}
+              onChange={(e) => onChange("lorry_no", e.target.value)}
+              placeholder="CTH. SAB 1234 A"
+              className="w-full min-w-0 box-border h-11 px-[14px] rounded-xl text-sm outline-none border transition-colors duration-150 bg-[var(--bg-input-field)] border-[var(--border-input-field)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30"
+            />
+          </label>
+        </div>
       </div>
 
-      {/* 5) JENIS BAJA */}
-      <CreatableInput
-        label="Jenis Baja"
-        value={value.fertilizer_type ?? "FELDA COMPACT"}
+      {/* 5) BILANGAN TRIP (HARI INI) */}
+      <div>
+        <FieldLabel>Bilangan Trip (Hari Ini)</FieldLabel>
+        <Stepper
+          value={tripCount}
+          onChange={(n) => onChange("trip_count", String(n))}
+          ariaLabel="Bilangan trip hari ini"
+        />
+        <p className="mt-1 text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+          Berapa kali lori pusing hari ini
+        </p>
+      </div>
+
+      {/* 6) JENIS BAJA */}
+      <CreatableCombobox
+        category="fertilizer_type"
+        plantationId={plantationId}
+        value={value.fertilizer_type ?? ""}
         onChange={(v) => onChange("fertilizer_type", v)}
-        suggestions={FERTILIZER_SUGGESTIONS}
-        placeholder="Cth. FELDA COMPACT"
+        onToast={onToast}
+        label="Jenis Baja"
+        placeholder="PILIH JENIS BAJA"
         error={errors.fertilizer_type}
       />
 
-      {/* 6) JADUAL BAJA */}
+      {/* 7) JADUAL BAJA */}
       <div>
         <FieldLabel required>Jadual Baja</FieldLabel>
         <FertilizerTable
           rows={rows}
           onChange={(next) => onChange("items", JSON.stringify(next))}
           errors={errors}
-          defaultName={value.fertilizer_type ?? "FELDA COMPACT"}
+          plantationId={plantationId}
+          onToast={onToast}
+          tripCount={tripCount}
         />
       </div>
 
-      {/* 7) KELUASAN CHEKAR + KADAR PER POKOK */}
+      {/* 8) KELUASAN CHEKAR + KADAR PER POKOK */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <NumberField
           label="Keluasan Chekar (pilihan)"

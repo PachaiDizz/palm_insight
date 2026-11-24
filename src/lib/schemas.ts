@@ -96,8 +96,6 @@ export const OtherWorkSchema = z.object({
   status: z.enum(OTHER_WORK_STATUSES),
   progress: z.coerce.number(),
   worker_count: z.coerce.number().default(0),
-  group_name: z.string().nullable(),
-  leader_name: z.string().nullable(),
   details: z.record(z.string(), z.unknown()).nullable(),
   started_at: z.string().nullable(),
   ended_at: z.string().nullable(),
@@ -128,10 +126,24 @@ const optNum = z.coerce.number().min(0).optional();
 export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("mencuci_merumput"),
-    method: z.enum(["manual", "racun", "mesin"]),
-    area_hectare: reqNum,
+    method: z.string().optional(),
+    area_ha: optNum,
     chemical_name: z.string().optional(),
-    chemical_qty_liter: optNum,
+    chemical_qty_l: optNum,
+    first_work_date: z.string().optional(),
+    last_work_date: z.string().optional(),
+    rounds: z
+      .array(
+        z.object({
+          no: z.coerce.number().int().min(1),
+          start_date: z.string().min(1, "TARIKH MULA DIPERLUKAN"),
+          end_date: z.string().optional(),
+          area_ha: optNum,
+          worker_count: optNum,
+          notes: z.string().optional(),
+        })
+      )
+      .default([]),
   }),
   z.object({
     type: z.literal("membaja"),
@@ -139,7 +151,8 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
     worker_count: z.coerce.number().min(0),
     driver_name: z.string().optional(),
     lorry_no: z.string().optional(),
-    fertilizer_type: z.string().min(1, "JENIS BAJA DIPERLUKAN"),
+    trip_count: z.coerce.number().int().min(0).default(0),
+    fertilizer_type: z.string().optional(),
     items: z
       .array(
         z.object({
@@ -155,7 +168,7 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("pruning"),
-    pruning_type: z.enum(["rutin", "sanitasi"]),
+    pruning_type: z.string().optional(),
     tree_count: reqNum,
     area_hectare: reqNum,
   }),
@@ -168,7 +181,7 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("baiki_jalan"),
     road_length_m: reqNum,
-    material: z.enum(["batu", "tanah_merah", "lain_lain"]),
+    material: z.string().optional(),
     machine: z.string().optional(),
   }),
   z.object({

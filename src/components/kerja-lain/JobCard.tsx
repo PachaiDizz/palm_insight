@@ -34,8 +34,6 @@ export default function JobCard({
   const blockText = job.plantations?.block
     ? `Block ${job.plantations.block}`
     : job.plantations?.rancangan || "—";
-  const groupText =
-    [job.group_name, job.leader_name].filter(Boolean).join(" · ") || "—";
   const duration = formatDuration(job.started_at, job.ended_at);
   const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
   const chips = getDetailChips(job.type, job.details);
@@ -45,7 +43,8 @@ export default function JobCard({
   const detailsObj = (job.details ?? {}) as Record<string, unknown>;
   const contractorText =
     typeof detailsObj.contractor === "string" ? detailsObj.contractor : "";
-  const secondaryText = isMembaja ? contractorText || "—" : groupText;
+  const workerText = `${Number(job.worker_count) || 0} pekerja`;
+  const secondaryText = isMembaja ? contractorText || "—" : workerText;
 
   return (
     <article
@@ -127,7 +126,7 @@ export default function JobCard({
       <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
         <Meta icon={MapPin} value={blockText} />
         <Meta icon={Users} value={secondaryText} />
-        <Meta icon={Users} value={`${Number(job.worker_count) || 0} pekerja`} />
+        {isMembaja && <Meta icon={Users} value={workerText} />}
         <Meta icon={Clock} value={formatDateTime(job.started_at)} />
       </div>
 

@@ -57,6 +57,20 @@ function asNum(v: unknown): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+const MONTHS_SHORT = [
+  "JAN", "FEB", "MAC", "APR", "MEI", "JUN",
+  "JUL", "OGOS", "SEP", "OKT", "NOV", "DIS",
+];
+
+/** `YYYY-MM-DD` → "24 NOV" (or "24 NOV 2026" when withYear). */
+function shortDate(v: unknown, withYear = false): string | undefined {
+  if (typeof v !== "string") return undefined;
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return undefined;
+  const base = `${m[3]} ${MONTHS_SHORT[+m[2] - 1]}`;
+  return withYear ? `${base} ${m[1]}` : base;
+}
+
 /** Small uppercase chips summarising the type-specific values. */
 export function getDetailChips(
   type: OtherWorkType,
@@ -72,19 +86,22 @@ export function getDetailChips(
   switch (type) {
     case "mencuci_merumput": {
       chips.push("MENCUCI / MERUMPUT");
-      push(asStr(d.method));
-      const area = asNum(d.area_hectare);
-      if (area != null) push(`${area} HA`);
-      push(asStr(d.chemical_name));
+      const rounds = asNum(d.total_rounds);
+      if (rounds != null && rounds > 0) push(`${rounds} PUSINGAN`);
+      const first = shortDate(d.first_work_date);
+      const last = shortDate(d.last_work_date);
+      if (first && last) push(`${first} - ${last}`);
+      else if (first) push(first);
       break;
     }
     case "membaja": {
       chips.push("MEMBAJA");
-      push(asStr(d.fertilizer_type));
       const bags = asNum(d.total_bags);
       if (bags != null) push(`${bags.toLocaleString("en-MY")} BAG`);
       const kg = asNum(d.total_kg);
       if (kg != null) push(`${kg.toLocaleString("en-MY")} KG`);
+      const trips = asNum(d.trip_count);
+      if (trips != null && trips > 0) push(`${trips} TRIP`);
       break;
     }
     case "pruning": {

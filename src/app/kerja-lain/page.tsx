@@ -112,7 +112,6 @@ export default function KerjaLainPage() {
 
   const [tab, setTab] = useState<Tab>("running");
   const [filterType, setFilterType] = useState("all");
-  const [filterTeam, setFilterTeam] = useState("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
@@ -122,49 +121,11 @@ export default function KerjaLainPage() {
   const [detailJob, setDetailJob] = useState<OtherWork | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
 
-  const groupOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(works.map((w) => w.group_name).filter((g): g is string => !!g && g.trim() !== ""))
-      ).sort(),
-    [works]
-  );
-  const groupSuggestions = useMemo(
-    () =>
-      Array.from(
-        new Set(works.map((w) => w.group_name).filter((g): g is string => !!g && g.trim() !== ""))
-      ),
-    [works]
-  );
-  const leaderSuggestions = useMemo(
-    () =>
-      Array.from(
-        new Set(works.map((w) => w.leader_name).filter((g): g is string => !!g && g.trim() !== ""))
-      ),
-    [works]
-  );
-  const contractorSuggestions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .filter((w) => w.type === "membaja")
-            .map((w) => {
-              const d = (w.details ?? {}) as Record<string, unknown>;
-              return typeof d.contractor === "string" ? d.contractor : "";
-            })
-            .filter((c) => c.trim() !== "")
-        )
-      ),
-    [works]
-  );
-
   const running = useMemo(() => works.filter((w) => w.status === "running"), [works]);
   const completed = useMemo(() => works.filter((w) => w.status === "completed"), [works]);
 
   const passesFilters = (job: OtherWork) => {
     if (filterType !== "all" && job.type !== filterType) return false;
-    if (filterTeam !== "all" && job.group_name !== filterTeam) return false;
     const key = jobDateKey(job);
     if (fromDate && key < fromDate) return false;
     if (toDate && key > toDate) return false;
@@ -174,12 +135,12 @@ export default function KerjaLainPage() {
   const filteredCompleted = useMemo(
     () => completed.filter(passesFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [completed, filterType, filterTeam, fromDate, toDate]
+    [completed, filterType, fromDate, toDate]
   );
   const filteredAll = useMemo(
     () => works.filter(passesFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [works, filterType, filterTeam, fromDate, toDate]
+    [works, filterType, fromDate, toDate]
   );
 
   const loading = plantationsLoading || worksLoading;
@@ -331,20 +292,6 @@ export default function KerjaLainPage() {
               ))}
             </Select>
 
-            <Select
-              aria-label="Tapis kumpulan"
-              value={filterTeam}
-              onChange={(e) => setFilterTeam(e.target.value)}
-              containerClassName="sm:flex-1 min-w-0"
-            >
-              <option value="all">Semua kumpulan</option>
-              {groupOptions.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </Select>
-
             <div className="flex items-center gap-2">
               <Input
                 aria-label="Dari tarikh"
@@ -434,9 +381,7 @@ export default function KerjaLainPage() {
           plantations={plantations}
           defaultPlantationId={selectedPlantation?.id}
           editing={editing}
-          existingGroups={groupSuggestions}
-          existingLeaders={leaderSuggestions}
-          existingContractors={contractorSuggestions}
+          onToast={setToast}
         />
       )}
 
