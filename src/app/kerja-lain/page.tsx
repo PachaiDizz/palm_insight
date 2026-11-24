@@ -104,7 +104,7 @@ export default function KerjaLainPage() {
     [plantations, plantationId]
   );
 
-  const { data: works = [], isLoading: worksLoading } = useOtherWorks(
+  const { data: works = [], isLoading: worksLoading, error: worksError } = useOtherWorks(
     user?.id,
     selectedPlantation?.id
   );
@@ -238,6 +238,22 @@ export default function KerjaLainPage() {
             <span className="sr-only">Tambah Kerja</span>
           </Button>
         </div>
+
+        {/* Data error (e.g. table not created yet) */}
+        {worksError && (
+          <div
+            className="mb-3 sm:mb-4 rounded-xl border p-3 text-xs uppercase font-medium"
+            style={{
+              borderColor: "var(--accent-red-border)",
+              backgroundColor: "var(--accent-red-light)",
+              color: "var(--accent-red)",
+            }}
+            role="alert"
+          >
+            Gagal memuatkan data. Pastikan jadual `other_works` telah disediakan di
+            Supabase (jalankan SQL migration).
+          </div>
+        )}
 
         {/* Tabs */}
         <div

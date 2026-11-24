@@ -274,7 +274,13 @@ export default function JobFormDrawer({
     setSaving(false);
 
     if (error) {
-      setErrors({ form: error.message || "GAGAL MENYIMPAN KERJA" });
+      console.error("Failed to save other_work:", error);
+      const msg = error.message || "GAGAL MENYIMPAN KERJA";
+      const needsMigration = /does not exist|schema cache|column .* does not exist|check constraint/i.test(msg);
+      const hint = needsMigration
+        ? " — SILA JALANKAN SQL MIGRATION (other_works_schema.sql / other_works_v2_upgrade.sql / membaja_trips_schema.sql)"
+        : "";
+      setErrors({ form: `${msg}${hint}`.toUpperCase() });
       return;
     }
 
@@ -307,13 +313,24 @@ export default function JobFormDrawer({
       size="lg"
       mobileFull
       footer={
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2" style={{ textTransform: "uppercase" }}>
-          <Button type="button" variant="ghost" onClick={onClose} disabled={saving}>
-            Batal
-          </Button>
-          <Button type="submit" form="job-form" loading={saving}>
-            {editing ? "Simpan Perubahan" : "Tambah Kerja"}
-          </Button>
+        <div style={{ textTransform: "uppercase" }}>
+          {(errors.form || Object.keys(errors).some((k) => k !== "form")) && (
+            <p
+              className="mb-3 text-[11px] font-semibold leading-snug text-center sm:text-left"
+              style={{ color: "var(--accent-red)" }}
+              role="alert"
+            >
+              {errors.form || "SILA LENGKAPKAN MEDAN YANG DITANDAKAN"}
+            </p>
+          )}
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={onClose} disabled={saving}>
+              Batal
+            </Button>
+            <Button type="submit" form="job-form" loading={saving}>
+              {editing ? "Simpan Perubahan" : "Tambah Kerja"}
+            </Button>
+          </div>
         </div>
       }
     >
@@ -439,12 +456,6 @@ export default function JobFormDrawer({
             placeholder="Nota tambahan"
           />
         </Section>
-
-        {errors.form && (
-          <p className="text-xs font-medium" style={{ color: "var(--accent-red)" }} role="alert">
-            {errors.form}
-          </p>
-        )}
       </form>
     </Modal>
   );
