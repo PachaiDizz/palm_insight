@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Users, Clock, Timer, Pencil, type LucideIcon } from "lucide-react";
+import { MapPin, Users, Clock, Timer, Pencil, Truck, type LucideIcon } from "lucide-react";
 import type { OtherWork } from "@/types";
 import { getJobTypeMeta } from "./jobMeta";
 import JobStatusChip from "./JobStatusChip";
@@ -26,9 +26,11 @@ function Meta({
 export default function JobCard({
   job,
   onEdit,
+  onOpenTrips,
 }: {
   job: OtherWork;
   onEdit?: (job: OtherWork) => void;
+  onOpenTrips?: (job: OtherWork) => void;
 }) {
   const typeMeta = getJobTypeMeta(job.type);
   const Icon = typeMeta.icon;
@@ -132,6 +134,22 @@ export default function JobCard({
         >
           {job.notes}
         </p>
+      )}
+
+      {/* Membaja: manage daily fertilizer trips */}
+      {job.type === "baja" && onOpenTrips && (
+        <button
+          type="button"
+          onClick={() => onOpenTrips(job)}
+          className="mt-1 inline-flex items-center justify-center gap-2 w-full rounded-xl border text-xs font-medium transition-colors hover:bg-[var(--accent-primary-light)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
+          style={{
+            borderColor: "var(--accent-primary-border)",
+            color: "var(--accent-primary)",
+          }}
+        >
+          <Truck className="w-4 h-4" />
+          Urus Trip Baja
+        </button>
       )}
     </article>
   );

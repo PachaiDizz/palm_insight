@@ -120,9 +120,35 @@ Table `public.other_works`:
 
 ---
 
-## 8. Go-live checklist
+## 8. Membaja — Trip Baja (fertilizer trips per day)
 
-1. Run `other_works_schema.sql` in Supabase (table + RLS + realtime).
+Added a per-day trip log for **Membaja** (`baja`) jobs: how many trips the
+fertilizer went out from the store each day.
+
+**Database — `membaja_trips_schema.sql`**
+- Table `public.other_work_trips`: `id, other_work_id → other_works(id) cascade,
+  plantation_id → plantations(id) cascade, date, trips, quantity_tons, store,
+  notes, created_by, created_at`.
+- Indexes on other_work_id / plantation_id / date / created_by.
+- RLS scoped to `plantations.user_id = auth.uid()` (select/insert/update/delete).
+- Realtime publication enabled.
+
+**Data / UI**
+- `src/lib/bajaTrips.ts` — `fetchBajaTrips`, `useBajaTrips` (Realtime),
+  `summarizeTrips` (total trips / tons / days), `formatTripDate`.
+- `src/components/kerja-lain/BajaTripsDrawer.tsx` — drawer (Modal) showing a
+  summary (Jumlah Trip / Jumlah Tan / Hari), the daily trip list (date, trips,
+  tonnage, store, notes, delete), and an add form (date, trips, quantity, store,
+  notes).
+- `JobCard` shows an **"Urus Trip Baja"** button on `baja` jobs that opens the
+  drawer; wired through `src/app/kerja-lain/page.tsx`.
+
+---
+
+## 9. Go-live checklist
+
+1. Run `other_works_schema.sql` **then** `membaja_trips_schema.sql` in Supabase
+   (tables + RLS + realtime).
 2. Render auto-deploys from `main` (verify in Render → Events).
 3. Hard-refresh the PWA once after deploy.
 

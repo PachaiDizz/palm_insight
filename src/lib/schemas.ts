@@ -118,3 +118,26 @@ export const otherWorkFormSchema = z.object({
 });
 
 export type OtherWorkFormData = z.infer<typeof otherWorkFormSchema>;
+
+// ─── Membaja trips (fertilizer out of store, per day) ───────────────────────
+
+export const BajaTripSchema = z.object({
+  id: z.string(),
+  other_work_id: z.string(),
+  plantation_id: z.string(),
+  date: z.string(),
+  trips: z.coerce.number(),
+  quantity_tons: z.coerce.number().nullable(),
+  store: z.string().nullable(),
+  notes: z.string().nullable(),
+  created_by: z.string(),
+  created_at: z.string(),
+});
+
+export const bajaTripFormSchema = z.object({
+  date: z.string().min(1, "Tarikh diperlukan"),
+  trips: z.coerce.number().min(0, "Trip tidak boleh negatif"),
+  quantity_tons: z.coerce.number().min(0).optional(),
+});
+
+export type BajaTripFormData = z.infer<typeof bajaTripFormSchema>;

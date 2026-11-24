@@ -13,6 +13,7 @@ import {
 import DashboardLayout from "@/components/DashboardLayout";
 import JobCard from "@/components/kerja-lain/JobCard";
 import JobFormDrawer from "@/components/kerja-lain/JobFormDrawer";
+import BajaTripsDrawer from "@/components/kerja-lain/BajaTripsDrawer";
 import { JOB_TYPES } from "@/components/kerja-lain/jobMeta";
 import Button from "@/components/ui/Button";
 import Toast, { type ToastData } from "@/components/ui/Toast";
@@ -117,6 +118,7 @@ export default function KerjaLainPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<OtherWork | null>(null);
+  const [tripsJob, setTripsJob] = useState<OtherWork | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
 
   const teamOptions = useMemo(
@@ -337,7 +339,7 @@ export default function KerjaLainPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {running.map((job) => (
-                <JobCard key={job.id} job={job} onEdit={openEdit} />
+                <JobCard key={job.id} job={job} onEdit={openEdit} onOpenTrips={setTripsJob} />
               ))}
             </div>
           )
@@ -356,7 +358,7 @@ export default function KerjaLainPage() {
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {group.items.map((job) => (
-                      <JobCard key={job.id} job={job} onEdit={openEdit} />
+                      <JobCard key={job.id} job={job} onEdit={openEdit} onOpenTrips={setTripsJob} />
                     ))}
                   </div>
                 </section>
@@ -368,7 +370,7 @@ export default function KerjaLainPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filteredAll.map((job) => (
-              <JobCard key={job.id} job={job} onEdit={openEdit} />
+              <JobCard key={job.id} job={job} onEdit={openEdit} onOpenTrips={setTripsJob} />
             ))}
           </div>
         )}
@@ -384,6 +386,14 @@ export default function KerjaLainPage() {
           teams={allTeams}
           defaultPlantationId={selectedPlantation?.id}
           editing={editing}
+        />
+      )}
+
+      {tripsJob && (
+        <BajaTripsDrawer
+          key={tripsJob.id}
+          job={tripsJob}
+          onClose={() => setTripsJob(null)}
         />
       )}
 

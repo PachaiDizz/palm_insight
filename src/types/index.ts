@@ -122,3 +122,17 @@ export interface OtherWork {
   team_leaders?: { name: string } | null;
   plantations?: { block: string; rancangan: string } | null;
 }
+
+// Per-day fertilizer trips for a Membaja (baja) job.
+export interface BajaTrip {
+  id: string;
+  other_work_id: string;
+  plantation_id: string;
+  date: string;
+  trips: number;
+  quantity_tons: number | null;
+  store: string | null;
+  notes: string | null;
+  created_by: string;
+  created_at: string;
+}
