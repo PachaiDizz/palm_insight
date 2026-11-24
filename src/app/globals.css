@@ -258,6 +258,16 @@ body {
   animation: slide-up 0.35s ease-out;
 }
 
+/* Fast, non-blocking page enter. Opacity-only so it never creates a containing
+   block for position:fixed overlays (notification sheet, modals). */
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-fade {
+  animation: page-fade-in 0.18s ease-out both;
+}
+
 /* ─── Landing page animations (replace framer-motion) ─── */
 .bg-gradient-header {
   background: var(--bg-header);
@@ -343,8 +353,9 @@ select option {
 
 /* Mobile-friendly touch targets and spacing */
 @media (max-width: 639px) {
-  /* Ensure all interactive elements have minimum 44px touch target */
-  button, a, input[type="checkbox"], input[type="radio"], select {
+  /* Interactive controls stay tappable. Plain text links are excluded so they
+     don't stretch sentence-height or widen inline layouts. */
+  button, input[type="checkbox"], input[type="radio"], select {
     min-height: 36px;
   }
   /* Reduce padding on small screens for tighter layouts */
@@ -496,9 +507,14 @@ input[type="range"]::-moz-range-thumb {
 
 /* ─── Global Responsive Rules ─── */
 
-/* Fluid typography — scales with viewport */
+/* Keep the root at 16px so Tailwind's rem scale stays consistent on phones.
+   (A shrunk root cascades into every rem-based padding/size and made the UI
+   feel cramped on ~375px devices.) Fluid sizing is handled per-element with
+   responsive utilities instead. */
 html {
-  font-size: clamp(13px, 1.2vw, 16px);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Prevent horizontal overflow on any page */
@@ -507,10 +523,14 @@ body {
   width: 100%;
 }
 
-/* All images and media scale with container */
-img, video, canvas, svg {
+/* Images scale with their container. Do NOT force height on SVG/canvas —
+   it overrides the intrinsic sizing Recharts and Leaflet rely on. */
+img {
   max-width: 100%;
   height: auto;
+}
+video, canvas, svg {
+  max-width: 100%;
 }
 
 /* Inputs readable on mobile — prevent iOS zoom on focus */
@@ -518,10 +538,10 @@ input, select, textarea {
   font-size: max(16px, 1em);
 }
 
-/* Touch targets minimum size */
-button, a, [role="button"] {
+/* Comfortable touch targets without forcing a min-width, which stretched
+   inline links and could cause horizontal overflow. */
+button, [role="button"] {
   min-height: 44px;
-  min-width: 44px;
 }
 
 /* Orientation handling */

@@ -14,6 +14,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       queries: {
         refetchOnWindowFocus: false,
         retry: 1,
+        // Serve cached data instantly when navigating between tabs/pages.
+        // Without this, every remount re-fetched and flashed a loading state.
+        staleTime: 30_000,
+        gcTime: 5 * 60_000,
       },
     },
   }));

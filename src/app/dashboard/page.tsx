@@ -2,8 +2,8 @@
 import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState, useCallback, useMemo } from "react";
 
-import { hasCompletedOnboarding, getAllUserPlantations } from "@/lib/onboarding";
 import {
+  usePlantations,
   usePlantationTeamLeaders,
   useDashboardMonthEntries,
   useDashboardRecentEntries,
@@ -40,11 +40,20 @@ function getFormattedDate() {
 export default function DashboardPage() {
   const { user, profile } = useAuth();
   const { t } = useI18n();
-  const [checking, setChecking] = useState(true);
-  const [plantations, setPlantations] = useState<Plantation[]>([]);
-  const [selectedPlantation, setSelectedPlantation] = useState<Plantation | null>(null);
+  const [selectedPlantationId, setSelectedPlantationId] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTour, setShowTour] = useState(false);
+
+  // Cached via React Query: revisiting the dashboard serves plantations
+  // instantly instead of running a two-step onboarding query waterfall.
+  const { data: plantations = [], isLoading: plantationsLoading } = usePlantations(user?.id);
+
+  // Derived (not synced via effect): stays valid as data loads/changes and
+  // avoids an extra render pass.
+  const selectedPlantation = useMemo<Plantation | null>(
+    () => plantations.find((p) => p.id === selectedPlantationId) ?? plantations[0] ?? null,
+    [plantations, selectedPlantationId]
+  );
 
   // Monthly filter state — default to current month (timezone-invariant, safe for SSR)
   const now = new Date();
@@ -132,38 +141,19 @@ export default function DashboardPage() {
 
   const hasMonthEntries = monthEntries.length > 0;
 
+  // Show the skeleton only until auth + plantation data resolve.
+  const checking = !user || plantationsLoading;
+
+  // First-visit guided tour.
   useEffect(() => {
-    if (!user) return;
-    checkOnboarding();
-  }, [user]);
-
-  async function checkOnboarding() {
-    if (!user) {
-      setChecking(false);
-      return;
+    if (
+      !plantationsLoading &&
+      plantations.length > 0 &&
+      !localStorage.getItem("palminsight_tour_seen")
+    ) {
+      setShowTour(true);
     }
-    try {
-      const hasPlantation = await hasCompletedOnboarding(user.id);
-      if (!hasPlantation) {
-        setPlantations([]);
-        setChecking(false);
-        return;
-      }
-      const allPlantations = await getAllUserPlantations(user.id);
-      setPlantations(allPlantations);
-      if (allPlantations.length > 0) {
-        setSelectedPlantation(allPlantations[0]);
-      }
-      setChecking(false);
-
-      if (allPlantations.length > 0 && !localStorage.getItem("palminsight_tour_seen")) {
-        setShowTour(true);
-      }
-    } catch (error) {
-      console.error("Onboarding check failed:", error);
-      setChecking(false);
-    }
-  }
+  }, [plantationsLoading, plantations.length]);
 
   if (checking) {
     return (
@@ -265,7 +255,7 @@ export default function DashboardPage() {
                       {plantations.map((p) => (
                         <button
                           key={p.id}
-                          onClick={() => { setSelectedPlantation(p); setShowDropdown(false); }}
+                          onClick={() => { setSelectedPlantationId(p.id); setShowDropdown(false); }}
                           className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all hover:bg-[var(--hover-subtle)] border-b last:border-b-0"
                           style={{
                             backgroundColor: selectedPlantation?.id === p.id ? "var(--accent-primary-light)" : "transparent",

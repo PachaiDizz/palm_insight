@@ -30,13 +30,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    let active = true;
+
+    // Hydrate from the persisted session right away instead of only waiting
+    // for the first onAuthStateChange event — faster cold start on mobile.
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      setUser(data.session?.user ?? null);
+      setLoading(false);
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        if (!active) return;
         setUser(session?.user ?? null);
         setLoading(false);
       }
     );
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = useCallback(async () => {

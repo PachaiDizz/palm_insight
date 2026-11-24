@@ -182,6 +182,9 @@ export function useDashboardMonthEntries(
     },
     enabled: !!userId && !!plantationId,
     staleTime: 30_000,
+    // Keep the current month's data visible while the next month loads,
+    // so month navigation never flashes an empty grid.
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -208,6 +211,7 @@ export function useDashboardRecentEntries(
     },
     enabled: !!userId && !!plantationId,
     staleTime: 30_000,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -253,5 +257,6 @@ export function useReportEntries(
     },
     enabled: !!userId,
     staleTime: 30_000,
+    placeholderData: (previousData) => previousData,
   });
 }

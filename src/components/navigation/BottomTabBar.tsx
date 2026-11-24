@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Home, Sprout, Users, BarChart3, ClipboardList, Map } from "lucide-react";
+import { Home, Sprout, Users, BarChart3, ClipboardList } from "lucide-react";
 
+// Five primary destinations — the sweet spot for a bottom bar on ~375px
+// devices (iPhone 11 Pro ~= 375x812). Map lives in the mobile header so the
+// bar stays breathable instead of cramming six items into the same width.
 const tabs = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Blocks", href: "/plantations", icon: Sprout },
   { label: "Teams", href: "/team", icon: Users },
-  { label: "Map", href: "/map", icon: Map },
   { label: "Entries", href: "/daily-entries", icon: ClipboardList },
   { label: "Reports", href: "/reports", icon: BarChart3 },
 ];
@@ -22,11 +24,13 @@ export default function BottomTabBar() {
     <nav
       className="lg:hidden fixed bottom-0 left-0 right-0 z-[var(--z-nav)] flex items-stretch"
       style={{
-        height: 64,
         background: "var(--bg-nav)",
         borderTop: "1px solid var(--border-nav)",
         boxShadow: "0 -4px 24px rgba(0, 0, 0, 0.15)",
-        paddingBottom: "calc(8px + env(safe-area-inset-bottom))",
+        paddingTop: 6,
+        // Safe-area is ADDED to the bar height, never subtracted from it,
+        // so the notch/home-indicator never squeezes the icons.
+        paddingBottom: "calc(6px + env(safe-area-inset-bottom))",
       }}
       role="navigation"
       aria-label="Mobile navigation"
@@ -37,7 +41,7 @@ export default function BottomTabBar() {
           <Link
             key={tab.href}
             href={tab.href}
-            className="flex-1 flex flex-col items-center justify-center gap-1 relative min-h-[44px]"
+            className="flex-1 flex flex-col items-center justify-center gap-1 relative min-h-[48px]"
             aria-label={tab.label}
             aria-current={isActive ? "page" : undefined}
           >

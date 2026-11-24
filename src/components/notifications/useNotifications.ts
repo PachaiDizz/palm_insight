@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { runAllChecks } from "./notificationHelpers";
 import type { Notification } from "@/types";
+
+// Module-level throttle (NOT a per-hook ref). DashboardLayout remounts on every
+// navigation, so a per-instance guard re-ran the heavy notification checks
+// (several sequential queries) each time you switched tabs. Run at most once
+// per 5 minutes per browser session.
+const CHECKS_TTL_MS = 5 * 60_000;
+let lastChecksAt = 0;
 
 export function useNotifications() {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const checksRun = useRef(false);
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -35,8 +41,9 @@ export function useNotifications() {
   }, [user, fetchNotifications]);
 
   useEffect(() => {
-    if (!user || checksRun.current) return;
-    checksRun.current = true;
+    if (!user) return;
+    if (Date.now() - lastChecksAt < CHECKS_TTL_MS) return;
+    lastChecksAt = Date.now();
     runAllChecks(user.id).then(() => fetchNotifications());
   }, [user, fetchNotifications]);
 

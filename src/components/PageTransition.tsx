@@ -1,36 +1,25 @@
 "use client";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-import type { Variants } from "framer-motion";
 
+/**
+ * Fast page enter transition.
+ *
+ * The previous implementation used framer-motion's <AnimatePresence mode="wait">,
+ * which kept the OLD page mounted until its exit animation finished (~150ms)
+ * and only then mounted the new route — adding a visible blank gap to every
+ * navigation on top of data fetching. This is a plain keyed wrapper with a
+ * ~180ms CSS opacity fade: the new page mounts immediately, so navigation feels
+ * instant. Framer-motion is also dropped from the app shell (smaller bundle).
+ *
+ * Intentionally opacity-only — a transform here would turn the wrapper into a
+ * containing block and break `position: fixed` overlays (notification sheet).
+ */
 export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const reduceMotion = useReducedMotion();
-
-  const pageVariants: Variants = reduceMotion
-    ? {
-        initial: { opacity: 1 },
-        enter: { opacity: 1 },
-        exit: { opacity: 1 },
-      }
-    : {
-        initial: { opacity: 0, y: 8 },
-        enter: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" as const } },
-        exit: { opacity: 0, transition: { duration: 0.15, ease: "easeIn" as const } },
-      };
-
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={pathname}
-        variants={pageVariants}
-        initial="initial"
-        animate="enter"
-        exit="exit"
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div key={pathname} className="page-fade">
+      {children}
+    </div>
   );
 }
