@@ -444,7 +444,6 @@ export default function KerjaLainPage() {
         <JobDetailDrawer
           key={detailJob.id}
           job={detailJob}
-          plantations={plantations}
           onClose={() => setDetailJob(null)}
         />
       )}

@@ -5,7 +5,7 @@ import JobStatusChip from "./JobStatusChip";
 import { getJobTypeMeta, getDetailChips } from "./jobMeta";
 import { formatDateTime } from "@/lib/otherWorks";
 import { Clock } from "lucide-react";
-import type { OtherWork, Plantation } from "@/types";
+import type { OtherWork } from "@/types";
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
@@ -21,11 +21,9 @@ function Field({ label, value }: { label: string; value: string }) {
 export default function JobDetailDrawer({
   job,
   onClose,
-  plantations = [],
 }: {
   job: OtherWork;
   onClose: () => void;
-  plantations?: Plantation[];
 }) {
   const typeMeta = getJobTypeMeta(job.type);
   const Icon = typeMeta.icon;
@@ -46,18 +44,7 @@ export default function JobDetailDrawer({
   const totalBags = Number(details.total_bags) || items.reduce((s, i) => s + i.bags, 0);
   const totalKg = Number(details.total_kg) || items.reduce((s, i) => s + i.kg, 0);
 
-  const blockIds = Array.isArray(details.blocks)
-    ? (details.blocks as unknown[]).filter((x): x is string => typeof x === "string")
-    : [];
-  const blockLabels = blockIds
-    .map((id) => plantations.find((p) => p.id === id)?.block)
-    .filter(Boolean);
-  const blocksText =
-    blockLabels.length > 0
-      ? blockLabels.map((b) => `BLOK ${b}`).join(", ")
-      : job.plantations?.block
-        ? `BLOK ${job.plantations.block}`
-        : "";
+  const blockText = job.plantations?.block ? `BLOK ${job.plantations.block}` : "";
 
   const timeText = job.started_at
     ? `${formatDateTime(job.started_at)}${
@@ -107,8 +94,10 @@ export default function JobDetailDrawer({
 
         {/* Common meta */}
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Blok" value={blocksText} />
-          <Field label="Kumpulan" value={[job.group_name, job.leader_name].filter(Boolean).join(" · ")} />
+          <Field label="Blok" value={blockText} />
+          {!isMembaja && (
+            <Field label="Kumpulan" value={[job.group_name, job.leader_name].filter(Boolean).join(" · ")} />
+          )}
           <Field label="Pekerja" value={`${job.worker_count} pekerja`} />
           <Field label="Status" value={job.status.replace("_", " ")} />
         </div>

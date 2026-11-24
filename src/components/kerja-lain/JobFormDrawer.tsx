@@ -53,7 +53,6 @@ function defaultsFor(type: OtherWorkType): Record<string, string> {
         fertilizer_type: "FELDA COMPACT",
         items: JSON.stringify([{ name: "FELDA COMPACT", bags: "", kg: "" }]),
         chekar_area_ha: "",
-        blocks: "",
         rate_per_palm_kg: "",
       };
     case "pruning":
@@ -106,15 +105,6 @@ function parseFertilizerItems(raw?: string) {
     .filter((r) => !(r.name === "" && r.bags === undefined && r.kg === undefined));
 }
 
-function parseBlocks(raw?: string): string[] {
-  try {
-    const a = JSON.parse(raw || "[]");
-    return Array.isArray(a) ? a.filter((x): x is string => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
 function numOrUndef(s?: string): number | undefined {
   if (s == null || s.trim() === "") return undefined;
   const n = Number(s);
@@ -125,7 +115,11 @@ function strOrUndef(s?: string): string | undefined {
   return t ? t.toUpperCase() : undefined;
 }
 
-function buildCandidate(type: OtherWorkType, raw: Record<string, string>) {
+function buildCandidate(
+  type: OtherWorkType,
+  raw: Record<string, string>,
+  workerCount = 0
+) {
   switch (type) {
     case "mencuci_merumput":
       return {
@@ -139,12 +133,12 @@ function buildCandidate(type: OtherWorkType, raw: Record<string, string>) {
       return {
         type,
         contractor: (raw.contractor ?? "").trim().toUpperCase(),
+        worker_count: Math.max(0, Math.round(workerCount)),
         driver_name: strOrUndef(raw.driver_name),
         lorry_no: strOrUndef(raw.lorry_no),
         fertilizer_type: (raw.fertilizer_type ?? "").trim().toUpperCase(),
         items: parseFertilizerItems(raw.items),
         chekar_area_ha: numOrUndef(raw.chekar_area_ha),
-        blocks: parseBlocks(raw.blocks),
         rate_per_palm_kg: numOrUndef(raw.rate_per_palm_kg),
       };
     case "pruning":
@@ -247,7 +241,6 @@ export default function JobFormDrawer({
   const [notes, setNotes] = useState(editing?.notes ?? "");
 
   const [title, setTitle] = useState(editing?.title ?? "");
-  const [titleTouched, setTitleTouched] = useState(!!editing);
 
   const [details, setDetails] = useState<Record<string, string>>(() => ({
     ...defaultsFor(initialType),
@@ -258,7 +251,6 @@ export default function JobFormDrawer({
   const [saving, setSaving] = useState(false);
 
   const autoTitle = buildAutoTitle(type, plantationId, startedAt, plantations);
-  const displayedTitle = titleTouched ? title : autoTitle;
 
   const setDetail = (key: string, val: string) =>
     setDetails((prev) => ({ ...prev, [key]: val }));
@@ -277,7 +269,7 @@ export default function JobFormDrawer({
     const nextErrors: Record<string, string> = {};
     if (!plantationId) nextErrors.plantation_id = "BLOK DIPERLUKAN";
 
-    const candidate = buildCandidate(type, details);
+    const candidate = buildCandidate(type, details, workerCount);
     const parsed = otherWorkDetailsSchema.safeParse(candidate);
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
@@ -303,15 +295,13 @@ export default function JobFormDrawer({
       const items = (detailData.items as { bags: number; kg: number }[] | undefined) ?? [];
       detailData.total_bags = items.reduce((s, it) => s + (Number(it.bags) || 0), 0);
       detailData.total_kg = items.reduce((s, it) => s + (Number(it.kg) || 0), 0);
-      const blocksArr = (detailData.blocks as string[] | undefined) ?? [];
-      detailData.blocks =
-        blocksArr.length > 0 ? blocksArr : plantationId ? [plantationId] : [];
     }
 
-    const finalTitle = (titleTouched && title.trim() ? title.trim() : autoTitle).toUpperCase();
+    const finalTitle = (title.trim() ? title.trim() : autoTitle).toUpperCase();
     const finalProgress =
       status === "completed" ? 100 : status === "running" ? Math.max(0, Math.min(100, progress)) : 0;
 
+    const isMembaja = type === "membaja";
     const payload = {
       plantation_id: plantationId,
       type,
@@ -319,8 +309,16 @@ export default function JobFormDrawer({
       status,
       progress: finalProgress,
       worker_count: Math.max(0, Math.round(workerCount)),
-      group_name: groupName.trim() ? groupName.trim().toUpperCase() : null,
-      leader_name: leaderName.trim() ? leaderName.trim().toUpperCase() : null,
+      group_name: isMembaja
+        ? null
+        : groupName.trim()
+          ? groupName.trim().toUpperCase()
+          : null,
+      leader_name: isMembaja
+        ? null
+        : leaderName.trim()
+          ? leaderName.trim().toUpperCase()
+          : null,
       details: detailData,
       started_at: fromLocalInput(startedAt),
       ended_at: fromLocalInput(endedAt),
@@ -358,8 +356,8 @@ export default function JobFormDrawer({
             value={details}
             onChange={setDetail}
             errors={errors}
-            plantations={plantations}
-            primaryPlantationId={plantationId}
+            workerCount={workerCount}
+            onWorkerCountChange={setWorkerCount}
             contractorSuggestions={existingContractors}
           />
         );
@@ -421,11 +419,8 @@ export default function JobFormDrawer({
           <TextField
             label="Tajuk Kerja (pilihan)"
             placeholder="Cth. Membaja Blok 04 Pusingan 2"
-            value={displayedTitle}
-            onChange={(v) => {
-              setTitle(v);
-              setTitleTouched(true);
-            }}
+            value={title}
+            onChange={setTitle}
           />
 
           <div>
@@ -464,25 +459,29 @@ export default function JobFormDrawer({
             )}
           </label>
 
-          <CreatableInput
-            label="Kumpulan"
-            value={groupName}
-            onChange={setGroupName}
-            suggestions={existingGroups}
-            placeholder="Taip nama kumpulan"
-          />
-          <CreatableInput
-            label="Ketua"
-            value={leaderName}
-            onChange={setLeaderName}
-            suggestions={existingLeaders}
-            placeholder="Taip nama ketua"
-          />
+          {type !== "membaja" && (
+            <>
+              <CreatableInput
+                label="Kumpulan"
+                value={groupName}
+                onChange={setGroupName}
+                suggestions={existingGroups}
+                placeholder="Taip nama kumpulan"
+              />
+              <CreatableInput
+                label="Ketua"
+                value={leaderName}
+                onChange={setLeaderName}
+                suggestions={existingLeaders}
+                placeholder="Taip nama ketua"
+              />
 
-          <div>
-            <FieldLabel>Bilangan Pekerja</FieldLabel>
-            <Stepper value={workerCount} onChange={setWorkerCount} ariaLabel="Bilangan pekerja" />
-          </div>
+              <div>
+                <FieldLabel>Bilangan Pekerja</FieldLabel>
+                <Stepper value={workerCount} onChange={setWorkerCount} ariaLabel="Bilangan pekerja" />
+              </div>
+            </>
+          )}
         </Section>
 
         {/* BUTIRAN KERJA (dynamic) */}

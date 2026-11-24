@@ -136,6 +136,7 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("membaja"),
     contractor: z.string().min(1, "KONTRAKTOR DIPERLUKAN"),
+    worker_count: z.coerce.number().min(0),
     driver_name: z.string().optional(),
     lorry_no: z.string().optional(),
     fertilizer_type: z.string().min(1, "JENIS BAJA DIPERLUKAN"),
@@ -150,7 +151,6 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
       )
       .min(1, "SEKURANG-KURANGNYA SATU BARIS"),
     chekar_area_ha: optNum,
-    blocks: z.array(z.string()).optional(),
     rate_per_palm_kg: optNum,
   }),
   z.object({

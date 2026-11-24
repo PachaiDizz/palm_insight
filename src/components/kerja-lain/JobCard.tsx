@@ -41,6 +41,12 @@ export default function JobCard({
   const chips = getDetailChips(job.type, job.details);
   const subline = job.type === "membaja" ? getMembajaSubline(job.details) : null;
 
+  const isMembaja = job.type === "membaja";
+  const detailsObj = (job.details ?? {}) as Record<string, unknown>;
+  const contractorText =
+    typeof detailsObj.contractor === "string" ? detailsObj.contractor : "";
+  const secondaryText = isMembaja ? contractorText || "—" : groupText;
+
   return (
     <article
       className="card-glow rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all"
@@ -120,7 +126,7 @@ export default function JobCard({
       {/* Meta */}
       <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
         <Meta icon={MapPin} value={blockText} />
-        <Meta icon={Users} value={groupText} />
+        <Meta icon={Users} value={secondaryText} />
         <Meta icon={Users} value={`${Number(job.worker_count) || 0} pekerja`} />
         <Meta icon={Clock} value={formatDateTime(job.started_at)} />
       </div>

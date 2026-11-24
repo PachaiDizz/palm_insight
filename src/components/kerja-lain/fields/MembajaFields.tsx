@@ -1,6 +1,6 @@
 "use client";
 
-import { NumberField, TextField, FieldLabel } from "../form/controls";
+import { NumberField, TextField, FieldLabel, Stepper } from "../form/controls";
 import CreatableInput from "../form/CreatableInput";
 import FertilizerTable, { type FertRow } from "../form/FertilizerTable";
 import type { FieldGroupProps } from "./types";
@@ -24,45 +24,19 @@ function parseRows(raw?: string): FertRow[] {
   return [{ name: "", bags: "", kg: "" }];
 }
 
-function parseBlocks(raw?: string): string[] {
-  if (!raw) return [];
-  try {
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
 export default function MembajaFields({
   value,
   onChange,
   errors,
-  plantations = [],
-  primaryPlantationId,
+  workerCount = 0,
+  onWorkerCountChange,
   contractorSuggestions = [],
 }: FieldGroupProps) {
   const rows = parseRows(value.items);
-  const totalBags = rows.reduce((s, r) => s + (Number(r.bags) || 0), 0);
-  const totalKg = rows.reduce((s, r) => s + (Number(r.kg) || 0), 0);
-
-  const storedBlocks = parseBlocks(value.blocks);
-  const selectedBlocks =
-    storedBlocks.length > 0
-      ? storedBlocks
-      : primaryPlantationId
-        ? [primaryPlantationId]
-        : [];
-
-  const toggleBlock = (id: string) => {
-    const set = new Set(selectedBlocks);
-    if (set.has(id)) set.delete(id);
-    else set.add(id);
-    onChange("blocks", JSON.stringify(Array.from(set)));
-  };
 
   return (
     <div className="space-y-3">
+      {/* 1) KONTRAKTOR */}
       <CreatableInput
         label="Kontraktor"
         value={value.contractor ?? ""}
@@ -72,6 +46,17 @@ export default function MembajaFields({
         error={errors.contractor}
       />
 
+      {/* 2) BILANGAN PEKERJA */}
+      <div>
+        <FieldLabel>Bilangan Pekerja</FieldLabel>
+        <Stepper
+          value={workerCount}
+          onChange={(n) => onWorkerCountChange?.(n)}
+          ariaLabel="Bilangan pekerja"
+        />
+      </div>
+
+      {/* 3) NAMA DRIVER + 4) NO. LORI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <TextField
           label="Nama Driver (pilihan)"
@@ -89,18 +74,17 @@ export default function MembajaFields({
         />
       </div>
 
-      <div>
-        <CreatableInput
-          label="Jenis Baja"
-          value={value.fertilizer_type ?? "FELDA COMPACT"}
-          onChange={(v) => onChange("fertilizer_type", v)}
-          suggestions={FERTILIZER_SUGGESTIONS}
-          placeholder="Cth. FELDA COMPACT"
-          error={errors.fertilizer_type}
-        />
-      </div>
+      {/* 5) JENIS BAJA */}
+      <CreatableInput
+        label="Jenis Baja"
+        value={value.fertilizer_type ?? "FELDA COMPACT"}
+        onChange={(v) => onChange("fertilizer_type", v)}
+        suggestions={FERTILIZER_SUGGESTIONS}
+        placeholder="Cth. FELDA COMPACT"
+        error={errors.fertilizer_type}
+      />
 
-      {/* JADUAL BAJA */}
+      {/* 6) JADUAL BAJA */}
       <div>
         <FieldLabel required>Jadual Baja</FieldLabel>
         <FertilizerTable
@@ -111,19 +95,7 @@ export default function MembajaFields({
         />
       </div>
 
-      {/* JUMLAH BAJA read-only summary */}
-      <div
-        className="flex items-center justify-between rounded-xl px-3 py-2.5"
-        style={{ backgroundColor: "var(--accent-primary-light)" }}
-      >
-        <span className="text-[11px] font-bold tracking-[0.12em]" style={{ color: "var(--accent-primary)" }}>
-          Jumlah Baja
-        </span>
-        <span className="text-sm font-bold tabular-nums" style={{ color: "var(--accent-primary)" }}>
-          {totalBags.toLocaleString("en-MY")} BAG · {totalKg.toLocaleString("en-MY")} KG
-        </span>
-      </div>
-
+      {/* 7) KELUASAN CHEKAR + KADAR PER POKOK */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <NumberField
           label="Keluasan Chekar (pilihan)"
@@ -142,34 +114,6 @@ export default function MembajaFields({
           error={errors.rate_per_palm_kg}
         />
       </div>
-
-      {/* Block multi-select */}
-      {plantations.length > 0 && (
-        <div>
-          <FieldLabel>Blok Diliputi</FieldLabel>
-          <div className="flex flex-wrap gap-1.5">
-            {plantations.map((p) => {
-              const active = selectedBlocks.includes(p.id);
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => toggleBlock(p.id)}
-                  className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors duration-150"
-                  style={{
-                    backgroundColor: active ? "var(--accent-primary-light)" : "var(--bg-input)",
-                    color: active ? "var(--accent-primary)" : "var(--text-secondary)",
-                    boxShadow: active ? "inset 0 0 0 1px var(--accent-primary-border)" : "none",
-                  }}
-                >
-                  BLOK {p.block}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

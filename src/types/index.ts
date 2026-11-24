@@ -138,6 +138,7 @@ export interface MembajaItem {
 
 export interface MembajaDetails {
   contractor: string;
+  worker_count: number;
   driver_name: string | null;
   lorry_no: string | null;
   fertilizer_type: string;
@@ -145,7 +146,6 @@ export interface MembajaDetails {
   total_bags: number;
   total_kg: number;
   chekar_area_ha: number | null;
-  blocks: string[];
   rate_per_palm_kg: number | null;
 }
 
