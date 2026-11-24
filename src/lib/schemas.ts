@@ -71,11 +71,11 @@ export const DailyEntryWithRelationsSchema = DailyEntrySchema.extend({
 // ─── Kerja-Kerja Lain (Other Works) ──────────────────────────────────────
 
 export const OTHER_WORK_TYPES = [
-  "racun_rumpai",
-  "baja",
-  "pangkas",
+  "mencuci_merumput",
+  "membaja",
+  "pruning",
+  "cuci_parit",
   "baiki_jalan",
-  "parit",
   "lain_lain",
 ] as const;
 
@@ -95,13 +95,15 @@ export const OtherWorkSchema = z.object({
   title: z.string(),
   status: z.enum(OTHER_WORK_STATUSES),
   progress: z.coerce.number(),
-  workers: z.coerce.number(),
+  worker_count: z.coerce.number().default(0),
+  group_name: z.string().nullable(),
+  leader_name: z.string().nullable(),
+  details: z.record(z.string(), z.unknown()).nullable(),
   started_at: z.string().nullable(),
   ended_at: z.string().nullable(),
   notes: z.string().nullable(),
   created_by: z.string(),
   created_at: z.string(),
-  team_leaders: z.object({ name: z.string() }).nullable().optional(),
   plantations: z
     .object({ block: z.string(), rancangan: z.string() })
     .nullable()
@@ -109,15 +111,64 @@ export const OtherWorkSchema = z.object({
 });
 
 export const otherWorkFormSchema = z.object({
-  title: z.string().trim().min(1, "Tajuk kerja diperlukan"),
+  title: z.string().optional(),
   type: z.enum(OTHER_WORK_TYPES),
   status: z.enum(OTHER_WORK_STATUSES),
-  plantation_id: z.string().min(1, "Blok diperlukan"),
+  plantation_id: z.string().min(1, "BLOK DIPERLUKAN"),
+  worker_count: z.coerce.number().min(0),
   progress: z.coerce.number().min(0).max(100),
-  workers: z.coerce.number().min(0),
 });
 
 export type OtherWorkFormData = z.infer<typeof otherWorkFormSchema>;
+
+const reqNum = z.coerce.number().gt(0, "MESTI LEBIH DARIPADA 0");
+const optNum = z.coerce.number().min(0).optional();
+
+/** Validates the type-specific `details` payload. Discriminated on `type`. */
+export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("mencuci_merumput"),
+    method: z.enum(["manual", "racun", "mesin"]),
+    area_hectare: reqNum,
+    chemical_name: z.string().optional(),
+    chemical_qty_liter: optNum,
+  }),
+  z.object({
+    type: z.literal("membaja"),
+    fertilizer_type: z.enum(["npk", "urea", "mop", "kieserite", "lain_lain"]),
+    quantity_value: reqNum,
+    quantity_unit: z.enum(["kg", "bag"]),
+    area_hectare: reqNum,
+    tree_count: reqNum,
+    rate_per_tree_kg: optNum,
+  }),
+  z.object({
+    type: z.literal("pruning"),
+    pruning_type: z.enum(["rutin", "sanitasi"]),
+    tree_count: reqNum,
+    area_hectare: reqNum,
+  }),
+  z.object({
+    type: z.literal("cuci_parit"),
+    ditch_length_m: reqNum,
+    ditch_count: reqNum,
+    depth_cm: optNum,
+  }),
+  z.object({
+    type: z.literal("baiki_jalan"),
+    road_length_m: reqNum,
+    material: z.enum(["batu", "tanah_merah", "lain_lain"]),
+    machine: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal("lain_lain"),
+    description: z.string().min(1, "HURAIAN DIPERLUKAN"),
+    quantity: reqNum,
+    unit: z.string().min(1, "UNIT DIPERLUKAN"),
+  }),
+]);
+
+export type OtherWorkDetailsInput = z.infer<typeof otherWorkDetailsSchema>;
 
 // ─── Membaja trips (fertilizer out of store, per day) ───────────────────────
 

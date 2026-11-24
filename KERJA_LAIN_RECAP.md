@@ -147,12 +147,49 @@ fertilizer went out from the store each day.
 
 ## 9. Go-live checklist
 
-1. Run `other_works_schema.sql` **then** `membaja_trips_schema.sql` in Supabase
-   (tables + RLS + realtime).
+1. Fresh install: run `other_works_schema.sql` → `membaja_trips_schema.sql`.
+   Existing install (already created `other_works`): run `other_works_v2_upgrade.sql`
+   (adds details/group/leader/worker_count + migrates type values) then
+   `membaja_trips_schema.sql`.
 2. Render auto-deploys from `main` (verify in Render → Events).
 3. Hard-refresh the PWA once after deploy.
+
+---
+
+## 10. Premium "Tambah Kerja" form redesign (v2)
+
+**Categories (new `OtherWorkType` values):** `mencuci_merumput`, `membaja`,
+`pruning`, `cuci_parit`, `baiki_jalan`, `lain_lain` (old values auto-migrated).
+
+**Modal UX (`JobFormDrawer.tsx`)**
+- All text uppercase (CSS `text-transform` + values uppercased before save).
+- Sections: MAKLUMAT ASAS, LOKASI & KUMPULAN, BUTIRAN KERJA (dynamic), MASA, CATATAN.
+- JENIS KERJA = icon tile grid (2 cols mobile / 3 desktop) with amber selected state + check.
+- STATUS = segmented pill control (colour per status).
+- BILANGAN PEKERJA = stepper; KEMAJUAN % = slider with live badge (only when running).
+- Custom dark date+time picker (`form/DateTimeField.tsx`) — no native widget.
+- Creatable Kumpulan / Ketua inputs (`form/CreatableInput.tsx`): free text, suggestions
+  from prior Kerja-Kerja Lain entries, "+ Tambah Baru". Not tied to harvest teams.
+- Tajuk Kerja is optional and auto-suggests e.g. `MEMBAJA - BLOK 04 - 24 NOV 2026`;
+  final title uppercased and auto-used if left empty.
+- Sticky footer BATAL / TAMBAH KERJA; full-height bottom sheet on mobile
+  (`Modal` gained optional `footer` + `mobileFull`, backward compatible).
+
+**Dynamic fields per type** (`src/components/kerja-lain/fields/*`): each type has its own
+component with numeric unit-suffix inputs + segmented controls; values reset on type change.
+
+**Data**
+- `other_works` gains `details jsonb`, `group_name text`, `leader_name text`,
+  `worker_count integer` (SQL: `other_works_v2_upgrade.sql`, base schema updated).
+- Zod: `otherWorkDetailsSchema` discriminated union validates `details` per type;
+  `OtherWorkSchema` updated.
+- `fetchOtherWorks` no longer joins `team_leaders`.
+
+**Job cards** show uppercase detail chips (e.g. `MEMBAJA · NPK · 120 KG · 124 POKOK`),
+group/leader, worker count, and the Membaja "Urus Trip Baja" button.
 
 ## Notes / future
 - Delete action for jobs is not implemented (add/edit only) — add if needed.
 - Dashboard counts are month-scoped by `created_at`.
 - `block_id` reserved for future multi-block modeling.
+- Legacy `team_id` column kept but unused by this feature.

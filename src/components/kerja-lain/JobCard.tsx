@@ -2,17 +2,11 @@
 
 import { MapPin, Users, Clock, Timer, Pencil, Truck, type LucideIcon } from "lucide-react";
 import type { OtherWork } from "@/types";
-import { getJobTypeMeta } from "./jobMeta";
+import { getJobTypeMeta, getDetailChips } from "./jobMeta";
 import JobStatusChip from "./JobStatusChip";
 import { formatDateTime, formatDuration } from "@/lib/otherWorks";
 
-function Meta({
-  icon: Icon,
-  value,
-}: {
-  icon: LucideIcon;
-  value: string;
-}) {
+function Meta({ icon: Icon, value }: { icon: LucideIcon; value: string }) {
   return (
     <div className="flex items-center gap-1.5 min-w-0">
       <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} />
@@ -38,9 +32,11 @@ export default function JobCard({
   const blockText = job.plantations?.block
     ? `Block ${job.plantations.block}`
     : job.plantations?.rancangan || "—";
-  const teamText = job.team_leaders?.name || "—";
+  const groupText =
+    [job.group_name, job.leader_name].filter(Boolean).join(" · ") || "—";
   const duration = formatDuration(job.started_at, job.ended_at);
   const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
+  const chips = getDetailChips(job.type, job.details);
 
   return (
     <article
@@ -58,7 +54,7 @@ export default function JobCard({
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-theme truncate">{job.title}</h3>
-            <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs truncate uppercase" style={{ color: "var(--text-muted)" }}>
               {typeMeta.label}
             </p>
           </div>
@@ -79,11 +75,29 @@ export default function JobCard({
         </div>
       </div>
 
+      {/* Detail chips */}
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((chip, i) => (
+            <span
+              key={`${chip}-${i}`}
+              className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md"
+              style={{
+                backgroundColor: i === 0 ? "var(--accent-primary-light)" : "var(--bg-input)",
+                color: i === 0 ? "var(--accent-primary)" : "var(--text-secondary)",
+              }}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Meta */}
       <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
         <Meta icon={MapPin} value={blockText} />
-        <Meta icon={Users} value={teamText} />
-        <Meta icon={Users} value={`${Number(job.workers) || 0} pekerja`} />
+        <Meta icon={Users} value={groupText} />
+        <Meta icon={Users} value={`${Number(job.worker_count) || 0} pekerja`} />
         <Meta icon={Clock} value={formatDateTime(job.started_at)} />
       </div>
 
@@ -137,7 +151,7 @@ export default function JobCard({
       )}
 
       {/* Membaja: manage daily fertilizer trips */}
-      {job.type === "baja" && onOpenTrips && (
+      {job.type === "membaja" && onOpenTrips && (
         <button
           type="button"
           onClick={() => onOpenTrips(job)}

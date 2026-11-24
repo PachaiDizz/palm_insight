@@ -18,7 +18,7 @@ export async function fetchOtherWorks(
 ): Promise<OtherWork[]> {
   const { data, error } = await supabase
     .from("other_works")
-    .select("*, team_leaders(name), plantations(block, rancangan)")
+    .select("*, plantations(block, rancangan)")
     .eq("plantation_id", plantationId)
     .order("started_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });

@@ -96,30 +96,34 @@ export interface NotificationPrefs {
 export type OtherWorkStatus = "scheduled" | "running" | "completed" | "cancelled";
 
 export type OtherWorkType =
-  | "racun_rumpai"
-  | "baja"
-  | "pangkas"
+  | "mencuci_merumput"
+  | "membaja"
+  | "pruning"
+  | "cuci_parit"
   | "baiki_jalan"
-  | "parit"
   | "lain_lain";
 
 export interface OtherWork {
   id: string;
   plantation_id: string;
   block_id: string | null;
+  /** Legacy column; no longer used by this feature. */
   team_id: string | null;
   type: OtherWorkType;
   title: string;
   status: OtherWorkStatus;
   progress: number;
-  workers: number;
+  worker_count: number;
+  group_name: string | null;
+  leader_name: string | null;
+  /** Type-specific values; shape depends on `type`. */
+  details: Record<string, unknown> | null;
   started_at: string | null;
   ended_at: string | null;
   notes: string | null;
   created_by: string;
   created_at: string;
   // Joined relations
-  team_leaders?: { name: string } | null;
   plantations?: { block: string; rancangan: string } | null;
 }
 

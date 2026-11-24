@@ -505,6 +505,16 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Amber progress slider (job form) */
+input[type="range"].progress-range::-webkit-slider-thumb {
+  background: var(--accent-primary);
+  border-color: var(--bg-card);
+}
+input[type="range"].progress-range::-moz-range-thumb {
+  background: var(--accent-primary);
+  border-color: var(--bg-card);
+}
+
 /* ─── Global Responsive Rules ─── */
 
 /* Keep the root at 16px so Tailwind's rem scale stays consistent on phones.

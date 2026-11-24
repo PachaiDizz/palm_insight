@@ -11,6 +11,10 @@ interface ModalProps {
   /** Wider content area for forms with many fields */
   size?: "sm" | "md" | "lg";
   className?: string;
+  /** Pinned footer (outside the scrollable body). */
+  footer?: ReactNode;
+  /** On phones, fill the viewport as a full-height bottom sheet. */
+  mobileFull?: boolean;
 }
 
 const sizeClasses = {
@@ -29,6 +33,8 @@ export default function Modal({
   children,
   size = "md",
   className = "",
+  footer,
+  mobileFull = false,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
@@ -99,6 +105,11 @@ export default function Modal({
 
   if (!open) return null;
 
+  const widthClass = sizeClasses[size];
+  const heightClass = mobileFull
+    ? "h-[100dvh] max-h-[100dvh] rounded-none sm:h-auto sm:max-h-[90vh] sm:rounded-2xl"
+    : "max-h-[90vh] sm:rounded-2xl rounded-t-2xl";
+
   return (
     <div
       className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4"
@@ -116,7 +127,7 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
         tabIndex={-1}
-        className={`relative w-full sm:max-w-md max-h-[90vh] flex flex-col card-glow sm:rounded-2xl rounded-t-2xl shadow-2xl outline-none ${className}`}
+        className={`relative w-full ${widthClass} ${heightClass} flex flex-col card-glow shadow-2xl outline-none ${className}`}
         style={{ backgroundColor: "var(--bg-card)" }}
       >
         {title && (
@@ -139,6 +150,14 @@ export default function Modal({
           </div>
         )}
         <div className="overflow-y-auto flex-1 p-5">{children}</div>
+        {footer && (
+          <div
+            className="shrink-0 px-5 py-4 border-t"
+            style={{ borderColor: "var(--border-default)" }}
+          >
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

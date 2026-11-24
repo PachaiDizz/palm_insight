@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/AuthProvider";
-import { usePlantations, useTeamLeaders } from "@/lib/queries";
+import { usePlantations } from "@/lib/queries";
 import {
   useOtherWorks,
   groupJobsByDate,
@@ -104,7 +104,6 @@ export default function KerjaLainPage() {
     [plantations, plantationId]
   );
 
-  const { data: allTeams = [] } = useTeamLeaders(user?.id);
   const { data: works = [], isLoading: worksLoading } = useOtherWorks(
     user?.id,
     selectedPlantation?.id
@@ -121,9 +120,26 @@ export default function KerjaLainPage() {
   const [tripsJob, setTripsJob] = useState<OtherWork | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
 
-  const teamOptions = useMemo(
-    () => allTeams.filter((t) => t.plantation_id === selectedPlantation?.id),
-    [allTeams, selectedPlantation?.id]
+  const groupOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(works.map((w) => w.group_name).filter((g): g is string => !!g && g.trim() !== ""))
+      ).sort(),
+    [works]
+  );
+  const groupSuggestions = useMemo(
+    () =>
+      Array.from(
+        new Set(works.map((w) => w.group_name).filter((g): g is string => !!g && g.trim() !== ""))
+      ),
+    [works]
+  );
+  const leaderSuggestions = useMemo(
+    () =>
+      Array.from(
+        new Set(works.map((w) => w.leader_name).filter((g): g is string => !!g && g.trim() !== ""))
+      ),
+    [works]
   );
 
   const running = useMemo(() => works.filter((w) => w.status === "running"), [works]);
@@ -131,7 +147,7 @@ export default function KerjaLainPage() {
 
   const passesFilters = (job: OtherWork) => {
     if (filterType !== "all" && job.type !== filterType) return false;
-    if (filterTeam !== "all" && job.team_id !== filterTeam) return false;
+    if (filterTeam !== "all" && job.group_name !== filterTeam) return false;
     const key = jobDateKey(job);
     if (fromDate && key < fromDate) return false;
     if (toDate && key > toDate) return false;
@@ -289,9 +305,9 @@ export default function KerjaLainPage() {
               containerClassName="sm:flex-1 min-w-0"
             >
               <option value="all">Semua kumpulan</option>
-              {teamOptions.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+              {groupOptions.map((g) => (
+                <option key={g} value={g}>
+                  {g}
                 </option>
               ))}
             </Select>
@@ -383,9 +399,10 @@ export default function KerjaLainPage() {
           onClose={() => setFormOpen(false)}
           onSaved={handleSaved}
           plantations={plantations}
-          teams={allTeams}
           defaultPlantationId={selectedPlantation?.id}
           editing={editing}
+          existingGroups={groupSuggestions}
+          existingLeaders={leaderSuggestions}
         />
       )}
 

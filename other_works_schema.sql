@@ -14,12 +14,15 @@ create table if not exists public.other_works (
   block_id      uuid,
   team_id       uuid references public.team_leaders(id) on delete set null,
   type          text not null default 'lain_lain'
-                  check (type in ('racun_rumpai','baja','pangkas','baiki_jalan','parit','lain_lain')),
+                  check (type in ('mencuci_merumput','membaja','pruning','cuci_parit','baiki_jalan','lain_lain')),
   title         text not null,
   status        text not null default 'scheduled'
                   check (status in ('scheduled','running','completed','cancelled')),
   progress      integer not null default 0 check (progress between 0 and 100),
-  workers       integer not null default 0,
+  worker_count  integer not null default 0,
+  group_name    text,
+  leader_name   text,
+  details       jsonb,
   started_at    timestamptz,
   ended_at      timestamptz,
   notes         text,
