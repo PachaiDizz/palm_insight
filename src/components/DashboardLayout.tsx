@@ -14,9 +14,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
 
   return (
-    <div className="flex min-h-[100dvh] bg-[var(--bg-base)]">
+    <div className="flex h-[100dvh] overflow-hidden bg-[var(--bg-base)]">
       {/* Desktop sidebar only */}
-      <div className="hidden lg:flex">
+      <div className="hidden lg:flex h-full">
         <Sidebar
           onMobileClose={() => {}}
           notifications={notifications}
@@ -27,10 +27,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         {/* Mobile header — sticky, respects the notch / status-bar safe area */}
         <header
-          className="lg:hidden sticky top-0 z-[var(--z-nav)] flex items-center justify-between gap-2 px-4 pb-2 border-b border-[var(--border-nav)] bg-[var(--bg-nav-scrolled)] backdrop-blur-md"
+          className="lg:hidden sticky top-0 z-[var(--z-nav)] flex items-center justify-between gap-2 px-4 pb-2 border-b border-[var(--border-nav)] bg-[var(--bg-nav)]"
           style={{ paddingTop: "calc(0.5rem + env(safe-area-inset-top))" }}
         >
           <div className="flex items-center gap-2 min-w-0">
@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <main
           id="main-content"
-          className="flex-1 overflow-y-auto overscroll-contain lg:pb-0 pb-[calc(60px+env(safe-area-inset-bottom))]"
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain lg:pb-0 pb-[calc(60px+env(safe-area-inset-bottom))]"
           tabIndex={-1}
         >
           <PageTransition>{children}</PageTransition>

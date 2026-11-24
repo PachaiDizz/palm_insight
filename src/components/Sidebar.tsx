@@ -45,7 +45,7 @@ export default function Sidebar({ onMobileClose, notifications, unreadCount, onM
 
   return (
     <aside
-      className={`h-screen flex-col border-r transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"} bg-[var(--bg-card)] min-w-[72px] overflow-visible`}
+      className={`h-full flex-col border-r transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"} bg-[var(--bg-card)] min-w-[72px] overflow-visible`}
       style={{ borderColor: "var(--border-default)" }}
     >
       {/* Logo */}
