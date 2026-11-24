@@ -67,3 +67,54 @@ export const DailyEntryWithRelationsSchema = DailyEntrySchema.extend({
     .nullable()
     .optional(),
 });
+
+// ─── Kerja-Kerja Lain (Other Works) ──────────────────────────────────────
+
+export const OTHER_WORK_TYPES = [
+  "racun_rumpai",
+  "baja",
+  "pangkas",
+  "baiki_jalan",
+  "parit",
+  "lain_lain",
+] as const;
+
+export const OTHER_WORK_STATUSES = [
+  "scheduled",
+  "running",
+  "completed",
+  "cancelled",
+] as const;
+
+export const OtherWorkSchema = z.object({
+  id: z.string(),
+  plantation_id: z.string(),
+  block_id: z.string().nullable(),
+  team_id: z.string().nullable(),
+  type: z.enum(OTHER_WORK_TYPES),
+  title: z.string(),
+  status: z.enum(OTHER_WORK_STATUSES),
+  progress: z.coerce.number(),
+  workers: z.coerce.number(),
+  started_at: z.string().nullable(),
+  ended_at: z.string().nullable(),
+  notes: z.string().nullable(),
+  created_by: z.string(),
+  created_at: z.string(),
+  team_leaders: z.object({ name: z.string() }).nullable().optional(),
+  plantations: z
+    .object({ block: z.string(), rancangan: z.string() })
+    .nullable()
+    .optional(),
+});
+
+export const otherWorkFormSchema = z.object({
+  title: z.string().trim().min(1, "Tajuk kerja diperlukan"),
+  type: z.enum(OTHER_WORK_TYPES),
+  status: z.enum(OTHER_WORK_STATUSES),
+  plantation_id: z.string().min(1, "Blok diperlukan"),
+  progress: z.coerce.number().min(0).max(100),
+  workers: z.coerce.number().min(0),
+});
+
+export type OtherWorkFormData = z.infer<typeof otherWorkFormSchema>;

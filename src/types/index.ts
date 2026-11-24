@@ -90,3 +90,35 @@ export interface NotificationPrefs {
   checkinReminder: boolean;
   browserPush: boolean;
 }
+
+// ─── Kerja-Kerja Lain (Other Works) ──────────────────────────────────────
+
+export type OtherWorkStatus = "scheduled" | "running" | "completed" | "cancelled";
+
+export type OtherWorkType =
+  | "racun_rumpai"
+  | "baja"
+  | "pangkas"
+  | "baiki_jalan"
+  | "parit"
+  | "lain_lain";
+
+export interface OtherWork {
+  id: string;
+  plantation_id: string;
+  block_id: string | null;
+  team_id: string | null;
+  type: OtherWorkType;
+  title: string;
+  status: OtherWorkStatus;
+  progress: number;
+  workers: number;
+  started_at: string | null;
+  ended_at: string | null;
+  notes: string | null;
+  created_by: string;
+  created_at: string;
+  // Joined relations
+  team_leaders?: { name: string } | null;
+  plantations?: { block: string; rancangan: string } | null;
+}

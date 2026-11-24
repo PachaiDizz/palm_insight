@@ -16,6 +16,7 @@ import { Users, ChevronDown, ChevronLeft, ChevronRight, MapPin, Truck, AlertCirc
 import { Plantation, TodayStats } from "@/types";
 import { lazy, Suspense } from "react";
 const MonthlyTrendChart = lazy(() => import("@/components/dashboard/MonthlyTrendChart"));
+import OtherWorksCard from "@/components/dashboard/OtherWorksCard";
 import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { FadeIn } from "@/components/ui/Skeleton";
 import StatCard from "@/components/ui/StatCard";
@@ -403,6 +404,16 @@ export default function DashboardPage() {
                 </Link>
               </div>
             )}
+          </div>
+
+          {/* Kerja-Kerja Lain */}
+          <div className="mb-4 sm:mb-6">
+            <OtherWorksCard
+              userId={user?.id}
+              plantationId={selectedPlantation?.id}
+              year={selectedYear}
+              month={selectedMonth}
+            />
           </div>
 
           {/* Monthly Trend Chart */}
