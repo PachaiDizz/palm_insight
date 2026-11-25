@@ -53,19 +53,23 @@ export default function CreatableCombobox({
   const [savedError, setSavedError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [panel, setPanel] = useState<PanelRect | null>(null);
+  // Search text is kept separate from the selected value so reopening the
+  // dropdown always shows the full list (the selected value is never the query).
+  const [query, setQuery] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
 
   const normalized = normalizeOption(value);
+  const normalizedQuery = normalizeOption(query);
   const filtered = useMemo(() => {
-    if (!normalized) return options;
-    return options.filter((o) => o.value.toUpperCase().includes(normalized));
-  }, [options, normalized]);
+    if (!normalizedQuery) return options;
+    return options.filter((o) => o.value.toUpperCase().includes(normalizedQuery));
+  }, [options, normalizedQuery]);
 
-  const exactMatch = options.some((o) => o.value.toUpperCase() === normalized);
-  const canCreate = normalized.length > 0 && !exactMatch;
+  const exactMatch = options.some((o) => o.value.toUpperCase() === normalizedQuery);
+  const canCreate = normalizedQuery.length > 0 && !exactMatch;
   const rowCount = filtered.length + (canCreate ? 1 : 0);
 
   const updatePosition = useCallback(() => {
@@ -109,10 +113,24 @@ export default function CreatableCombobox({
     };
   }, [open, updatePosition]);
 
+  const openDropdown = () => {
+    if (open) return;
+    setQuery("");
+    setActiveIndex(-1);
+    setOpen(true);
+  };
+
   const selectOption = (optionValue: string) => {
     onChange(optionValue);
+    setQuery("");
     setOpen(false);
     setActiveIndex(-1);
+  };
+
+  const clearSelection = () => {
+    onChange("");
+    setQuery("");
+    setSavedError(null);
   };
 
   const createOption = async () => {
@@ -120,7 +138,7 @@ export default function CreatableCombobox({
     setSaving(true);
     setSavedError(null);
     try {
-      const saved = await addOption(normalized);
+      const saved = await addOption(normalizedQuery);
       onChange(saved);
       onToast?.({ type: "success", message: "DISIMPAN" });
       setOpen(false);
@@ -155,15 +173,15 @@ export default function CreatableCombobox({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (!open) setOpen(true);
+      if (!open) openDropdown();
       setActiveIndex((i) => (rowCount === 0 ? -1 : (i + 1) % rowCount));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      if (!open) setOpen(true);
+      if (!open) openDropdown();
       setActiveIndex((i) => (rowCount === 0 ? -1 : (i - 1 + rowCount) % rowCount));
     } else if (e.key === "Enter") {
       if (!open) {
-        setOpen(true);
+        openDropdown();
         return;
       }
       e.preventDefault();
@@ -271,7 +289,7 @@ export default function CreatableCombobox({
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="truncate text-xs font-bold tracking-wide">
-                {saving ? "MENYIMPAN…" : `+ TAMBAH "${normalized}"`}
+                {saving ? "MENYIMPAN…" : `+ TAMBAH "${normalizedQuery}"`}
               </span>
             </button>
           )}
@@ -300,17 +318,33 @@ export default function CreatableCombobox({
           placeholder={placeholder}
           onChange={(e) => {
             onChange(e.target.value);
+            setQuery(e.target.value);
             setSavedError(null);
             setActiveIndex(-1);
             if (!open) setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={openDropdown}
+          onClick={openDropdown}
           onKeyDown={handleKeyDown}
           className={`w-full min-w-0 box-border rounded-xl text-sm outline-none border transition-colors duration-150 bg-[var(--bg-input-field)] border-[var(--border-input-field)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:uppercase focus:border-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30 disabled:opacity-50 ${
-            compact ? "h-11 px-[14px] pr-9" : "h-12 px-3 pr-10"
+            compact ? "h-11 px-[14px] pr-16" : "h-12 px-3 pr-[68px]"
           }`}
           style={errorText ? { borderColor: "var(--accent-red)" } : undefined}
         />
+        {value && !disabled && (
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              clearSelection();
+            }}
+            aria-label="Kosongkan pilihan"
+            className="absolute right-8 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-md transition-colors hover:bg-[var(--hover-subtle)]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
         <span
           className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
           style={{ color: "var(--text-muted)" }}

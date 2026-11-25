@@ -134,17 +134,25 @@ export interface MembajaItem {
   kg: number;
 }
 
+export interface MembajaTrip {
+  trip_no: number;
+  items: MembajaItem[];
+  total_bags: number;
+  total_kg: number;
+}
+
 export interface MembajaDetails {
   contractor: string;
   worker_count: number;
   driver_name: string | null;
   lorry_no: string | null;
-  trip_count: number;
+  round_no: 1 | 2 | 3 | 4 | 5 | null;
   fertilizer_type: string | null;
-  items: MembajaItem[];
+  trip_count: number;
+  trips: MembajaTrip[];
   total_bags: number;
   total_kg: number;
-  chekar_area_ha: number | null;
+  area_ha: number | null;
   rate_per_palm_kg: number | null;
 }
 
@@ -160,6 +168,7 @@ export interface MencuciRound {
 }
 
 export interface MencuciDetails {
+  contractor: string | null;
   method: string | null;
   area_ha: number | null;
   chemical_name: string | null;
@@ -171,12 +180,45 @@ export interface MencuciDetails {
   total_round_area_ha: number;
 }
 
+// ─── Other type-specific details (stored in other_works.details) ────────────
+
+export interface PruningDetails {
+  contractor: string | null;
+  pruning_type: string | null;
+  tree_count: number;
+  area_hectare: number;
+}
+
+export type DitchLengthUnit = "M" | "KM";
+
+export interface CuciParitDetails {
+  contractor: string;
+  ditch_length_value: number;
+  ditch_length_unit: DitchLengthUnit;
+  ditch_length_m: number;
+  ditch_count: number;
+  depth_cm: number | null;
+}
+
+export interface BaikiJalanDetails {
+  contractor: string | null;
+  road_length_m: number;
+  material: string | null;
+  machine: string | null;
+}
+
+export interface LainLainDetails {
+  contractor: string | null;
+  description: string;
+  quantity: number;
+  unit: string;
+}
+
 // ─── Saved creatable dropdown options (work_options) ────────────────────────
 
 export type WorkOptionCategory =
   | "contractor"
-  | "fertilizer_type"
-  | "fertilizer_name"
+  | "fertilizer"
   | "method"
   | "chemical_name"
   | "pruning_type"

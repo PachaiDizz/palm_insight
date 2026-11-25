@@ -2,7 +2,7 @@
 
 import { MapPin, Users, Clock, Timer, Pencil, Truck, Eye, type LucideIcon } from "lucide-react";
 import type { OtherWork } from "@/types";
-import { getJobTypeMeta, getDetailChips, getMembajaSubline } from "./jobMeta";
+import { getJobTypeMeta, getDetailChips, getContractorLine } from "./jobMeta";
 import JobStatusChip from "./JobStatusChip";
 import { formatDateTime, formatDuration } from "@/lib/otherWorks";
 
@@ -37,14 +37,9 @@ export default function JobCard({
   const duration = formatDuration(job.started_at, job.ended_at);
   const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
   const chips = getDetailChips(job.type, job.details);
-  const subline = job.type === "membaja" ? getMembajaSubline(job.details) : null;
+  const subline = getContractorLine(job.details);
 
-  const isMembaja = job.type === "membaja";
-  const detailsObj = (job.details ?? {}) as Record<string, unknown>;
-  const contractorText =
-    typeof detailsObj.contractor === "string" ? detailsObj.contractor : "";
   const workerText = `${Number(job.worker_count) || 0} pekerja`;
-  const secondaryText = isMembaja ? contractorText || "—" : workerText;
 
   return (
     <article
@@ -112,7 +107,7 @@ export default function JobCard({
         </div>
       )}
 
-      {/* Membaja contractor / lorry subline */}
+      {/* Contractor / lorry subline (all job types) */}
       {subline && (
         <p
           className="text-[10px] font-semibold uppercase tracking-wide"
@@ -125,8 +120,7 @@ export default function JobCard({
       {/* Meta */}
       <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
         <Meta icon={MapPin} value={blockText} />
-        <Meta icon={Users} value={secondaryText} />
-        {isMembaja && <Meta icon={Users} value={workerText} />}
+        <Meta icon={Users} value={workerText} />
         <Meta icon={Clock} value={formatDateTime(job.started_at)} />
       </div>
 

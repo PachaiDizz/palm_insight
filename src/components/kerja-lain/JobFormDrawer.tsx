@@ -46,6 +46,7 @@ function defaultsFor(type: OtherWorkType): Record<string, string> {
   switch (type) {
     case "mencuci_merumput":
       return {
+        contractor: "",
         method: "",
         area_ha: "",
         chemical_name: "",
@@ -59,21 +60,54 @@ function defaultsFor(type: OtherWorkType): Record<string, string> {
         contractor: "",
         driver_name: "",
         lorry_no: "",
-        trip_count: "0",
+        round_no: "",
+        trip_count: "1",
         fertilizer_type: "",
-        items: JSON.stringify([{ name: "", bags: "", kg: "" }]),
-        chekar_area_ha: "",
+        trips: JSON.stringify([{ items: [{ name: "", bags: "", kg: "" }] }]),
+        area_ha: "",
         rate_per_palm_kg: "",
       };
     case "pruning":
-      return { pruning_type: "", tree_count: "", area_hectare: "" };
+      return { contractor: "", pruning_type: "", tree_count: "", area_hectare: "" };
     case "cuci_parit":
-      return { ditch_length_m: "", ditch_count: "", depth_cm: "" };
+      return {
+        contractor: "",
+        ditch_length_value: "",
+        ditch_length_unit: "M",
+        ditch_count: "",
+        depth_cm: "",
+      };
     case "baiki_jalan":
-      return { road_length_m: "", material: "", machine: "" };
+      return { contractor: "", road_length_m: "", material: "", machine: "" };
     case "lain_lain":
-      return { description: "", quantity: "", unit: "" };
+      return { contractor: "", description: "", quantity: "", unit: "" };
   }
+}
+
+/** Merge saved details onto defaults, upgrading legacy MEMBAJA shapes. */
+function initialDetails(
+  type: OtherWorkType,
+  saved: Record<string, unknown> | null | undefined
+): Record<string, string> {
+  const merged = { ...defaultsFor(type), ...toStringRecord(saved) };
+  if (type === "membaja" && saved) {
+    const hasTrips = Array.isArray(saved.trips) && saved.trips.length > 0;
+    const legacyItems = saved.items;
+    if (!hasTrips && Array.isArray(legacyItems) && legacyItems.length > 0) {
+      merged.trips = JSON.stringify([{ items: legacyItems }]);
+      merged.trip_count = "1";
+    }
+    if (!merged.area_ha && merged["chekar_area_ha"]) {
+      merged.area_ha = merged["chekar_area_ha"];
+    }
+  }
+  if (type === "cuci_parit" && saved) {
+    if (!merged.ditch_length_value && merged["ditch_length_m"]) {
+      merged.ditch_length_value = merged["ditch_length_m"];
+      merged.ditch_length_unit = "M";
+    }
+  }
+  return merged;
 }
 
 function toStringRecord(d: Record<string, unknown> | null | undefined): Record<string, string> {
@@ -94,15 +128,9 @@ function toStringRecord(d: Record<string, unknown> | null | undefined): Record<s
 
 const letterFor = (i: number) => String.fromCharCode(65 + (i % 26));
 
-function parseFertilizerItems(raw?: string) {
-  let arr: unknown = [];
-  try {
-    arr = JSON.parse(raw || "[]");
-  } catch {
-    arr = [];
-  }
-  if (!Array.isArray(arr)) return [];
-  return arr
+function parseTripItems(rawItems: unknown) {
+  if (!Array.isArray(rawItems)) return [];
+  return rawItems
     .map((r, i) => {
       const o = (r ?? {}) as Record<string, unknown>;
       return {
@@ -113,6 +141,24 @@ function parseFertilizerItems(raw?: string) {
       };
     })
     .filter((r) => !(r.name === "" && r.bags === undefined && r.kg === undefined));
+}
+
+function parseMembajaTrips(raw?: string) {
+  let arr: unknown = [];
+  try {
+    arr = JSON.parse(raw || "[]");
+  } catch {
+    arr = [];
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr.map((t, i) => {
+    const o = (t ?? {}) as Record<string, unknown>;
+    return { trip_no: i + 1, items: parseTripItems(o.items) };
+  });
+}
+
+function parseDitchUnit(raw?: string): "M" | "KM" {
+  return (raw ?? "").trim().toUpperCase() === "KM" ? "KM" : "M";
 }
 
 function parseRounds(raw?: string) {
@@ -155,6 +201,7 @@ function buildCandidate(
     case "mencuci_merumput":
       return {
         type,
+        contractor: strOrUndef(raw.contractor),
         method: strOrUndef(raw.method),
         area_ha: numOrUndef(raw.area_ha),
         chemical_name: strOrUndef(raw.chemical_name),
@@ -163,36 +210,51 @@ function buildCandidate(
         last_work_date: raw.last_work_date?.trim() || undefined,
         rounds: parseRounds(raw.rounds),
       };
-    case "membaja":
+    case "membaja": {
+      const round = numOrUndef(raw.round_no);
       return {
         type,
         contractor: (raw.contractor ?? "").trim().toUpperCase(),
         worker_count: Math.max(0, Math.round(workerCount)),
         driver_name: strOrUndef(raw.driver_name),
         lorry_no: strOrUndef(raw.lorry_no),
-        trip_count: Math.max(0, Math.round(Number(raw.trip_count) || 0)),
+        round_no: round != null && Number.isFinite(round) ? round : undefined,
         fertilizer_type: strOrUndef(raw.fertilizer_type),
-        items: parseFertilizerItems(raw.items),
-        chekar_area_ha: numOrUndef(raw.chekar_area_ha),
+        trips: parseMembajaTrips(raw.trips),
+        area_ha: numOrUndef(raw.area_ha),
         rate_per_palm_kg: numOrUndef(raw.rate_per_palm_kg),
       };
+    }
     case "pruning":
       return {
         type,
+        contractor: strOrUndef(raw.contractor),
         pruning_type: strOrUndef(raw.pruning_type),
         tree_count: numOrUndef(raw.tree_count),
         area_hectare: numOrUndef(raw.area_hectare),
       };
-    case "cuci_parit":
+    case "cuci_parit": {
+      const unit = parseDitchUnit(raw.ditch_length_unit);
+      const value = numOrUndef(raw.ditch_length_value);
       return {
         type,
-        ditch_length_m: numOrUndef(raw.ditch_length_m),
+        contractor: (raw.contractor ?? "").trim().toUpperCase(),
+        ditch_length_value: value,
+        ditch_length_unit: unit,
+        ditch_length_m:
+          value != null && Number.isFinite(value)
+            ? unit === "KM"
+              ? value * 1000
+              : value
+            : value,
         ditch_count: numOrUndef(raw.ditch_count),
         depth_cm: numOrUndef(raw.depth_cm),
       };
+    }
     case "baiki_jalan":
       return {
         type,
+        contractor: strOrUndef(raw.contractor),
         road_length_m: numOrUndef(raw.road_length_m),
         material: strOrUndef(raw.material),
         machine: strOrUndef(raw.machine),
@@ -200,6 +262,7 @@ function buildCandidate(
     case "lain_lain":
       return {
         type,
+        contractor: strOrUndef(raw.contractor),
         description: (raw.description ?? "").trim().toUpperCase(),
         quantity: numOrUndef(raw.quantity),
         unit: (raw.unit ?? "").trim().toUpperCase(),
@@ -271,10 +334,9 @@ export default function JobFormDrawer({
 
   const [title, setTitle] = useState(editing?.title ?? "");
 
-  const [details, setDetails] = useState<Record<string, string>>(() => ({
-    ...defaultsFor(initialType),
-    ...toStringRecord(editing?.details),
-  }));
+  const [details, setDetails] = useState<Record<string, string>>(() =>
+    initialDetails(initialType, editing?.details)
+  );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -335,9 +397,23 @@ export default function JobFormDrawer({
 
     // Totals are always derived on save (never trusted from the UI).
     if (type === "membaja") {
-      const items = (detailData.items as { bags: number; kg: number }[] | undefined) ?? [];
-      detailData.total_bags = items.reduce((s, it) => s + (Number(it.bags) || 0), 0);
-      detailData.total_kg = items.reduce((s, it) => s + (Number(it.kg) || 0), 0);
+      type TripItems = { bags: number; kg: number }[];
+      const trips =
+        (detailData.trips as { trip_no: number; items: TripItems }[] | undefined) ?? [];
+      let grandBags = 0;
+      let grandKg = 0;
+      detailData.trips = trips.map((t, i) => {
+        const items = t.items ?? [];
+        const bags = items.reduce((s, it) => s + (Number(it.bags) || 0), 0);
+        const kg = items.reduce((s, it) => s + (Number(it.kg) || 0), 0);
+        grandBags += bags;
+        grandKg += kg;
+        return { ...t, trip_no: i + 1, total_bags: bags, total_kg: kg };
+      });
+      detailData.trip_count = trips.length;
+      detailData.total_bags = grandBags;
+      detailData.total_kg = grandKg;
+      if (detailData.round_no == null) detailData.round_no = null;
     } else if (type === "mencuci_merumput") {
       const rounds = (detailData.rounds as { area_ha?: number }[] | undefined) ?? [];
       detailData.total_rounds = rounds.length;
@@ -347,7 +423,8 @@ export default function JobFormDrawer({
       );
     }
 
-    const finalTitle = (title.trim() ? title.trim() : autoTitle).toUpperCase();
+    const finalTitle =
+      type === "lain_lain" && title.trim() ? title.trim().toUpperCase() : autoTitle;
     const finalProgress =
       status === "completed" ? 100 : status === "running" ? Math.max(0, Math.min(100, progress)) : 0;
 
@@ -382,12 +459,15 @@ export default function JobFormDrawer({
     }
 
     // Persist any typed-but-unsaved creatable values against the block.
-    const optionEntries: { category: WorkOptionCategory; value: string | null | undefined }[] = [];
+    const optionEntries: { category: WorkOptionCategory; value: string | null | undefined }[] = [
+      { category: "contractor", value: details.contractor },
+    ];
     if (type === "membaja") {
-      optionEntries.push({ category: "contractor", value: details.contractor });
-      optionEntries.push({ category: "fertilizer_type", value: details.fertilizer_type });
-      for (const it of parseFertilizerItems(details.items)) {
-        optionEntries.push({ category: "fertilizer_name", value: it.name });
+      optionEntries.push({ category: "fertilizer", value: details.fertilizer_type });
+      for (const trip of parseMembajaTrips(details.trips)) {
+        for (const it of trip.items) {
+          optionEntries.push({ category: "fertilizer", value: it.name });
+        }
       }
     } else if (type === "mencuci_merumput") {
       optionEntries.push({ category: "method", value: details.method });
@@ -439,7 +519,15 @@ export default function JobFormDrawer({
           />
         );
       case "cuci_parit":
-        return <CuciParitFields value={details} onChange={setDetail} errors={errors} />;
+        return (
+          <CuciParitFields
+            value={details}
+            onChange={setDetail}
+            errors={errors}
+            plantationId={plantationId}
+            onToast={onToast}
+          />
+        );
       case "baiki_jalan":
         return (
           <BaikiJalanFields
@@ -451,7 +539,15 @@ export default function JobFormDrawer({
           />
         );
       case "lain_lain":
-        return <LainFields value={details} onChange={setDetail} errors={errors} />;
+        return (
+          <LainFields
+            value={details}
+            onChange={setDetail}
+            errors={errors}
+            plantationId={plantationId}
+            onToast={onToast}
+          />
+        );
     }
   };
 
@@ -499,12 +595,14 @@ export default function JobFormDrawer({
             options={JOB_TYPES.map((jt) => ({ value: jt.value, label: jt.label, icon: jt.icon }))}
           />
 
-          <TextField
-            label="Tajuk Kerja (pilihan)"
-            placeholder="Cth. Membaja Blok 04 Pusingan 2"
-            value={title}
-            onChange={setTitle}
-          />
+          {type === "lain_lain" && (
+            <TextField
+              label="Tajuk Kerja (pilihan)"
+              placeholder="Cth. Kerja baik pulih pagar"
+              value={title}
+              onChange={setTitle}
+            />
+          )}
 
           <div>
             <FieldLabel required>Status</FieldLabel>

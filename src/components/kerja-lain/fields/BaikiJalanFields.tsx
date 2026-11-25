@@ -13,6 +13,17 @@ export default function BaikiJalanFields({
 }: FieldGroupProps) {
   return (
     <div className="space-y-3">
+      <CreatableCombobox
+        category="contractor"
+        plantationId={plantationId}
+        value={value.contractor ?? ""}
+        onChange={(v) => onChange("contractor", v)}
+        onToast={onToast}
+        label="Kontraktor (pilihan)"
+        placeholder="PILIH KONTRAKTOR"
+        error={errors.contractor}
+      />
+
       <NumberField
         label="Panjang jalan"
         unit="M"

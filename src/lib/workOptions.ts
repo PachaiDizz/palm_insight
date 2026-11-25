@@ -1,6 +1,27 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabaseClient";
 import type { WorkOption, WorkOptionCategory } from "@/types";
+
+const WORK_OPTIONS_QUERY_KEY = ["workOptions"] as const;
+
+// One shared realtime subscription per app session — every mounted combobox
+// reads the same React Query cache, so a single channel keeps them all fresh.
+let realtimeStarted = false;
+function ensureRealtime(queryClient: QueryClient) {
+  if (realtimeStarted) return;
+  realtimeStarted = true;
+  supabase
+    .channel("work_options_changes")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "work_options" },
+      () => {
+        queryClient.invalidateQueries({ queryKey: WORK_OPTIONS_QUERY_KEY });
+      }
+    )
+    .subscribe();
+}
 
 /** Trim, collapse whitespace and force uppercase. */
 export function normalizeOption(raw: string): string {
@@ -8,7 +29,7 @@ export function normalizeOption(raw: string): string {
 }
 
 function keyFor(category: WorkOptionCategory, plantationId?: string | null) {
-  return ["workOptions", category, plantationId ?? "global"] as const;
+  return [...WORK_OPTIONS_QUERY_KEY, category, plantationId ?? "global"] as const;
 }
 
 function dedupe(options: WorkOption[]): WorkOption[] {
@@ -93,6 +114,10 @@ export function useWorkOptions(
   const pid = plantationId || null;
   const key = keyFor(category, pid);
 
+  useEffect(() => {
+    ensureRealtime(queryClient);
+  }, [queryClient]);
+
   const query = useQuery({
     queryKey: key,
     queryFn: () => fetchWorkOptions(category, pid),
@@ -118,7 +143,8 @@ export function useWorkOptions(
 
     try {
       await addWorkOption(category, value, pid);
-      queryClient.invalidateQueries({ queryKey: key });
+      queryClient.invalidateQueries({ queryKey: WORK_OPTIONS_QUERY_KEY });
+      await queryClient.refetchQueries({ queryKey: key });
       return value;
     } catch (err) {
       queryClient.setQueryData<WorkOption[]>(key, previous);

@@ -46,18 +46,35 @@ export default function JobDetailDrawer({
   const isMembaja = job.type === "membaja";
   const isMencuci = job.type === "mencuci_merumput";
 
-  const rawItems = Array.isArray(details.items) ? (details.items as unknown[]) : [];
-  const items = rawItems.map((r) => {
-    const o = (r ?? {}) as Record<string, unknown>;
-    return {
-      name: String(o.name ?? ""),
-      bags: Number(o.bags) || 0,
-      kg: Number(o.kg) || 0,
-    };
-  });
-  const totalBags = Number(details.total_bags) || items.reduce((s, i) => s + i.bags, 0);
-  const totalKg = Number(details.total_kg) || items.reduce((s, i) => s + i.kg, 0);
-  const tripCount = Number(details.trip_count) || 0;
+  const parseItems = (raw: unknown) =>
+    (Array.isArray(raw) ? (raw as unknown[]) : []).map((r) => {
+      const o = (r ?? {}) as Record<string, unknown>;
+      return {
+        name: String(o.name ?? ""),
+        bags: Number(o.bags) || 0,
+        kg: Number(o.kg) || 0,
+      };
+    });
+
+  // Prefer the new `trips` array; fall back to legacy flat `items`.
+  const rawTrips = Array.isArray(details.trips) ? (details.trips as unknown[]) : [];
+  const trips = rawTrips.length
+    ? rawTrips.map((t, i) => {
+        const o = (t ?? {}) as Record<string, unknown>;
+        return { trip_no: Number(o.trip_no) || i + 1, items: parseItems(o.items) };
+      })
+    : Array.isArray(details.items) && details.items.length
+      ? [{ trip_no: 1, items: parseItems(details.items) }]
+      : [];
+
+  const totalBags =
+    Number(details.total_bags) ||
+    trips.reduce((s, t) => s + t.items.reduce((a, i) => a + i.bags, 0), 0);
+  const totalKg =
+    Number(details.total_kg) ||
+    trips.reduce((s, t) => s + t.items.reduce((a, i) => a + i.kg, 0), 0);
+  const tripCount = Number(details.trip_count) || trips.length;
+  const roundNo = details.round_no == null ? null : Number(details.round_no);
 
   const rawRounds = Array.isArray(details.rounds) ? (details.rounds as unknown[]) : [];
   const rounds = rawRounds.map((r, i) => {
@@ -125,6 +142,7 @@ export default function JobDetailDrawer({
         <div className="grid grid-cols-2 gap-3">
           <Field label="Blok" value={blockText} />
           <Field label="Pekerja" value={`${job.worker_count} pekerja`} />
+          <Field label="Kontraktor" value={String(details.contractor ?? "")} />
           <Field label="Status" value={job.status.replace("_", " ")} />
         </div>
 
@@ -140,14 +158,14 @@ export default function JobDetailDrawer({
         {isMembaja && (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Kontraktor" value={String(details.contractor ?? "")} />
+              <Field label="Pusingan" value={roundNo ? `PUSINGAN ${roundNo}` : ""} />
               <Field label="Bilangan Trip" value={tripCount ? `${tripCount} TRIP` : ""} />
               <Field label="Jenis Baja" value={String(details.fertilizer_type ?? "")} />
               <Field label="Nama Driver" value={String(details.driver_name ?? "")} />
               <Field label="No. Lori" value={String(details.lorry_no ?? "")} />
               <Field
-                label="Keluasan Chekar"
-                value={details.chekar_area_ha != null ? `${Number(details.chekar_area_ha)} HA` : ""}
+                label="Keluasan Hektar"
+                value={details.area_ha != null ? `${Number(details.area_ha)} HA` : ""}
               />
               <Field
                 label="Kadar Per Pokok"
@@ -155,56 +173,79 @@ export default function JobDetailDrawer({
               />
             </div>
 
-            {/* JADUAL BAJA */}
+            {/* JADUAL BAJA — one table per trip */}
             <div>
               <h3 className="text-[11px] font-bold tracking-[0.14em] mb-2" style={{ color: "var(--accent-primary)" }}>
                 Jadual Baja
               </h3>
-              <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--bg-input)" }}>
-                <div
-                  className="grid grid-cols-[24px_minmax(0,1fr)_64px_84px] gap-2 px-3 py-2 text-[10px] font-semibold"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  <span>No.</span>
-                  <span>Nama Baja</span>
-                  <span className="text-right">Bag</span>
-                  <span className="text-right">Kg</span>
+              {trips.length === 0 ? (
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Tiada trip
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {trips.map((trip) => {
+                    const tripBags = trip.items.reduce((s, i) => s + i.bags, 0);
+                    const tripKg = trip.items.reduce((s, i) => s + i.kg, 0);
+                    return (
+                      <div
+                        key={trip.trip_no}
+                        className="rounded-xl overflow-hidden"
+                        style={{ backgroundColor: "var(--bg-input)" }}
+                      >
+                        <div
+                          className="flex items-center justify-between gap-2 px-3 py-2 text-[10px] font-bold"
+                          style={{ color: "var(--accent-primary)" }}
+                        >
+                          <span>TRIP {trip.trip_no}</span>
+                          <span className="tabular-nums">
+                            {tripBags.toLocaleString("en-MY")} BAG · {tripKg.toLocaleString("en-MY")} KG
+                          </span>
+                        </div>
+                        {trip.items.map((it, i) => (
+                          <div
+                            key={i}
+                            className="grid grid-cols-[24px_minmax(0,1fr)_64px_84px] gap-2 px-3 py-2 text-xs border-t"
+                            style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
+                          >
+                            <span className="font-bold" style={{ color: "var(--accent-primary)" }}>
+                              {letterFor(i)}
+                            </span>
+                            <span className="truncate text-theme">{it.name}</span>
+                            <span className="text-right tabular-nums">{it.bags.toLocaleString("en-MY")}</span>
+                            <span className="text-right tabular-nums">{it.kg.toLocaleString("en-MY")}</span>
+                          </div>
+                        ))}
+                        <div
+                          className="grid grid-cols-[24px_minmax(0,1fr)_64px_84px] gap-2 px-3 py-2 text-xs font-bold border-t"
+                          style={{ borderColor: "var(--accent-primary-border)", color: "var(--accent-primary)" }}
+                        >
+                          <span />
+                          <span>Subjumlah</span>
+                          <span className="text-right tabular-nums">{tripBags.toLocaleString("en-MY")}</span>
+                          <span className="text-right tabular-nums">{tripKg.toLocaleString("en-MY")}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                {items.length === 0 ? (
-                  <p className="px-3 pb-3 text-xs" style={{ color: "var(--text-muted)" }}>
-                    Tiada baris
-                  </p>
-                ) : (
-                  items.map((it, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-[24px_minmax(0,1fr)_64px_84px] gap-2 px-3 py-2 text-xs border-t"
-                      style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
-                    >
-                      <span className="font-bold" style={{ color: "var(--accent-primary)" }}>
-                        {letterFor(i)}
-                      </span>
-                      <span className="truncate text-theme">{it.name}</span>
-                      <span className="text-right tabular-nums">{it.bags.toLocaleString("en-MY")}</span>
-                      <span className="text-right tabular-nums">{it.kg.toLocaleString("en-MY")}</span>
-                    </div>
-                  ))
-                )}
-                <div
-                  className="grid grid-cols-[24px_minmax(0,1fr)_64px_84px] gap-2 px-3 py-2.5 text-xs font-bold border-t"
-                  style={{ borderColor: "var(--accent-primary-border)", color: "var(--accent-primary)" }}
-                >
-                  <span />
-                  <span>Jumlah</span>
-                  <span className="text-right tabular-nums">{totalBags.toLocaleString("en-MY")}</span>
-                  <span className="text-right tabular-nums">{totalKg.toLocaleString("en-MY")}</span>
+              )}
+
+              <div
+                className="mt-3 rounded-xl p-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm font-bold tabular-nums"
+                style={{
+                  backgroundColor: "var(--accent-primary-light)",
+                  border: "1px solid var(--accent-primary-border)",
+                  color: "var(--accent-primary)",
+                }}
+              >
+                <span>JUMLAH</span>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="whitespace-nowrap">{tripCount} TRIP</span>
+                  <span className="whitespace-nowrap">{totalBags.toLocaleString("en-MY")} BAG</span>
+                  <span className="whitespace-nowrap">{totalKg.toLocaleString("en-MY")} KG</span>
                 </div>
               </div>
-              {tripCount > 0 && (
-                <p className="mt-2 text-[11px] font-semibold" style={{ color: "var(--accent-primary)" }}>
-                  JUMLAH TRIP: {tripCount.toLocaleString("en-MY")} TRIP
-                </p>
-              )}
             </div>
           </>
         )}
@@ -290,6 +331,68 @@ export default function JobDetailDrawer({
               </div>
             </div>
           </>
+        )}
+
+        {/* CUCI PARIT specifics */}
+        {job.type === "cuci_parit" && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Panjang Parit"
+              value={
+                details.ditch_length_value != null
+                  ? `${Number(details.ditch_length_value).toLocaleString("en-MY")} ${String(
+                      details.ditch_length_unit ?? "M"
+                    )}`
+                  : details.ditch_length_m != null
+                    ? `${Number(details.ditch_length_m).toLocaleString("en-MY")} M`
+                    : ""
+              }
+            />
+            <Field label="Bilangan Parit" value={String(details.ditch_count ?? "")} />
+            <Field
+              label="Kedalaman"
+              value={details.depth_cm != null ? `${Number(details.depth_cm)} CM` : ""}
+            />
+          </div>
+        )}
+
+        {/* PRUNING specifics */}
+        {job.type === "pruning" && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Jenis Pruning" value={String(details.pruning_type ?? "")} />
+            <Field label="Bilangan Pokok" value={String(details.tree_count ?? "")} />
+            <Field
+              label="Luas"
+              value={details.area_hectare != null ? `${Number(details.area_hectare)} HA` : ""}
+            />
+          </div>
+        )}
+
+        {/* BAIKI JALAN specifics */}
+        {job.type === "baiki_jalan" && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Panjang Jalan"
+              value={details.road_length_m != null ? `${Number(details.road_length_m)} M` : ""}
+            />
+            <Field label="Bahan" value={String(details.material ?? "")} />
+            <Field label="Mesin" value={String(details.machine ?? "")} />
+          </div>
+        )}
+
+        {/* LAIN-LAIN specifics */}
+        {job.type === "lain_lain" && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Huraian" value={String(details.description ?? "")} />
+            <Field
+              label="Kuantiti"
+              value={
+                details.quantity != null
+                  ? `${Number(details.quantity)} ${String(details.unit ?? "")}`.trim()
+                  : ""
+              }
+            />
+          </div>
         )}
 
         {/* Notes */}

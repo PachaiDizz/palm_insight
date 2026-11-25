@@ -123,9 +123,22 @@ const reqNum = z.coerce.number().gt(0, "MESTI LEBIH DARIPADA 0");
 const optNum = z.coerce.number().min(0).optional();
 
 /** Validates the type-specific `details` payload. Discriminated on `type`. */
+const fertItemSchema = z.object({
+  label: z.string(),
+  name: z.string().min(1, "NAMA BAJA DIPERLUKAN"),
+  bags: z.coerce.number().int("BAG MESTI NOMBOR BULAT").gt(0, "BAG MESTI > 0"),
+  kg: z.coerce.number().gt(0, "KG MESTI > 0"),
+});
+
+const membajaTripSchema = z.object({
+  trip_no: z.coerce.number().int().min(1),
+  items: z.array(fertItemSchema).min(1, "SEKURANG-KURANGNYA SATU BARIS"),
+});
+
 export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("mencuci_merumput"),
+    contractor: z.string().optional(),
     method: z.string().optional(),
     area_ha: optNum,
     chemical_name: z.string().optional(),
@@ -151,41 +164,38 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
     worker_count: z.coerce.number().min(0),
     driver_name: z.string().optional(),
     lorry_no: z.string().optional(),
-    trip_count: z.coerce.number().int().min(0).default(0),
+    round_no: z.coerce.number().int().min(1).max(5).optional(),
     fertilizer_type: z.string().optional(),
-    items: z
-      .array(
-        z.object({
-          label: z.string(),
-          name: z.string().min(1, "NAMA BAJA DIPERLUKAN"),
-          bags: z.coerce.number().int("BAG MESTI NOMBOR BULAT").gt(0, "BAG MESTI > 0"),
-          kg: z.coerce.number().gt(0, "KG MESTI > 0"),
-        })
-      )
-      .min(1, "SEKURANG-KURANGNYA SATU BARIS"),
-    chekar_area_ha: optNum,
+    trips: z.array(membajaTripSchema).min(1, "SEKURANG-KURANGNYA SATU TRIP"),
+    area_ha: optNum,
     rate_per_palm_kg: optNum,
   }),
   z.object({
     type: z.literal("pruning"),
+    contractor: z.string().optional(),
     pruning_type: z.string().optional(),
     tree_count: reqNum,
     area_hectare: reqNum,
   }),
   z.object({
     type: z.literal("cuci_parit"),
+    contractor: z.string().min(1, "KONTRAKTOR DIPERLUKAN"),
+    ditch_length_value: reqNum,
+    ditch_length_unit: z.enum(["M", "KM"]).default("M"),
     ditch_length_m: reqNum,
     ditch_count: reqNum,
     depth_cm: optNum,
   }),
   z.object({
     type: z.literal("baiki_jalan"),
+    contractor: z.string().optional(),
     road_length_m: reqNum,
     material: z.string().optional(),
     machine: z.string().optional(),
   }),
   z.object({
     type: z.literal("lain_lain"),
+    contractor: z.string().optional(),
     description: z.string().min(1, "HURAIAN DIPERLUKAN"),
     quantity: reqNum,
     unit: z.string().min(1, "UNIT DIPERLUKAN"),

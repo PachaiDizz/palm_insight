@@ -53,6 +53,7 @@ function asStr(v: unknown): string | undefined {
   return typeof v === "string" && v.trim() ? v.toUpperCase() : undefined;
 }
 function asNum(v: unknown): number | undefined {
+  if (v === null || v === undefined || v === "") return undefined;
   const n = Number(v);
   return Number.isFinite(n) ? n : undefined;
 }
@@ -96,12 +97,14 @@ export function getDetailChips(
     }
     case "membaja": {
       chips.push("MEMBAJA");
+      const round = asNum(d.round_no);
+      if (round != null) push(`PUSINGAN ${round}`);
+      const trips = asNum(d.trip_count);
+      if (trips != null && trips > 0) push(`${trips} TRIP`);
       const bags = asNum(d.total_bags);
       if (bags != null) push(`${bags.toLocaleString("en-MY")} BAG`);
       const kg = asNum(d.total_kg);
       if (kg != null) push(`${kg.toLocaleString("en-MY")} KG`);
-      const trips = asNum(d.trip_count);
-      if (trips != null && trips > 0) push(`${trips} TRIP`);
       break;
     }
     case "pruning": {
@@ -113,8 +116,11 @@ export function getDetailChips(
     }
     case "cuci_parit": {
       chips.push("CUCI PARIT");
-      const len = asNum(d.ditch_length_m);
-      if (len != null) push(`${len} M`);
+      const value = asNum(d.ditch_length_value);
+      const unit = asStr(d.ditch_length_unit);
+      const legacy = asNum(d.ditch_length_m);
+      if (value != null) push(`${value} ${unit ?? "M"}`);
+      else if (legacy != null) push(`${legacy} M`);
       const cnt = asNum(d.ditch_count);
       if (cnt != null) push(`${cnt} PARIT`);
       break;
@@ -135,11 +141,11 @@ export function getDetailChips(
     }
   }
 
-  return chips.filter(Boolean).slice(0, 4);
+  return chips.filter(Boolean).slice(0, 6);
 }
 
-/** Second-line summary for MEMBAJA cards: "KONTRAKTOR: X · LORI: Y". */
-export function getMembajaSubline(
+/** Second-line summary shown on every job card: "KONTRAKTOR: X · LORI: Y". */
+export function getContractorLine(
   details: Record<string, unknown> | null
 ): string | null {
   const d = details ?? {};

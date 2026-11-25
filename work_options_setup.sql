@@ -77,16 +77,11 @@ create policy "work_options_delete_owner" on public.work_options for delete usin
 insert into public.work_options (plantation_id, category, value)
 select null, v.category, v.value
 from (values
-  ('fertilizer_type', 'FELDA COMPACT'),
-  ('fertilizer_type', 'NPK'),
-  ('fertilizer_type', 'UREA'),
-  ('fertilizer_type', 'MOP'),
-  ('fertilizer_type', 'KIESERITE'),
-  ('fertilizer_name', 'FELDA COMPACT'),
-  ('fertilizer_name', 'NPK'),
-  ('fertilizer_name', 'UREA'),
-  ('fertilizer_name', 'MOP'),
-  ('fertilizer_name', 'KIESERITE'),
+  ('fertilizer', 'FELDA COMPACT'),
+  ('fertilizer', 'NPK'),
+  ('fertilizer', 'UREA'),
+  ('fertilizer', 'MOP'),
+  ('fertilizer', 'KIESERITE'),
   ('method', 'MANUAL'),
   ('method', 'RACUN'),
   ('method', 'MESIN'),

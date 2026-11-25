@@ -2,24 +2,50 @@
 
 import { NumberField, FieldLabel, Stepper } from "../form/controls";
 import CreatableCombobox from "../form/CreatableCombobox";
-import FertilizerTable, { type FertRow } from "../form/FertilizerTable";
+import PusinganPicker from "../form/PusinganPicker";
+import TripScheduleSection, { type TripDraft, emptyTrip } from "../form/TripScheduleSection";
+import type { FertRow } from "../form/FertilizerTable";
 import type { FieldGroupProps } from "./types";
 
-function parseRows(raw?: string): FertRow[] {
-  if (!raw) return [{ name: "", bags: "", kg: "" }];
-  try {
-    const arr = JSON.parse(raw);
-    if (Array.isArray(arr) && arr.length) {
-      return arr.map((r) => ({
-        name: String(r?.name ?? ""),
-        bags: String(r?.bags ?? ""),
-        kg: String(r?.kg ?? ""),
-      }));
-    }
-  } catch {
-    // ignore malformed
+function parseRows(raw: unknown): FertRow[] {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return [{ name: "", bags: "", kg: "" }];
   }
-  return [{ name: "", bags: "", kg: "" }];
+  return raw.map((r) => {
+    const o = (r ?? {}) as Record<string, unknown>;
+    return {
+      name: String(o.name ?? ""),
+      bags: o.bags == null || o.bags === "" ? "" : String(o.bags),
+      kg: o.kg == null || o.kg === "" ? "" : String(o.kg),
+    };
+  });
+}
+
+function parseTrips(raw?: string, legacyItems?: string): TripDraft[] {
+  let arr: unknown = [];
+  try {
+    arr = JSON.parse(raw || "[]");
+  } catch {
+    arr = [];
+  }
+  if (Array.isArray(arr) && arr.length > 0) {
+    return arr.map((t) => {
+      const o = (t ?? {}) as Record<string, unknown>;
+      return { items: parseRows(o.items) };
+    });
+  }
+  // Legacy flat `items` array → single trip.
+  if (legacyItems) {
+    try {
+      const items = JSON.parse(legacyItems);
+      if (Array.isArray(items) && items.length > 0) {
+        return [{ items: parseRows(items) }];
+      }
+    } catch {
+      // ignore malformed
+    }
+  }
+  return [emptyTrip()];
 }
 
 export default function MembajaFields({
@@ -31,8 +57,12 @@ export default function MembajaFields({
   plantationId,
   onToast,
 }: FieldGroupProps) {
-  const rows = parseRows(value.items);
-  const tripCount = Math.max(0, Math.round(Number(value.trip_count) || 0));
+  const trips = parseTrips(value.trips, value.items);
+
+  const setTrips = (next: TripDraft[]) => {
+    onChange("trips", JSON.stringify(next.map((t) => ({ items: t.items }))));
+    onChange("trip_count", String(next.length));
+  };
 
   return (
     <div className="space-y-3">
@@ -87,22 +117,15 @@ export default function MembajaFields({
         </div>
       </div>
 
-      {/* 5) BILANGAN TRIP (HARI INI) */}
-      <div>
-        <FieldLabel>Bilangan Trip (Hari Ini)</FieldLabel>
-        <Stepper
-          value={tripCount}
-          onChange={(n) => onChange("trip_count", String(n))}
-          ariaLabel="Bilangan trip hari ini"
-        />
-        <p className="mt-1 text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-          Berapa kali lori pusing hari ini
-        </p>
-      </div>
+      {/* 4) PUSINGAN */}
+      <PusinganPicker
+        value={value.round_no ?? ""}
+        onChange={(v) => onChange("round_no", v)}
+      />
 
-      {/* 6) JENIS BAJA */}
+      {/* 5) JENIS BAJA */}
       <CreatableCombobox
-        category="fertilizer_type"
+        category="fertilizer"
         plantationId={plantationId}
         value={value.fertilizer_type ?? ""}
         onChange={(v) => onChange("fertilizer_type", v)}
@@ -112,28 +135,24 @@ export default function MembajaFields({
         error={errors.fertilizer_type}
       />
 
-      {/* 7) JADUAL BAJA */}
-      <div>
-        <FieldLabel required>Jadual Baja</FieldLabel>
-        <FertilizerTable
-          rows={rows}
-          onChange={(next) => onChange("items", JSON.stringify(next))}
-          errors={errors}
-          plantationId={plantationId}
-          onToast={onToast}
-          tripCount={tripCount}
-        />
-      </div>
+      {/* 6) TRIP & JADUAL BAJA */}
+      <TripScheduleSection
+        trips={trips}
+        onChange={setTrips}
+        errors={errors}
+        plantationId={plantationId}
+        onToast={onToast}
+      />
 
-      {/* 8) KELUASAN CHEKAR + KADAR PER POKOK */}
+      {/* 7) KELUASAN HEKTAR + KADAR PER POKOK */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <NumberField
-          label="Keluasan Chekar (pilihan)"
+          label="Keluasan Hektar (pilihan)"
           unit="HA"
           step="0.01"
-          value={value.chekar_area_ha ?? ""}
-          onChange={(v) => onChange("chekar_area_ha", v)}
-          error={errors.chekar_area_ha}
+          value={value.area_ha ?? ""}
+          onChange={(v) => onChange("area_ha", v)}
+          error={errors.area_ha}
         />
         <NumberField
           label="Kadar Per Pokok (pilihan)"

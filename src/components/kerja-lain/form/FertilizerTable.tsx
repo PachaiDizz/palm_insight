@@ -28,6 +28,8 @@ export default function FertilizerTable({
   plantationId,
   onToast,
   tripCount = 0,
+  showTotals = true,
+  errorPrefix = "items",
 }: {
   rows: FertRow[];
   onChange: (rows: FertRow[]) => void;
@@ -35,6 +37,10 @@ export default function FertilizerTable({
   plantationId?: string | null;
   onToast?: (toast: ToastData) => void;
   tripCount?: number;
+  /** Hide the grand-total footer (used inside per-trip cards). */
+  showTotals?: boolean;
+  /** Error key prefix, e.g. `trips.0.items`. */
+  errorPrefix?: string;
 }) {
   const [autoFocusIndex, setAutoFocusIndex] = useState(-1);
   const totalBags = rows.reduce((s, r) => s + (Number(r.bags) || 0), 0);
@@ -61,9 +67,9 @@ export default function FertilizerTable({
     <div className="min-w-0 overflow-hidden">
       <div className="space-y-3 min-w-0">
         {rows.map((row, i) => {
-          const eName = errors[`items.${i}.name`];
-          const eBags = errors[`items.${i}.bags`];
-          const eKg = errors[`items.${i}.kg`];
+          const eName = errors[`${errorPrefix}.${i}.name`];
+          const eBags = errors[`${errorPrefix}.${i}.bags`];
+          const eKg = errors[`${errorPrefix}.${i}.kg`];
           const isLast = i === rows.length - 1;
 
           return (
@@ -86,7 +92,7 @@ export default function FertilizerTable({
                   </span>
                   <div className="flex-1 min-w-0">
                     <CreatableCombobox
-                      category="fertilizer_name"
+                      category="fertilizer"
                       plantationId={plantationId}
                       value={row.name}
                       onChange={(v) => update(i, "name", v)}
@@ -191,34 +197,36 @@ export default function FertilizerTable({
         Tambah Baris
       </button>
 
-      <div
-        className="mt-3 rounded-xl p-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 min-w-0"
-        style={{
-          backgroundColor: "var(--accent-primary-light)",
-          border: "1px solid var(--accent-primary-border)",
-        }}
-      >
-        <span
-          className="text-[11px] font-bold tracking-[0.14em] shrink-0"
-          style={{ color: "var(--accent-primary)" }}
-        >
-          Jumlah
-        </span>
+      {showTotals && (
         <div
-          className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-base font-bold tabular-nums min-w-0"
-          style={{ color: "var(--accent-primary)" }}
+          className="mt-3 rounded-xl p-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 min-w-0"
+          style={{
+            backgroundColor: "var(--accent-primary-light)",
+            border: "1px solid var(--accent-primary-border)",
+          }}
         >
-          <span className="whitespace-nowrap">{totalBags.toLocaleString("en-MY")} BAG</span>
-          <span className="whitespace-nowrap">{totalKg.toLocaleString("en-MY")} KG</span>
-          {tripCount > 0 && (
-            <span className="whitespace-nowrap">{tripCount.toLocaleString("en-MY")} TRIP</span>
-          )}
+          <span
+            className="text-[11px] font-bold tracking-[0.14em] shrink-0"
+            style={{ color: "var(--accent-primary)" }}
+          >
+            Jumlah
+          </span>
+          <div
+            className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-base font-bold tabular-nums min-w-0"
+            style={{ color: "var(--accent-primary)" }}
+          >
+            <span className="whitespace-nowrap">{totalBags.toLocaleString("en-MY")} BAG</span>
+            <span className="whitespace-nowrap">{totalKg.toLocaleString("en-MY")} KG</span>
+            {tripCount > 0 && (
+              <span className="whitespace-nowrap">{tripCount.toLocaleString("en-MY")} TRIP</span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {errors.items && (
+      {errors[errorPrefix] && (
         <p className="mt-2 text-[11px] font-medium uppercase" style={{ color: "var(--accent-red)" }} role="alert">
-          {errors.items}
+          {errors[errorPrefix]}
         </p>
       )}
     </div>

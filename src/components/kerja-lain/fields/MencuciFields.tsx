@@ -28,6 +28,17 @@ export default function MencuciFields({
   return (
     <div className="space-y-3">
       <CreatableCombobox
+        category="contractor"
+        plantationId={plantationId}
+        value={value.contractor ?? ""}
+        onChange={(v) => onChange("contractor", v)}
+        onToast={onToast}
+        label="Kontraktor (pilihan)"
+        placeholder="PILIH KONTRAKTOR"
+        error={errors.contractor}
+      />
+
+      <CreatableCombobox
         category="method"
         plantationId={plantationId}
         value={value.method ?? ""}
