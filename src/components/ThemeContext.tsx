@@ -11,12 +11,15 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// v2: app defaults to dark everywhere; light is only used when explicitly chosen.
+const STORAGE_KEY = "palm-insight-theme-v2";
+
 function readInitialTheme(): Theme {
   if (typeof document === "undefined") return "dark";
   if (document.documentElement.classList.contains("light")) return "light";
   if (document.documentElement.classList.contains("dark")) return "dark";
   try {
-    const stored = localStorage.getItem("palm-insight-theme") as Theme | null;
+    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
     if (stored === "light" || stored === "dark") return stored;
   } catch {
     /* ignore */
@@ -44,7 +47,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     try {
-      localStorage.setItem("palm-insight-theme", theme);
+      localStorage.setItem(STORAGE_KEY, theme);
     } catch {
       /* ignore */
     }
