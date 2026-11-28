@@ -139,6 +139,39 @@ export function TextField({
   );
 }
 
+// ── Contractor input (plain free text, no dropdown) ─────────────────────────
+
+export function ContractorField({
+  label = "Kontraktor",
+  value,
+  onChange,
+  error,
+  required,
+}: {
+  label?: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <FieldLabel required={required}>{label}</FieldLabel>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value.toUpperCase())}
+        placeholder="TAIP NAMA KONTRAKTOR"
+        autoComplete="off"
+        className="w-full box-border h-11 px-[14px] rounded-xl text-sm uppercase outline-none border transition-colors duration-150 bg-[var(--bg-input-field)] border-[var(--border-input-field)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30 disabled:opacity-50"
+        style={error ? { borderColor: "var(--accent-red)" } : undefined}
+        aria-invalid={error ? true : undefined}
+      />
+      <FieldError error={error} />
+    </label>
+  );
+}
+
 // ── Segmented control ───────────────────────────────────────────────────────
 
 export interface SegOption<T extends string> {

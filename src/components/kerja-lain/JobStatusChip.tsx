@@ -1,14 +1,7 @@
 "use client";
 
 import type { OtherWorkStatus } from "@/types";
-import { JOB_STATUS_LABELS } from "./jobMeta";
-
-const STATUS_STYLES: Record<OtherWorkStatus, { bg: string; color: string }> = {
-  scheduled: { bg: "var(--accent-blue-light)", color: "var(--accent-blue)" },
-  running: { bg: "var(--status-work-bg)", color: "var(--status-work)" },
-  completed: { bg: "var(--accent-primary-light)", color: "var(--accent-primary)" },
-  cancelled: { bg: "var(--accent-red-light)", color: "var(--accent-red)" },
-};
+import { getStatusStyle } from "./statusStyles";
 
 export default function JobStatusChip({
   status,
@@ -17,26 +10,33 @@ export default function JobStatusChip({
   status: OtherWorkStatus;
   size?: "sm" | "md";
 }) {
-  const style = STATUS_STYLES[status];
+  const style = getStatusStyle(status);
+  const Icon = style.icon;
   const padding = size === "sm" ? "px-2 py-0.5" : "px-2.5 py-1";
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full text-xs font-medium whitespace-nowrap ${padding}`}
-      style={{ backgroundColor: style.bg, color: style.color }}
+      className={`inline-flex items-center gap-1.5 rounded-full text-xs font-medium whitespace-nowrap border ${padding}`}
+      style={{
+        backgroundColor: style.bg,
+        color: style.text,
+        borderColor: style.border,
+      }}
     >
-      {status === "running" && (
-        <span className="relative flex h-1.5 w-1.5" aria-hidden>
+      {style.dot ? (
+        <span className="relative flex h-2 w-2" aria-hidden>
           <span
             className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
-            style={{ backgroundColor: style.color }}
+            style={{ backgroundColor: style.text }}
           />
           <span
-            className="relative inline-flex h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: style.color }}
+            className="relative inline-flex h-2 w-2 rounded-full"
+            style={{ backgroundColor: style.text }}
           />
         </span>
+      ) : (
+        <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />
       )}
-      {JOB_STATUS_LABELS[status]}
+      {style.label}
     </span>
   );
 }

@@ -21,24 +21,34 @@ import Toast, { type ToastData } from "@/components/ui/Toast";
 import { Input, Select } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
+  getStatusStyle,
+  ALL_STATUS_STYLE,
+} from "@/components/kerja-lain/statusStyles";
+import {
   ChevronLeft,
   Plus,
   Briefcase,
+  CalendarClock,
+  Activity,
+  CheckCircle2,
+  type LucideIcon,
 } from "lucide-react";
 import type { OtherWork } from "@/types";
 
-type Tab = "running" | "completed" | "all";
+type Tab = "all" | "scheduled" | "running" | "completed";
 
 function EmptyState({
   title,
   subtitle,
   onAdd,
   showAdd,
+  icon: Icon = Briefcase,
 }: {
   title: string;
   subtitle?: string;
   onAdd?: () => void;
   showAdd?: boolean;
+  icon?: LucideIcon;
 }) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-14 px-6">
@@ -46,9 +56,9 @@ function EmptyState({
         className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
         style={{ backgroundColor: "var(--accent-subtle)", color: "var(--accent-primary)" }}
       >
-        <Briefcase className="w-8 h-8" />
+        <Icon className="w-8 h-8" />
       </div>
-      <p className="text-sm font-semibold text-theme">{title}</p>
+      <p className="text-sm font-semibold uppercase text-theme">{title}</p>
       {subtitle && (
         <p className="text-xs mt-1 max-w-xs" style={{ color: "var(--text-muted)" }}>
           {subtitle}
@@ -121,6 +131,7 @@ export default function KerjaLainPage() {
   const [detailJob, setDetailJob] = useState<OtherWork | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
 
+  const scheduled = useMemo(() => works.filter((w) => w.status === "scheduled"), [works]);
   const running = useMemo(() => works.filter((w) => w.status === "running"), [works]);
   const completed = useMemo(() => works.filter((w) => w.status === "completed"), [works]);
 
@@ -136,6 +147,11 @@ export default function KerjaLainPage() {
     () => completed.filter(passesFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [completed, filterType, fromDate, toDate]
+  );
+  const filteredScheduled = useMemo(
+    () => scheduled.filter(passesFilters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [scheduled, filterType, fromDate, toDate]
   );
   const filteredAll = useMemo(
     () => works.filter(passesFilters),
@@ -160,10 +176,53 @@ export default function KerjaLainPage() {
     setToast({ type: "success", message });
   };
 
-  const tabs: { id: Tab; label: string; count: number; dot?: boolean }[] = [
-    { id: "running", label: "Sedang Berjalan", count: running.length, dot: true },
-    { id: "completed", label: "Selesai", count: completed.length },
-    { id: "all", label: "Semua", count: works.length },
+  const tabs: {
+    id: Tab;
+    label: string;
+    count: number;
+    color: string;
+    bg: string;
+    border: string;
+    solid: string;
+    dot?: boolean;
+  }[] = [
+    {
+      id: "all",
+      label: ALL_STATUS_STYLE.label,
+      count: works.length,
+      color: ALL_STATUS_STYLE.text,
+      bg: ALL_STATUS_STYLE.bg,
+      border: ALL_STATUS_STYLE.border,
+      solid: ALL_STATUS_STYLE.solid,
+    },
+    {
+      id: "scheduled",
+      label: getStatusStyle("scheduled").label,
+      count: scheduled.length,
+      color: getStatusStyle("scheduled").text,
+      bg: getStatusStyle("scheduled").bg,
+      border: getStatusStyle("scheduled").border,
+      solid: getStatusStyle("scheduled").solid,
+    },
+    {
+      id: "running",
+      label: getStatusStyle("running").label,
+      count: running.length,
+      color: getStatusStyle("running").text,
+      bg: getStatusStyle("running").bg,
+      border: getStatusStyle("running").border,
+      solid: getStatusStyle("running").solid,
+      dot: true,
+    },
+    {
+      id: "completed",
+      label: getStatusStyle("completed").label,
+      count: completed.length,
+      color: getStatusStyle("completed").text,
+      bg: getStatusStyle("completed").bg,
+      border: getStatusStyle("completed").border,
+      solid: getStatusStyle("completed").solid,
+    },
   ];
 
   return (
@@ -235,7 +294,7 @@ export default function KerjaLainPage() {
 
         {/* Tabs */}
         <div
-          className="flex items-center gap-1 p-1 rounded-xl mb-3 sm:mb-4 overflow-x-auto"
+          className="flex items-stretch gap-1 p-1 rounded-xl mb-3 sm:mb-4 overflow-x-auto"
           style={{ backgroundColor: "var(--bg-card)" }}
           role="tablist"
           aria-label="Tapis kerja"
@@ -248,28 +307,42 @@ export default function KerjaLainPage() {
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(t.id)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors min-h-[38px]"
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 transition-colors duration-150 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
                 style={{
-                  backgroundColor: active ? "var(--accent-primary-light)" : "transparent",
-                  color: active ? "var(--accent-primary)" : "var(--text-secondary)",
+                  backgroundColor: active ? t.bg : "transparent",
+                  color: active ? t.color : "var(--text-secondary)",
                 }}
               >
                 {t.dot && (
                   <span className="relative flex h-2 w-2" aria-hidden>
-                    <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style={{ backgroundColor: "var(--status-work)" }} />
-                    <span className="relative inline-flex h-2 w-2 rounded-full" style={{ backgroundColor: "var(--status-work)" }} />
+                    <span
+                      className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
+                      style={{ backgroundColor: t.solid }}
+                    />
+                    <span
+                      className="relative inline-flex h-2 w-2 rounded-full"
+                      style={{ backgroundColor: t.solid }}
+                    />
                   </span>
                 )}
                 {t.label}
                 <span
-                  className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full"
+                  className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full tabular-nums"
                   style={{
-                    backgroundColor: active ? "var(--accent-primary-border)" : "var(--hover-subtle)",
-                    color: active ? "var(--accent-primary)" : "var(--text-muted)",
+                    backgroundColor: t.bg,
+                    color: t.color,
+                    opacity: active ? 1 : 0.75,
                   }}
                 >
                   {t.count}
                 </span>
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute left-2 right-2 bottom-0 h-0.5 rounded-full"
+                    style={{ backgroundColor: t.solid }}
+                  />
+                )}
               </button>
             );
           })}
@@ -319,19 +392,29 @@ export default function KerjaLainPage() {
           <GridSkeleton />
         ) : plantations.length === 0 ? (
           <EmptyState
-            title="Tiada blok dijumpai"
+            title="TIADA BLOK DIJUMPAI"
             subtitle="Tambah blok terlebih dahulu untuk merekod kerja-kerja lain."
           />
         ) : !hasAny ? (
           <EmptyState
-            title="Tiada kerja direkodkan"
+            title="TIADA KERJA DIREKODKAN"
             subtitle="Mulakan dengan merekod kerja-kerja lain untuk blok ini."
             onAdd={openAdd}
             showAdd
           />
+        ) : tab === "scheduled" ? (
+          filteredScheduled.length === 0 ? (
+            <EmptyState icon={CalendarClock} title="TIADA KERJA DIJADUALKAN" />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {filteredScheduled.map((job) => (
+                <JobCard key={job.id} job={job} onEdit={openEdit} onOpenTrips={setTripsJob} onView={setDetailJob} />
+              ))}
+            </div>
+          )
         ) : tab === "running" ? (
           running.length === 0 ? (
-            <EmptyState title="Tiada kerja sedang berjalan" />
+            <EmptyState icon={Activity} title="TIADA KERJA SEDANG BERJALAN" />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {running.map((job) => (
@@ -341,7 +424,7 @@ export default function KerjaLainPage() {
           )
         ) : tab === "completed" ? (
           filteredCompleted.length === 0 ? (
-            <EmptyState title="Belum ada sejarah kerja" />
+            <EmptyState icon={CheckCircle2} title="BELUM ADA SEJARAH KERJA" />
           ) : (
             <div className="space-y-6">
               {groupJobsByDate(filteredCompleted).map((group) => (
@@ -362,7 +445,7 @@ export default function KerjaLainPage() {
             </div>
           )
         ) : filteredAll.length === 0 ? (
-          <EmptyState title="Tiada kerja sepadan dengan tapisan" />
+          <EmptyState icon={Briefcase} title="TIADA KERJA DIREKODKAN" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filteredAll.map((job) => (

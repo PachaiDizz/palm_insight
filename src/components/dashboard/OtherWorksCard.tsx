@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Briefcase, ArrowRight } from "lucide-react";
 import { useOtherWorkCounts } from "@/lib/otherWorks";
+import { STATUS_STYLES } from "@/components/kerja-lain/statusStyles";
 
 interface OtherWorksCardProps {
   userId?: string;
@@ -18,11 +19,12 @@ export default function OtherWorksCard({
   month,
 }: OtherWorksCardProps) {
   const { data, isLoading } = useOtherWorkCounts(userId, plantationId, year, month);
-  const counts = data ?? { running: 0, completed: 0, total: 0 };
+  const counts = data ?? { scheduled: 0, running: 0, completed: 0, total: 0 };
 
   const stats = [
-    { label: "Sedang Berjalan", value: counts.running, accent: "var(--status-work)" },
-    { label: "Selesai", value: counts.completed, accent: "var(--accent-primary)" },
+    { label: "Dijadualkan", value: counts.scheduled, accent: STATUS_STYLES.scheduled.text },
+    { label: "Sedang Berjalan", value: counts.running, accent: STATUS_STYLES.running.text },
+    { label: "Selesai", value: counts.completed, accent: STATUS_STYLES.completed.text },
     { label: "Jumlah Kerja", value: counts.total, accent: "var(--text-secondary)" },
   ];
 
@@ -63,7 +65,7 @@ export default function OtherWorksCard({
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {stats.map((s) => (
           <div
             key={s.label}

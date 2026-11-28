@@ -11,6 +11,7 @@ import { toLocalInput, fromLocalInput } from "@/lib/otherWorks";
 import { persistWorkOptions } from "@/lib/workOptions";
 import { toLocalDateKey } from "@/lib/date";
 import { getJobTypeLabel, JOB_TYPES } from "./jobMeta";
+import { STATUS_STYLES } from "./statusStyles";
 import {
   Section,
   FieldLabel,
@@ -78,7 +79,13 @@ function defaultsFor(type: OtherWorkType): Record<string, string> {
         depth_cm: "",
       };
     case "baiki_jalan":
-      return { contractor: "", road_length_m: "", material: "", machine: "" };
+      return {
+        contractor: "",
+        road_length_m: "",
+        material: "",
+        material_other: "",
+        machine: "",
+      };
     case "lain_lain":
       return { contractor: "", description: "", quantity: "", unit: "" };
   }
@@ -251,14 +258,18 @@ function buildCandidate(
         depth_cm: numOrUndef(raw.depth_cm),
       };
     }
-    case "baiki_jalan":
+    case "baiki_jalan": {
+      const material = strOrUndef(raw.material);
       return {
         type,
         contractor: strOrUndef(raw.contractor),
         road_length_m: numOrUndef(raw.road_length_m),
-        material: strOrUndef(raw.material),
+        material,
+        material_other:
+          material === "LAIN-LAIN" ? strOrUndef(raw.material_other) : undefined,
         machine: strOrUndef(raw.machine),
       };
+    }
     case "lain_lain":
       return {
         type,
@@ -286,12 +297,14 @@ function buildAutoTitle(
   return parts.join(" - ");
 }
 
-const STATUS_OPTIONS: SegOption<OtherWorkStatus>[] = [
-  { value: "scheduled", label: "Dijadualkan", bg: "var(--accent-blue-light)", color: "var(--accent-blue)" },
-  { value: "running", label: "Sedang Berjalan", bg: "var(--status-work-bg)", color: "var(--status-work)" },
-  { value: "completed", label: "Selesai", bg: "var(--accent-primary-light)", color: "var(--accent-primary)" },
-  { value: "cancelled", label: "Dibatalkan", bg: "var(--accent-red-light)", color: "var(--accent-red)" },
-];
+const STATUS_OPTIONS: SegOption<OtherWorkStatus>[] = (
+  ["scheduled", "running", "completed", "cancelled"] as OtherWorkStatus[]
+).map((value) => ({
+  value,
+  label: STATUS_STYLES[value].label,
+  bg: STATUS_STYLES[value].bg,
+  color: STATUS_STYLES[value].text,
+}));
 
 const selectClass =
   "w-full h-12 px-3 rounded-xl text-sm outline-none border transition-colors duration-150 bg-[var(--bg-input-field)] border-[var(--border-input-field)] text-[var(--text-primary)] focus:border-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/30";
@@ -459,9 +472,9 @@ export default function JobFormDrawer({
     }
 
     // Persist any typed-but-unsaved creatable values against the block.
-    const optionEntries: { category: WorkOptionCategory; value: string | null | undefined }[] = [
-      { category: "contractor", value: details.contractor },
-    ];
+    // Contractor and the tab-based fields are plain values now, so they are
+    // no longer written to work_options.
+    const optionEntries: { category: WorkOptionCategory; value: string | null | undefined }[] = [];
     if (type === "membaja") {
       optionEntries.push({ category: "fertilizer", value: details.fertilizer_type });
       for (const trip of parseMembajaTrips(details.trips)) {
@@ -470,15 +483,9 @@ export default function JobFormDrawer({
         }
       }
     } else if (type === "mencuci_merumput") {
-      optionEntries.push({ category: "method", value: details.method });
       optionEntries.push({ category: "chemical_name", value: details.chemical_name });
-    } else if (type === "pruning") {
-      optionEntries.push({ category: "pruning_type", value: details.pruning_type });
-    } else if (type === "baiki_jalan") {
-      optionEntries.push({ category: "material", value: details.material });
-      optionEntries.push({ category: "machine", value: details.machine });
     }
-    void persistWorkOptions(optionEntries, plantationId);
+    if (optionEntries.length > 0) void persistWorkOptions(optionEntries, plantationId);
 
     onSaved(editing ? "Kerja dikemas kini" : "Kerja ditambah");
     onClose();

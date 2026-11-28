@@ -1,6 +1,6 @@
 "use client";
 
-import { NumberField, FieldLabel, Stepper } from "../form/controls";
+import { NumberField, FieldLabel, Stepper, ContractorField } from "../form/controls";
 import CreatableCombobox from "../form/CreatableCombobox";
 import PusinganPicker from "../form/PusinganPicker";
 import TripScheduleSection, { type TripDraft, emptyTrip } from "../form/TripScheduleSection";
@@ -67,14 +67,9 @@ export default function MembajaFields({
   return (
     <div className="space-y-3">
       {/* 1) KONTRAKTOR */}
-      <CreatableCombobox
-        category="contractor"
-        plantationId={plantationId}
+      <ContractorField
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        onToast={onToast}
-        label="Kontraktor"
-        placeholder="PILIH KONTRAKTOR"
         required
         error={errors.contractor}
       />

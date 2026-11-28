@@ -169,6 +169,7 @@ export interface MencuciRound {
 
 export interface MencuciDetails {
   contractor: string | null;
+  /** "MANUAL" | "RACUN" | "MESIN" (legacy custom values allowed). */
   method: string | null;
   area_ha: number | null;
   chemical_name: string | null;
@@ -184,6 +185,7 @@ export interface MencuciDetails {
 
 export interface PruningDetails {
   contractor: string | null;
+  /** "RUTIN" | "SANITASI" (legacy custom values allowed). */
   pruning_type: string | null;
   tree_count: number;
   area_hectare: number;
@@ -203,7 +205,10 @@ export interface CuciParitDetails {
 export interface BaikiJalanDetails {
   contractor: string | null;
   road_length_m: number;
+  /** "BATU" | "TANAH MERAH" | "LAIN-LAIN" (legacy custom values allowed). */
   material: string | null;
+  /** Only set when material is "LAIN-LAIN". */
+  material_other: string | null;
   machine: string | null;
 }
 

@@ -191,6 +191,7 @@ export const otherWorkDetailsSchema = z.discriminatedUnion("type", [
     contractor: z.string().optional(),
     road_length_m: reqNum,
     material: z.string().optional(),
+    material_other: z.string().optional(),
     machine: z.string().optional(),
   }),
   z.object({

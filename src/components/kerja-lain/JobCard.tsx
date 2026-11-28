@@ -4,6 +4,7 @@ import { MapPin, Users, Clock, Timer, Pencil, Truck, Eye, type LucideIcon } from
 import type { OtherWork } from "@/types";
 import { getJobTypeMeta, getDetailChips, getContractorLine } from "./jobMeta";
 import JobStatusChip from "./JobStatusChip";
+import { getStatusStyle } from "./statusStyles";
 import { formatDateTime, formatDuration } from "@/lib/otherWorks";
 
 function Meta({ icon: Icon, value }: { icon: LucideIcon; value: string }) {
@@ -30,12 +31,17 @@ export default function JobCard({
 }) {
   const typeMeta = getJobTypeMeta(job.type);
   const Icon = typeMeta.icon;
+  const statusStyle = getStatusStyle(job.status);
 
   const blockText = job.plantations?.block
     ? `Block ${job.plantations.block}`
     : job.plantations?.rancangan || "—";
   const duration = formatDuration(job.started_at, job.ended_at);
   const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
+  const showProgress = job.status === "running" || job.status === "completed";
+  const shownProgress = job.status === "completed" ? 100 : progress;
+  const progressColor =
+    shownProgress >= 100 ? getStatusStyle("completed").solid : statusStyle.solid;
   const chips = getDetailChips(job.type, job.details);
   const subline = getContractorLine(job.details);
 
@@ -43,9 +49,14 @@ export default function JobCard({
 
   return (
     <article
-      className="card-glow rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all"
+      className="relative overflow-hidden card-glow rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all"
       style={{ backgroundColor: "var(--bg-card)" }}
     >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px]"
+        style={{ backgroundColor: statusStyle.solid }}
+      />
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -124,27 +135,27 @@ export default function JobCard({
         <Meta icon={Clock} value={formatDateTime(job.started_at)} />
       </div>
 
-      {/* Progress (running only) */}
-      {job.status === "running" && (
+      {/* Progress (running / completed) */}
+      {showProgress && (
         <div>
           <div
             className="flex items-center justify-between text-[11px] mb-1"
             style={{ color: "var(--text-muted)" }}
           >
             <span>Kemajuan</span>
-            <span className="font-medium text-theme">{progress}%</span>
+            <span className="font-medium text-theme">{shownProgress}%</span>
           </div>
           <div
             className="h-2 rounded-full overflow-hidden"
             style={{ backgroundColor: "var(--bg-input)" }}
             role="progressbar"
-            aria-valuenow={progress}
+            aria-valuenow={shownProgress}
             aria-valuemin={0}
             aria-valuemax={100}
           >
             <div
               className="h-full rounded-full transition-[width] duration-300"
-              style={{ width: `${progress}%`, background: "var(--accent-gradient)" }}
+              style={{ width: `${shownProgress}%`, backgroundColor: progressColor }}
             />
           </div>
         </div>

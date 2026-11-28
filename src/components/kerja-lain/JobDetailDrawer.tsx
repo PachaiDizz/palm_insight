@@ -3,6 +3,7 @@
 import Modal from "@/components/ui/Modal";
 import JobStatusChip from "./JobStatusChip";
 import { getJobTypeMeta, getDetailChips } from "./jobMeta";
+import { getStatusStyle } from "./statusStyles";
 import { formatDateTime } from "@/lib/otherWorks";
 import { Clock } from "lucide-react";
 import type { OtherWork } from "@/types";
@@ -143,7 +144,7 @@ export default function JobDetailDrawer({
           <Field label="Blok" value={blockText} />
           <Field label="Pekerja" value={`${job.worker_count} pekerja`} />
           <Field label="Kontraktor" value={String(details.contractor ?? "")} />
-          <Field label="Status" value={job.status.replace("_", " ")} />
+          <Field label="Status" value={getStatusStyle(job.status).label} />
         </div>
 
         <div
@@ -375,7 +376,15 @@ export default function JobDetailDrawer({
               label="Panjang Jalan"
               value={details.road_length_m != null ? `${Number(details.road_length_m)} M` : ""}
             />
-            <Field label="Bahan" value={String(details.material ?? "")} />
+            <Field
+              label="Bahan"
+              value={
+                String(details.material ?? "").toUpperCase() === "LAIN-LAIN" &&
+                details.material_other
+                  ? String(details.material_other)
+                  : String(details.material ?? "")
+              }
+            />
             <Field label="Mesin" value={String(details.machine ?? "")} />
           </div>
         )}

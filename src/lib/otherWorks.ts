@@ -6,6 +6,7 @@ import { OtherWorkSchema } from "./schemas";
 import type { OtherWork } from "@/types";
 
 export interface OtherWorkCounts {
+  scheduled: number;
   running: number;
   completed: number;
   total: number;
@@ -42,6 +43,7 @@ export async function fetchOtherWorkCounts(
 
   const rows = data ?? [];
   return {
+    scheduled: rows.filter((r) => r.status === "scheduled").length,
     running: rows.filter((r) => r.status === "running").length,
     completed: rows.filter((r) => r.status === "completed").length,
     total: rows.length,

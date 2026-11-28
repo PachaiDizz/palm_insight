@@ -1,7 +1,6 @@
 "use client";
 
-import { NumberField, FieldLabel } from "../form/controls";
-import CreatableCombobox from "../form/CreatableCombobox";
+import { NumberField, FieldLabel, ContractorField } from "../form/controls";
 import type { FieldGroupProps } from "./types";
 
 const UNITS = ["M", "KM"] as const;
@@ -10,21 +9,14 @@ export default function CuciParitFields({
   value,
   onChange,
   errors,
-  plantationId,
-  onToast,
 }: FieldGroupProps) {
   const unit = (value.ditch_length_unit || "M").toUpperCase() === "KM" ? "KM" : "M";
 
   return (
     <div className="space-y-3">
-      <CreatableCombobox
-        category="contractor"
-        plantationId={plantationId}
+      <ContractorField
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        onToast={onToast}
-        label="Kontraktor"
-        placeholder="PILIH KONTRAKTOR"
         required
         error={errors.contractor}
       />

@@ -87,6 +87,7 @@ export function getDetailChips(
   switch (type) {
     case "mencuci_merumput": {
       chips.push("MENCUCI / MERUMPUT");
+      push(asStr(d.method));
       const rounds = asNum(d.total_rounds);
       if (rounds != null && rounds > 0) push(`${rounds} PUSINGAN`);
       const first = shortDate(d.first_work_date);
@@ -129,7 +130,10 @@ export function getDetailChips(
       chips.push("BAIKI JALAN");
       const len = asNum(d.road_length_m);
       if (len != null) push(`${len} M`);
-      push(asStr(d.material));
+      const material = asStr(d.material);
+      const materialOther = asStr(d.material_other);
+      if (material === "LAIN-LAIN" && materialOther) push(materialOther);
+      else push(material);
       break;
     }
     case "lain_lain": {

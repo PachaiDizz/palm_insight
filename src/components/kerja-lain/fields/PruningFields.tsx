@@ -1,37 +1,31 @@
 "use client";
 
-import { NumberField } from "../form/controls";
-import CreatableCombobox from "../form/CreatableCombobox";
+import { NumberField, ContractorField } from "../form/controls";
+import OptionTabs from "../form/OptionTabs";
 import type { FieldGroupProps } from "./types";
 
-export default function PruningFields({
-  value,
-  onChange,
-  errors,
-  plantationId,
-  onToast,
-}: FieldGroupProps) {
+const PRUNING_TYPE_OPTIONS = [
+  { value: "RUTIN", label: "RUTIN" },
+  { value: "SANITASI", label: "SANITASI" },
+];
+
+export default function PruningFields({ value, onChange, errors }: FieldGroupProps) {
   return (
     <div className="space-y-3">
-      <CreatableCombobox
-        category="contractor"
-        plantationId={plantationId}
+      <ContractorField
+        label="Kontraktor (pilihan)"
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        onToast={onToast}
-        label="Kontraktor (pilihan)"
-        placeholder="PILIH KONTRAKTOR"
         error={errors.contractor}
       />
 
-      <CreatableCombobox
-        category="pruning_type"
-        plantationId={plantationId}
-        value={value.pruning_type ?? ""}
-        onChange={(v) => onChange("pruning_type", v)}
-        onToast={onToast}
+      <OptionTabs
         label="Jenis Pruning"
-        placeholder="PILIH JENIS PRUNING"
+        ariaLabel="Jenis pruning"
+        options={PRUNING_TYPE_OPTIONS}
+        value={(value.pruning_type ?? "").toUpperCase()}
+        onChange={(v) => onChange("pruning_type", v ?? "")}
+        allowClear
         error={errors.pruning_type}
       />
 

@@ -1,26 +1,25 @@
 "use client";
 
-import { NumberField } from "../form/controls";
-import CreatableCombobox from "../form/CreatableCombobox";
+import { NumberField, ContractorField, TextField } from "../form/controls";
+import OptionTabs from "../form/OptionTabs";
 import type { FieldGroupProps } from "./types";
 
-export default function BaikiJalanFields({
-  value,
-  onChange,
-  errors,
-  plantationId,
-  onToast,
-}: FieldGroupProps) {
+const MATERIAL_OPTIONS = [
+  { value: "BATU", label: "BATU" },
+  { value: "TANAH MERAH", label: "TANAH MERAH" },
+  { value: "LAIN-LAIN", label: "LAIN-LAIN" },
+];
+
+export default function BaikiJalanFields({ value, onChange, errors }: FieldGroupProps) {
+  const material = (value.material ?? "").toUpperCase();
+  const showMaterialOther = material === "LAIN-LAIN";
+
   return (
     <div className="space-y-3">
-      <CreatableCombobox
-        category="contractor"
-        plantationId={plantationId}
+      <ContractorField
+        label="Kontraktor (pilihan)"
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        onToast={onToast}
-        label="Kontraktor (pilihan)"
-        placeholder="PILIH KONTRAKTOR"
         error={errors.contractor}
       />
 
@@ -34,25 +33,33 @@ export default function BaikiJalanFields({
         error={errors.road_length_m}
       />
 
-      <CreatableCombobox
-        category="material"
-        plantationId={plantationId}
-        value={value.material ?? ""}
-        onChange={(v) => onChange("material", v)}
-        onToast={onToast}
+      <OptionTabs
         label="Bahan"
-        placeholder="PILIH BAHAN"
+        ariaLabel="Bahan"
+        options={MATERIAL_OPTIONS}
+        value={material}
+        onChange={(v) => onChange("material", v ?? "")}
+        allowClear
         error={errors.material}
       />
 
-      <CreatableCombobox
-        category="machine"
-        plantationId={plantationId}
-        value={value.machine ?? ""}
-        onChange={(v) => onChange("machine", v)}
-        onToast={onToast}
+      {showMaterialOther && (
+        <div className="animate-menu">
+          <TextField
+            label="Nama Bahan"
+            placeholder="TAIP NAMA BAHAN"
+            value={value.material_other ?? ""}
+            onChange={(v) => onChange("material_other", v.toUpperCase())}
+            error={errors.material_other}
+          />
+        </div>
+      )}
+
+      <TextField
         label="Mesin Digunakan (pilihan)"
-        placeholder="PILIH / TAMBAH MESIN"
+        placeholder="TAIP NAMA MESIN"
+        value={value.machine ?? ""}
+        onChange={(v) => onChange("machine", v.toUpperCase())}
         error={errors.machine}
       />
     </div>

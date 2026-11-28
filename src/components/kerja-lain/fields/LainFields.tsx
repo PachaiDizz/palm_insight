@@ -1,26 +1,15 @@
 "use client";
 
-import { NumberField, TextField } from "../form/controls";
-import CreatableCombobox from "../form/CreatableCombobox";
+import { NumberField, TextField, ContractorField } from "../form/controls";
 import type { FieldGroupProps } from "./types";
 
-export default function LainFields({
-  value,
-  onChange,
-  errors,
-  plantationId,
-  onToast,
-}: FieldGroupProps) {
+export default function LainFields({ value, onChange, errors }: FieldGroupProps) {
   return (
     <div className="space-y-3">
-      <CreatableCombobox
-        category="contractor"
-        plantationId={plantationId}
+      <ContractorField
+        label="Kontraktor (pilihan)"
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        onToast={onToast}
-        label="Kontraktor (pilihan)"
-        placeholder="PILIH KONTRAKTOR"
         error={errors.contractor}
       />
 

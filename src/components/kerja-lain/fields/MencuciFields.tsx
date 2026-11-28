@@ -1,10 +1,17 @@
 "use client";
 
-import { NumberField } from "../form/controls";
+import { NumberField, ContractorField } from "../form/controls";
 import CreatableCombobox from "../form/CreatableCombobox";
+import OptionTabs from "../form/OptionTabs";
 import DateField, { formatDateOnly } from "../form/DateField";
 import PusinganList from "./PusinganList";
 import type { FieldGroupProps } from "./types";
+
+const METHOD_OPTIONS = [
+  { value: "MANUAL", label: "MANUAL" },
+  { value: "RACUN", label: "RACUN" },
+  { value: "MESIN", label: "MESIN" },
+];
 
 function daysBetween(first: string, last: string): number {
   const a = new Date(`${first}T00:00:00`);
@@ -24,29 +31,25 @@ export default function MencuciFields({
   const last = value.last_work_date ?? "";
   const showTempoh = !!first && !!last;
   const days = showTempoh ? daysBetween(first, last) : 0;
+  const method = (value.method ?? "").toUpperCase();
+  const showChemical = method === "RACUN";
 
   return (
     <div className="space-y-3">
-      <CreatableCombobox
-        category="contractor"
-        plantationId={plantationId}
+      <ContractorField
+        label="Kontraktor (pilihan)"
         value={value.contractor ?? ""}
         onChange={(v) => onChange("contractor", v)}
-        onToast={onToast}
-        label="Kontraktor (pilihan)"
-        placeholder="PILIH KONTRAKTOR"
         error={errors.contractor}
       />
 
-      <CreatableCombobox
-        category="method"
-        plantationId={plantationId}
-        value={value.method ?? ""}
-        onChange={(v) => onChange("method", v)}
-        onToast={onToast}
+      <OptionTabs
         label="Kaedah"
-        placeholder="PILIH KAEDAH"
-        error={errors.method}
+        ariaLabel="Kaedah kerja"
+        options={METHOD_OPTIONS}
+        value={method}
+        onChange={(v) => onChange("method", v ?? "")}
+        allowClear
       />
 
       <NumberField
@@ -59,25 +62,29 @@ export default function MencuciFields({
         error={errors.area_ha}
       />
 
-      <CreatableCombobox
-        category="chemical_name"
-        plantationId={plantationId}
-        value={value.chemical_name ?? ""}
-        onChange={(v) => onChange("chemical_name", v)}
-        onToast={onToast}
-        label="Nama Racun (pilihan)"
-        placeholder="PILIH / TAMBAH NAMA RACUN"
-        error={errors.chemical_name}
-      />
+      {showChemical && (
+        <div className="space-y-3 animate-menu">
+          <CreatableCombobox
+            category="chemical_name"
+            plantationId={plantationId}
+            value={value.chemical_name ?? ""}
+            onChange={(v) => onChange("chemical_name", v)}
+            onToast={onToast}
+            label="Nama Racun (pilihan)"
+            placeholder="PILIH / TAMBAH NAMA RACUN"
+            error={errors.chemical_name}
+          />
 
-      <NumberField
-        label="Kuantiti racun (pilihan)"
-        unit="L"
-        step="0.01"
-        value={value.chemical_qty_l ?? ""}
-        onChange={(v) => onChange("chemical_qty_l", v)}
-        error={errors.chemical_qty_l}
-      />
+          <NumberField
+            label="Kuantiti racun (pilihan)"
+            unit="L"
+            step="0.01"
+            value={value.chemical_qty_l ?? ""}
+            onChange={(v) => onChange("chemical_qty_l", v)}
+            error={errors.chemical_qty_l}
+          />
+        </div>
+      )}
 
       {/* TEMPOH KERJA */}
       <div className="pt-1">
